@@ -168,5 +168,33 @@ function bindRouteForms(route) {
   if (route === 'sell') supabase.auth.getUser().then(({ data: { user } }) => { if (!user) document.querySelector('#listing-message').textContent = 'Ielogojies, lai publicētu sludinājumu.' })
 }
 
-window.addEventListener('hashchange', renderPage)
+window.addEventListener('hashchange', () => { renderPage(); if (english) translatePage() })
 renderPage()
+
+const translations = {
+  'Sākums': 'Home', 'Katalogs': 'Catalog', 'Sludinājumi': 'Listings', 'Pārdot detaļu': 'Sell a part', 'Mans konts': 'My account', 'Kontakti': 'Contact',
+  'KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ': 'QUALITY USED PARTS · SHIPPING ACROSS EUROPE', 'BEZMAKSAS PIEGĀDE NO 150 €': 'FREE SHIPPING FROM €150',
+  'DETĀĻAS, KURĀM VAR UZTICĒTIES': 'PARTS YOU CAN TRUST', 'Tava automašīna.': 'Your car.', 'Mūsu detaļas.': 'Our parts.',
+  'Pārbaudītas lietotas auto detaļas. Atrastas ātri, nosūtītas droši.': 'Checked used car parts. Found fast, shipped safely.', 'SKATĪT KATALOGU': 'BROWSE CATALOG',
+  'DETAĻAS NOLIKTAVĀ': 'PARTS IN STOCK', 'ĀTRA IZ SŪTĪŠANA': 'FAST SHIPPING', 'PIEGĀDE VISĀ EIROPĀ': 'SHIPPING ACROSS EUROPE',
+  'ATRODI SAVU DETAĻU': 'FIND YOUR PART', 'Ko tu meklē?': 'What are you looking for?', 'Meklē pēc nosaukuma, OEM koda vai detaļas numura.': 'Search by name, OEM code or part number.',
+  'JAUNUMI NOLIKTAVĀ': 'NEW IN STOCK', 'Pēdējie': 'Latest', 'atradumi.': 'finds.', 'KOPIENAS SLUDINĀJUMI': 'COMMUNITY LISTINGS', 'Ko pārdod': 'What others', 'citi.': 'sell.',
+  'Pārbaudīta kvalitāte': 'Checked quality', 'Piegāde Eiropā': 'European shipping', 'Atbalsts 7 dienas': 'Support 7 days', 'Rīga, Latvija': 'Riga, Latvia',
+}
+let english = false
+function translatePage() {
+  document.querySelectorAll('body *').forEach((element) => {
+    if (element.children.length) return
+    const original = element.dataset.lvText || element.textContent.trim()
+    if (!original) return
+    if (!element.dataset.lvText) element.dataset.lvText = original
+    element.textContent = english ? (translations[original] || original) : element.dataset.lvText
+  })
+  document.querySelectorAll('input[placeholder]').forEach((input) => {
+    if (!input.dataset.lvPlaceholder) input.dataset.lvPlaceholder = input.placeholder
+    input.placeholder = english ? 'E.g. BMW F10 headlight or OEM number' : input.dataset.lvPlaceholder
+  })
+  const languageButton = document.querySelector('.lang')
+  if (languageButton) languageButton.innerHTML = english ? 'EN <small>/ LV</small>' : 'LV <small>/ EN</small>'
+}
+document.querySelector('.lang').addEventListener('click', () => { english = !english; translatePage() })
