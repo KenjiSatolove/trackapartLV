@@ -15,7 +15,7 @@ const categories = [
 document.querySelector('#app').innerHTML = `
   <div class="announcement">KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ <span>BEZMAKSAS PIEGĀDE NO 150 €</span></div>
   <header class="site-header">
-    <a class="brand" href="#"><span>TP</span><strong>TRACK<span>PARTS</span></strong></a>
+    <a class="brand" href="#"><img src="image-removebg-preview.png" alt="TrackParts LV logo"></a>
     <nav class="main-nav"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#sell">Pārdot detaļu</a><a href="#account">Mans konts</a><a href="#contact">Kontakti</a></nav>
     <div class="header-actions"><button class="lang" type="button">LV <small>/ EN</small></button><button class="icon-button" aria-label="Meklēt">⌕</button><button class="icon-button user-button" aria-label="Mans konts">◎</button><button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button></div>
   </header>
@@ -35,7 +35,7 @@ document.querySelector('#app').innerHTML = `
 
     <section class="trust-section"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katra detaļa tiek apskatīta pirms nosūtīšanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No mūsu noliktavas Rīgā līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Atbalsts 7 dienas</strong><p>Zini, ko pērc. Mēs palīdzēsim atrast pareizo.</p></div></section>
   </main>
-  <footer id="contact"><div class="footer-brand"><a class="brand" href="#"><span>TP</span><strong>TRACK<span>PARTS</span></strong></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#catalog">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#">Piegāde</a><a href="#">Atgriešana</a><a href="#">Kontakti</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><span>INSTAGRAM ↗</span></div></footer>
+  <footer id="contact"><div class="footer-brand"><a class="brand" href="#"><img src="image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#catalog">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#">Piegāde</a><a href="#">Atgriešana</a><a href="#">Kontakti</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><span>INSTAGRAM ↗</span></div></footer>
 `
 
 let cartCount = 0

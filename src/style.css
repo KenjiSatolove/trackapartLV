@@ -20,6 +20,7 @@ button { cursor: pointer; }
 .announcement { padding: 9px 5vw; background: var(--orange); color: #fff; font: 10px 'DM Mono', monospace; letter-spacing: .12em; display: flex; justify-content: space-between; }
 .site-header { height: 78px; padding: 0 5vw; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 30px; }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 16px; letter-spacing: .08em; }
+.brand img { display: block; width: 154px; height: 58px; object-fit: contain; }
 .brand > span { width: 32px; height: 32px; display: grid; place-items: center; background: var(--ink); color: var(--orange); font: 500 12px 'DM Mono'; }
 .brand strong span, .brand strong { font-weight: 700; }.brand strong span { color: var(--orange); }
 .main-nav { display: flex; gap: 28px; margin-left: auto; }.main-nav a { font-size: 13px; color: var(--muted); }.main-nav a.active, .main-nav a:hover { color: var(--ink); }
