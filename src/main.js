@@ -1,4 +1,5 @@
 import './style.css'
+import { supabase } from './lib/supabase.js'
 
 const products = [
   { name: 'BMW F10 priekšējais kreisais lukturis', type: 'Lietota detaļa', price: 249, code: 'USED-BMW-F10-00152', image: 'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs' },
@@ -15,7 +16,7 @@ document.querySelector('#app').innerHTML = `
   <div class="announcement">KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ <span>BEZMAKSAS PIEGĀDE NO 150 €</span></div>
   <header class="site-header">
     <a class="brand" href="#"><span>TP</span><strong>TRACK<span>PARTS</span></strong></a>
-    <nav class="main-nav"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#about">Par mums</a><a href="#contact">Kontakti</a></nav>
+    <nav class="main-nav"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#sell">Pārdot detaļu</a><a href="#about">Par mums</a><a href="#contact">Kontakti</a></nav>
     <div class="header-actions"><button class="lang" type="button">LV <small>/ EN</small></button><button class="icon-button" aria-label="Meklēt">⌕</button><button class="icon-button user-button" aria-label="Mans konts">◎</button><button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button></div>
   </header>
 
@@ -60,10 +61,13 @@ function renderPage() {
     catalog: `<section class="page-hero"><div class="section-kicker">02 / PREČU KATALOGS</div><h1>Atrodi detaļu.<br><em>Uztaisi ātrāku.</em></h1><p>Oriģinālas un pārbaudītas detaļas ielas auto, trases projektam un servisam.</p></section><section class="product-section catalog-page"><div class="section-top"><div><div class="section-kicker">VISAS DETAĻAS</div><h2>Noliktavā <em>tagad.</em></h2></div><span class="catalog-count">${products.length} PRECES</span></div>${productMarkup()}</section>`,
     about: `<section class="page-hero about-hero"><div class="section-kicker">03 / PAR TRACKPARTS</div><h1>Built for the<br><em>road ahead.</em></h1><p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p></section><section class="story-section"><div class="section-kicker">MŪSU PIEEJA</div><h2>Nevis detaļu kaudze.<br><em>Īstais atradums.</em></h2><div class="story-grid"><p>TrackParts sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p><p>Mūsu noliktavā katram kodam ir sava vieta, statuss un vēsture. Mazāk minēšanas, vairāk laika uz ceļa.</p></div></section><section class="trust-section"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katrs produkts tiek apskatīts pirms pārdošanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No Rīgas līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Cilvēcīgs atbalsts</strong><p>Palīdzēsim atrast pareizo detaļu.</p></div></section>`,
     contact: `<section class="page-hero contact-hero"><div class="section-kicker">04 / SAZINĀSIMIES</div><h1>Ir jautājums?<br><em>Dod ziņu.</em></h1><p>Neatrodi detaļu katalogā? Atsūti VIN, OEM kodu vai bildi, un mēs paskatīsimies.</p></section><section class="contact-section"><div><div class="section-kicker">RAKSTI MUMS</div><h2>Atbildēsim<br><em>ātri.</em></h2></div><div class="contact-list"><a href="mailto:hello@trackparts.lv"><small>E-PASTS</small>hello@trackparts.lv ↗</a><a href="tel:+37120000000"><small>TELEFONS</small>+371 2000 0000 ↗</a><div><small>ATRODI MŪS</small>Rīga, Latvija</div></div></section>`,
+    account: `<section class="page-hero"><div class="section-kicker">05 / TAVS KONTS</div><h1>Pieslēdzies.<br><em>Pārdod.</em></h1><p>Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.</p></section><section class="form-section"><form class="site-form" id="auth-form"><div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Ienākt vai <em>reģistrēties.</em></h2><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><div class="form-actions"><button class="button button-dark" type="submit">IELOGOTIES ↗</button><button class="text-button" id="signup-button" type="button">IZVEIDOT KONTU</button></div><p class="form-message" id="auth-message"></p></form></section>`,
+    sell: `<section class="page-hero"><div class="section-kicker">06 / JAUNS SLUDINĀJUMS</div><h1>Ieliec detaļu<br><em>uz ceļa.</em></h1><p>Aizpildi informāciju, pievieno bildes un sasniedz cilvēku, kuram tā vajadzīga.</p></section><section class="form-section"><form class="site-form listing-form" id="listing-form"><div class="section-kicker">DETAĻAS INFORMĀCIJA</div><h2>Ko tu <em>pārdod?</em></h2><label>NOSAUKUMS<input name="title" required placeholder="Piem., BMW E46 priekšējais lukturis"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required placeholder="250"></label><label>OEM NUMURS<input name="oem_number" placeholder="63117203298"></label></div><div class="form-two"><label>MARKA<input name="brand" placeholder="BMW"></label><label>MODELIS<input name="model" placeholder="E46"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good">Ļoti labs</option><option value="good">Labs</option><option value="defect">Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="5" placeholder="Apraksti detaļas stāvokli un zināmos defektus"></textarea></label><label>BILDES<input name="images" type="file" accept="image/*" multiple required></label><div class="form-actions"><button class="button button-dark" type="submit">PUBLICĒT SLUDINĀJUMU ↗</button></div><p class="form-message" id="listing-message"></p></form></section>`,
   }
   document.querySelector('main').innerHTML = route === 'home' ? homeMarkup : (pages[route] || pages.catalog)
   document.querySelectorAll('.main-nav a').forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${route}`))
   bindProductButtons()
+  bindRouteForms(route)
   const form = document.querySelector('#search-form')
   if (form) form.addEventListener('submit', (event) => {
     event.preventDefault()
@@ -72,6 +76,46 @@ function renderPage() {
     document.querySelectorAll('.product-card').forEach((card) => { const matches = !query || card.dataset.name.includes(query); card.hidden = !matches; if (matches) visible += 1 })
     document.querySelector('#no-results').style.display = visible ? 'none' : 'block'
   })
+}
+
+function bindRouteForms(route) {
+  if (!supabase) return
+  const authForm = document.querySelector('#auth-form')
+  const authMessage = document.querySelector('#auth-message')
+  if (authForm) {
+    authForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const data = new FormData(authForm)
+      const { error } = await supabase.auth.signInWithPassword({ email: data.get('email'), password: data.get('password') })
+      authMessage.textContent = error ? error.message : 'Veiksmīgi ielogojies.'
+      if (!error) window.location.hash = 'sell'
+    })
+    document.querySelector('#signup-button').addEventListener('click', async () => {
+      const data = new FormData(authForm)
+      const { error } = await supabase.auth.signUp({ email: data.get('email'), password: data.get('password') })
+      authMessage.textContent = error ? error.message : 'Konts izveidots. Pārbaudi savu e-pastu.'
+    })
+  }
+
+  const listingForm = document.querySelector('#listing-form')
+  if (listingForm) listingForm.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const message = document.querySelector('#listing-message')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { message.textContent = 'Lai ievietotu sludinājumu, vispirms ielogojies.'; window.location.hash = 'account'; return }
+    const formData = new FormData(listingForm)
+    const { data: listing, error } = await supabase.from('listings').insert({ user_id: user.id, title: formData.get('title'), price: Number(formData.get('price')), oem_number: formData.get('oem_number'), brand: formData.get('brand'), model: formData.get('model'), condition: formData.get('condition'), description: formData.get('description'), status: 'pending' }).select().single()
+    if (error) { message.textContent = error.message; return }
+    const files = [...formData.getAll('images')].filter((file) => file.size)
+    for (const [index, file] of files.entries()) {
+      const path = `${user.id}/${listing.id}/${Date.now()}-${file.name}`
+      const upload = await supabase.storage.from('listing-images').upload(path, file)
+      if (!upload.error) await supabase.from('listing_images').insert({ listing_id: listing.id, storage_path: path, sort_order: index })
+    }
+    message.textContent = 'Sludinājums nosūtīts moderācijai.'
+    listingForm.reset()
+  })
+  if (route === 'sell') supabase.auth.getUser().then(({ data: { user } }) => { if (!user) document.querySelector('#listing-message').textContent = 'Ielogojies, lai publicētu sludinājumu.' })
 }
 
 window.addEventListener('hashchange', renderPage)
