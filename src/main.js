@@ -29,6 +29,8 @@ document.querySelector('#app').innerHTML = `
 
     <section class="search-section" id="catalog"><div class="section-kicker">01 / ATRODI SAVU DETAĻU</div><div class="search-heading"><h2>Ko tu meklē?</h2><p>Meklē pēc nosaukuma, OEM koda vai detaļas numura.</p></div><form class="search-box" id="search-form"><span>⌕</span><input id="search-input" placeholder="Piem., BMW F10 lukturis vai 63117203298"/><button type="submit">MEKLĒT <b>↗</b></button></form><div class="select-row"><label>MARKA<select><option>Visas markas</option><option>BMW</option><option>Audi</option><option>Mercedes-Benz</option></select></label><label>MODELIS<select><option>Visi modeļi</option><option>F10</option><option>E46</option><option>A4 B8</option></select></label><label>DETAĻAS TIPS<select><option>Visas kategorijas</option><option>Motora detaļas</option><option>Virsbūve</option><option>Salons</option></select></label><button class="filter-button" type="button">+ VAIRĀK FILTRU</button></div></section>
 
+    <section class="brand-section"><div class="section-kicker">MARKAS, KO PAZĪSTAM</div><div class="brand-strip">${['BMW', 'AUDI', 'MERCEDES-BENZ', 'VOLKSWAGEN', 'VOLVO', 'TOYOTA', 'FORD', 'HONDA'].map((brand) => `<button type="button" data-brand="${brand.toLowerCase()}">${brand}</button>`).join('')}</div></section>
+
     <section class="category-section"><div class="section-top"><div><div class="section-kicker">02 / IZPĒTI KATEGORIJAS</div><h2>Viss, kas vajadzīgs<br><em>tavam auto.</em></h2></div><a class="text-link" href="#">SKATĪT VISU <span>↗</span></a></div><div class="category-grid">${categories.map(([n, name, icon]) => `<a class="category" href="#"><span class="category-number">${n}</span><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a>`).join('')}</div></section>
 
     <section class="product-section" id="new"><div class="section-top"><div><div class="section-kicker">03 / JAUNUMI NOLIKTAVĀ</div><h2>Pēdējie <em>atradumi.</em></h2></div><a class="text-link" href="#">SKATĪT VISUS <span>↗</span></a></div><div class="product-grid" id="product-grid">${products.map((product, index) => `<article class="product-card" data-name="${product.name.toLowerCase()} ${product.code.toLowerCase()}"><div class="product-image"><img src="${product.image}" alt="${product.name}"/><span class="product-tag">${product.tag}</span><button class="quick-add" data-index="${index}" aria-label="Pievienot grozam">+</button></div><div class="product-meta"><span>${product.type}</span><small>${product.code}</small></div><h3>${product.name}</h3><div class="product-bottom"><strong>${product.price},00 €</strong><button class="add-text" data-index="${index}">PIEVIENOT <span>↗</span></button></div></article>`).join('')}</div><p class="no-results" id="no-results">Neviena detaļa neatbilst meklējumam.</p></section>
@@ -73,13 +75,23 @@ function renderPage() {
   loadListings()
   if (route.startsWith('listing-')) loadListingDetail(route.replace('listing-', ''))
   const form = document.querySelector('#search-form')
-  if (form) form.addEventListener('submit', (event) => {
-    event.preventDefault()
+  const runCatalogFilter = () => {
     const query = document.querySelector('#search-input').value.trim().toLowerCase()
+    const selectedBrand = document.querySelector('.select-row select:nth-of-type(1)')?.value.toLowerCase() || ''
+    const selectedModel = document.querySelector('.select-row select:nth-of-type(2)')?.value.toLowerCase() || ''
+    const selectedType = document.querySelector('.select-row select:nth-of-type(3)')?.value.toLowerCase() || ''
     let visible = 0
-    document.querySelectorAll('.product-card').forEach((card) => { const matches = !query || card.dataset.name.includes(query); card.hidden = !matches; if (matches) visible += 1 })
+    document.querySelectorAll('.product-card').forEach((card) => {
+      const text = card.dataset.name
+      const matches = (!query || text.includes(query)) && (!selectedBrand || selectedBrand.startsWith('visas') || text.includes(selectedBrand)) && (!selectedModel || selectedModel.startsWith('visi') || text.includes(selectedModel)) && (!selectedType || selectedType.startsWith('visas') || text.includes(selectedType.replace(' detaļas', '')))
+      card.hidden = !matches
+      if (matches) visible += 1
+    })
     document.querySelector('#no-results').style.display = visible ? 'none' : 'block'
-  })
+  }
+  if (form) form.addEventListener('submit', (event) => { event.preventDefault(); runCatalogFilter() })
+  document.querySelectorAll('.select-row select').forEach((select) => select.addEventListener('change', runCatalogFilter))
+  document.querySelectorAll('[data-brand]').forEach((button) => button.addEventListener('click', () => { document.querySelector('#search-input').value = button.dataset.brand; runCatalogFilter(); document.querySelector('#product-grid').scrollIntoView({ behavior: 'smooth' }) }))
 }
 
 const fallbackListings = [
