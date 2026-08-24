@@ -21,7 +21,10 @@ body { margin: 0; background: var(--paper); }
 @media (max-width: 800px) { .hero { padding-bottom: 125px !important; }.hero-stats { left: 8vw !important; right: 8vw !important; bottom: 28px !important; gap: 8px !important; } }
 @media (max-width: 800px) { .hero-stats { left: 6vw !important; right: 6vw; justify-content: space-between; gap: 8px; }.hero-stats div { min-width: 0; }.hero-stats strong { font-size: 20px; }.hero-stats span { font-size: 8px; } }
 .hero-wheel { display: none; }
-.product-image { display: none; }
+.product-image { display: flex; align-items: center; min-height: 48px; aspect-ratio: auto; background: transparent; overflow: visible; }
+.product-image img { display: none; }
+.product-image .product-tag { position: static; }
+.product-image .quick-add { position: static; margin-left: auto; width: 38px; height: 38px; }
 .product-card { border-top: 3px solid var(--ink); padding-top: 14px; }
 .hero-copy, .hero-visual { position: relative; z-index: 2; }
 .hero-visual { min-height: 390px; }
