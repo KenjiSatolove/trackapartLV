@@ -2,10 +2,10 @@ import './style.css'
 import { supabase } from './lib/supabase.js'
 
 const products = [
-  { name: 'BMW F10 priekšējais kreisais lukturis', type: 'Lietota detaļa', price: 249, code: 'USED-BMW-F10-00152', image: 'https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs' },
-  { name: 'BMW E46 M3 aizmugurējais tilts', type: 'Lietota detaļa', price: 390, code: 'USED-BMW-E46-00881', image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=85', tag: 'Pēdējais gabals' },
-  { name: 'Audi A4 B8 2.0 TDI turbīna', type: 'Lietota detaļa', price: 185, code: 'USED-AUD-B8-00304', image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=900&q=85', tag: 'Pārbaudīta' },
-  { name: 'Mercedes-Benz W204 AMG bremžu suports', type: 'Lietota detaļa', price: 129, code: 'USED-MER-W204-00027', image: 'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs' },
+  { id: 'bmw-f10-left-light', name: 'BMW F10 priekšējais kreisais lukturis', type: 'Lietota detaļa', price: 249, code: 'USED-BMW-F10-00152', oem: '63117203298', manufacturer: 'BMW Original', brand: 'BMW', model: '5. sērija F10', year: '2010–2017', engine: '530d 3.0 D', category: 'Apgaismes sistēma', condition: 'Ļoti labs', stock: '1 gab.', location: 'Plaukts B3 / 2. rinda', weight: '4.2 kg', dimensions: '78 × 32 × 28 cm', warranty: '3 mēneši', image: 'https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs', description: 'Oriģināls BMW F10 priekšējais kreisais lukturis. Pārbaudīts, stikls bez plaisām, stiprinājumi veseli.' },
+  { id: 'bmw-e46-rear-axle', name: 'BMW E46 M3 aizmugurējais tilts', type: 'Lietota detaļa', price: 390, code: 'USED-BMW-E46-00881', oem: '33312282479', manufacturer: 'BMW Original', brand: 'BMW', model: '3. sērija E46 M3', year: '2000–2006', engine: 'S54 3.2', category: 'Balstiekārta', condition: 'Labs', stock: '1 gab.', location: 'Plaukts C1 / 1. rinda', weight: '38 kg', dimensions: '145 × 55 × 50 cm', warranty: '3 mēneši', image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=85', tag: 'Pēdējais gabals', description: 'Pilns E46 M3 aizmugurējais tilts ar diferenciāli. Piemērots restaurācijai vai trases projektam.' },
+  { id: 'audi-a4-turbo', name: 'Audi A4 B8 2.0 TDI turbīna', type: 'Lietota detaļa', price: 185, code: 'USED-AUD-B8-00304', oem: '03L145702J', manufacturer: 'Garrett', brand: 'Audi', model: 'A4 B8', year: '2008–2015', engine: '2.0 TDI 105 kW', category: 'Dzinējs', condition: 'Pārbaudīta', stock: '1 gab.', location: 'Plaukts A2 / 4. rinda', weight: '9.5 kg', dimensions: '35 × 32 × 30 cm', warranty: '1 mēnesis', image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=900&q=85', tag: 'Pārbaudīta', description: 'Audi 2.0 TDI turbokompresors. Vārpsta pārbaudīta, bez liekas brīvkustības.' },
+  { id: 'mercedes-w204-caliper', name: 'Mercedes-Benz W204 AMG bremžu suports', type: 'Lietota detaļa', price: 129, code: 'USED-MER-W204-00027', oem: '2044211381', manufacturer: 'Mercedes-Benz Original', brand: 'Mercedes-Benz', model: 'C klase W204 AMG', year: '2007–2014', engine: 'C63 AMG 6.2', category: 'Bremžu sistēma', condition: 'Ļoti labs', stock: '1 gab.', location: 'Plaukts D4 / 3. rinda', weight: '8 kg', dimensions: '32 × 24 × 22 cm', warranty: '3 mēneši', image: 'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs', description: 'AMG priekšējais bremžu suports. Notīrīts un pārbaudīts, gatavs uzstādīšanai.' },
 ]
 
 const categories = [
@@ -63,6 +63,10 @@ function bindProductButtons() {
     button.textContent = '✓'
     setTimeout(() => { button.textContent = button.classList.contains('quick-add') ? '+' : 'PIEVIENOT ↗' }, 900)
   }))
+  document.querySelectorAll('.product-card').forEach((card, index) => card.addEventListener('click', (event) => {
+    if (event.target.closest('button')) return
+    window.location.hash = `product-${products[index].id}`
+  }))
 }
 
 function renderCart() {
@@ -89,12 +93,13 @@ function renderPage() {
     account: `<section class="page-hero"><div class="section-kicker">05 / TAVS KONTS</div><h1>Pieslēdzies.<br><em>Pārdod.</em></h1><p>Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.</p></section><section class="form-section"><form class="site-form" id="auth-form"><div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Ienākt vai <em>reģistrēties.</em></h2><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><div class="form-actions"><button class="button button-dark" type="submit">IELOGOTIES ↗</button><button class="text-button" id="signup-button" type="button">IZVEIDOT KONTU</button></div><p class="form-message" id="auth-message"></p></form></section>`,
     sell: `<section class="page-hero"><div class="section-kicker">06 / JAUNS SLUDINĀJUMS</div><h1>Ieliec detaļu<br><em>uz ceļa.</em></h1><p>Aizpildi informāciju, pievieno bildes un sasniedz cilvēku, kuram tā vajadzīga.</p></section><section class="form-section"><form class="site-form listing-form" id="listing-form"><div class="section-kicker">DETAĻAS INFORMĀCIJA</div><h2>Ko tu <em>pārdod?</em></h2><label>NOSAUKUMS<input name="title" required placeholder="Piem., BMW E46 priekšējais lukturis"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required placeholder="250"></label><label>OEM NUMURS<input name="oem_number" placeholder="63117203298"></label></div><div class="form-two"><label>MARKA<input name="brand" placeholder="BMW"></label><label>MODELIS<input name="model" placeholder="E46"></label></div><div class="form-two"><label>GADS<input name="production_year" type="number" min="1950" max="2030" placeholder="2014"></label><label>DZINĒJS<input name="engine" placeholder="530d / 3.0 TDI"></label></div><div class="form-two"><label>KATEGORIJA<select name="category"><option>Virsbūve</option><option>Dzinējs</option><option>Salons</option><option>Balstiekārta</option><option>Elektrība</option></select></label><label>ATRAŠANĀS VIETA<input name="location" placeholder="Rīga, noliktava B3"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good">Ļoti labs</option><option value="good">Labs</option><option value="defect">Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="5" placeholder="Apraksti detaļas stāvokli un zināmos defektus"></textarea></label><label>BILDES<input name="images" type="file" accept="image/*" multiple required></label><div class="form-actions"><button class="button button-dark" type="submit">PUBLICĒT SLUDINĀJUMU ↗</button></div><p class="form-message" id="listing-message"></p></form></section>`,
   }
-  document.querySelector('main').innerHTML = route === 'home' ? homeMarkup : (route === 'listings' ? listingsPage : (route.startsWith('listing-') ? listingDetailPage : (pages[route] || pages.catalog)))
+  document.querySelector('main').innerHTML = route === 'home' ? homeMarkup : (route === 'listings' ? listingsPage : (route.startsWith('listing-') ? listingDetailPage : (route.startsWith('product-') ? productDetailPage : (pages[route] || pages.catalog))))
   document.querySelectorAll('.main-nav a').forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${route}`))
   bindProductButtons()
   bindRouteForms(route)
   loadListings()
   if (route.startsWith('listing-')) loadListingDetail(route.replace('listing-', ''))
+  if (route.startsWith('product-')) loadProductDetail(route.replace('product-', ''))
   const form = document.querySelector('#search-form')
   const runCatalogFilter = () => {
     const query = document.querySelector('#search-input').value.trim().toLowerCase()
@@ -124,6 +129,17 @@ const fallbackListings = [
 
 const listingsPage = `<section class="page-hero"><div class="section-kicker">04 / KOPIENAS TIRGUS</div><h1>Redzi, ko citi<br><em>pārdod.</em></h1><p>Īstas detaļas no TrackParts kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.</p></section><section class="listings-section listings-page"><div class="section-top"><div><div class="section-kicker">AKTĪVIE SLUDINĀJUMI</div><h2>Jaunākie <em>sludinājumi.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
 const listingDetailPage = `<section class="detail-page"><a class="back-link" href="#listings">← ATPAKAĻ UZ SLUDINĀJUMIEM</a><div class="detail-layout"><div><div class="section-kicker">SLUDINĀJUMA INFORMĀCIJA</div><h1 id="detail-title">Ielādē...</h1><p id="detail-description" class="detail-description"></p></div><aside class="seller-panel"><span class="product-tag">AKTĪVS SLUDINĀJUMS</span><strong id="detail-price"></strong><div class="detail-data" id="detail-data"></div><hr><small>PĀRDEVĒJS</small><h3 id="detail-seller"></h3><a id="detail-phone" class="seller-contact" href="mailto:hello@trackparts.lv">SAZINĀTIES ↗</a><a class="seller-contact" href="mailto:hello@trackparts.lv">RAKSTĪT E-PASTU ↗</a></aside></div></section>`
+const productDetailPage = `<section class="detail-page product-detail"><a class="back-link" href="#catalog">← ATPAKAĻ UZ KATALOGU</a><div class="detail-layout"><div><div class="section-kicker">KATALOGA PRECE</div><h1 id="product-title">Ielādē...</h1><p id="product-description" class="detail-description"></p><button class="button button-dark" id="product-add" type="button">PIEVIENOT GROZAM ↗</button></div><aside class="seller-panel"><span class="product-tag">IR NOLIKTAVĀ</span><strong id="product-price"></strong><div class="detail-data" id="product-data"></div></aside></div></section>`
+
+function loadProductDetail(id) {
+  const product = products.find((item) => item.id === id)
+  if (!product) return
+  document.querySelector('#product-title').textContent = product.name
+  document.querySelector('#product-description').textContent = product.description
+  document.querySelector('#product-price').textContent = `${product.price.toFixed(2).replace('.', ',')} €`
+  document.querySelector('#product-data').innerHTML = `<span>OEM NUMURS<strong>${product.oem}</strong></span><span>RAŽOTĀJA KODS<strong>${product.code}</strong></span><span>RAŽOTĀJS<strong>${product.manufacturer}</strong></span><span>AUTO<strong>${product.brand} ${product.model}</strong></span><span>GADS / DZINĒJS<strong>${product.year} / ${product.engine}</strong></span><span>KATEGORIJA<strong>${product.category}</strong></span><span>STĀVOKLIS<strong>${product.condition}</strong></span><span>NOLIKTAVA<strong>${product.location} · Atlikums: ${product.stock}</strong></span><span>SVARS / IZMĒRI<strong>${product.weight} · ${product.dimensions}</strong></span><span>GARANTIJA<strong>${product.warranty}</strong></span>`
+  document.querySelector('#product-add').addEventListener('click', () => { cartItems.push(product); cartCount += 1; cartCountElement.textContent = cartCount; renderCart(); document.querySelector('#product-add').textContent = '✓ PIEVIENOTS GROZAM' })
+}
 
 async function loadListings() {
   const targets = document.querySelectorAll('#listing-table')
