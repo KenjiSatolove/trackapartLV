@@ -86,12 +86,14 @@ function bindRouteForms(route) {
     authForm.addEventListener('submit', async (event) => {
       event.preventDefault()
       const data = new FormData(authForm)
+      if (!data.get('email') || !data.get('password')) { authMessage.textContent = 'Ievadi e-pastu un paroli.'; return }
       const { error } = await supabase.auth.signInWithPassword({ email: data.get('email'), password: data.get('password') })
       authMessage.textContent = error ? error.message : 'Veiksmīgi ielogojies.'
       if (!error) window.location.hash = 'sell'
     })
     document.querySelector('#signup-button').addEventListener('click', async () => {
       const data = new FormData(authForm)
+      if (!data.get('email') || !data.get('password')) { authMessage.textContent = 'Ievadi e-pastu un paroli, lai izveidotu kontu.'; return }
       const { error } = await supabase.auth.signUp({ email: data.get('email'), password: data.get('password') })
       authMessage.textContent = error ? error.message : 'Konts izveidots. Pārbaudi savu e-pastu.'
     })

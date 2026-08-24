@@ -5,6 +5,8 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); }
 .hero-wheel { display: none; }
+.product-image { display: none; }
+.product-card { border-top: 3px solid var(--ink); padding-top: 14px; }
 .hero-copy, .hero-visual { position: relative; z-index: 2; }
 .hero-visual { min-height: 390px; }
 .hero-visual img { position: absolute; inset: 18px 0 0 8%; width: 92%; height: calc(100% - 18px); object-fit: cover; filter: grayscale(1) contrast(1.15); opacity: .84; clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%); }
