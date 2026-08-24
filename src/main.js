@@ -19,7 +19,7 @@ document.querySelector('#app').innerHTML = `
     <nav class="main-nav"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#listings">Sludinājumi</a><a href="#sell">Pārdot detaļu</a><a href="#account">Mans konts</a><a href="#contact">Kontakti</a></nav>
     <div class="header-actions"><button class="lang" type="button">LV <small>/ EN</small></button><button class="icon-button search-trigger" type="button" aria-label="Meklēt">⌕</button><button class="icon-button user-button" type="button" aria-label="Mans konts">◎</button><button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button></div>
   </header>
-  <aside class="cart-panel" id="cart-panel"><button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button><div class="section-kicker">TAVS GROZS</div><h2>Atlasītās <em>detaļas.</em></h2><p id="cart-empty">Grozs ir tukšs.</p><button class="button button-dark" type="button" id="checkout-button">UZ NORĒĶINU ↗</button></aside>
+  <aside class="cart-panel" id="cart-panel"><button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button><div class="section-kicker">TAVS GROZS</div><h2>Atlasītās <em>detaļas.</em></h2><div class="cart-items" id="cart-items"><p id="cart-empty">Grozs ir tukšs.</p></div><div class="cart-summary"><span>KOPĀ</span><strong id="cart-total">0,00 €</strong></div><button class="button button-dark" type="button" id="checkout-button">UZ NORĒĶINU ↗</button><button class="text-button" type="button" id="clear-cart">NOTĪRĪT GROZU</button></aside>
 
   <main>
     <section class="hero">
@@ -45,6 +45,7 @@ document.querySelector('#app').innerHTML = `
 `
 
 let cartCount = 0
+const cartItems = []
 const cartCountElement = document.querySelector('#cart-count')
 const homeMarkup = document.querySelector('main').innerHTML
 
@@ -55,18 +56,28 @@ function productMarkup() {
 function bindProductButtons() {
   document.querySelectorAll('[data-index]').forEach((button) => button.addEventListener('click', () => {
     cartCount += 1
+    const product = products[Number(button.dataset.index)]
+    cartItems.push(product)
     cartCountElement.textContent = cartCount
-    document.querySelector('#cart-empty').textContent = `${cartCount} detaļa${cartCount === 1 ? '' : 's'} pievienota grozam.`
+    renderCart()
     button.textContent = '✓'
     setTimeout(() => { button.textContent = button.classList.contains('quick-add') ? '+' : 'PIEVIENOT ↗' }, 900)
   }))
+}
+
+function renderCart() {
+  const items = document.querySelector('#cart-items')
+  const total = cartItems.reduce((sum, product) => sum + product.price, 0)
+  document.querySelector('#cart-total').textContent = `${total.toFixed(2).replace('.', ',')} €`
+  items.innerHTML = cartItems.length ? cartItems.map((product) => `<div class="cart-item"><div><strong>${product.name}</strong><small>${product.code}</small></div><b>${product.price},00 €</b></div>`).join('') : '<p id="cart-empty">Grozs ir tukšs.</p>'
 }
 
 document.querySelector('.search-trigger').addEventListener('click', () => { window.location.hash = 'home'; setTimeout(() => document.querySelector('#search-input')?.focus(), 50) })
 document.querySelector('.user-button').addEventListener('click', () => { window.location.hash = 'account' })
 document.querySelector('.cart-button').addEventListener('click', () => document.querySelector('#cart-panel').classList.toggle('is-open'))
 document.querySelector('.cart-close').addEventListener('click', () => document.querySelector('#cart-panel').classList.remove('is-open'))
-document.querySelector('#checkout-button').addEventListener('click', () => { document.querySelector('#cart-empty').textContent = cartCount ? 'Norēķins tiks pievienots nākamajā versijā.' : 'Pievieno detaļu grozam vispirms.' })
+document.querySelector('#checkout-button').addEventListener('click', () => { document.querySelector('#cart-items').insertAdjacentHTML('beforeend', `<p class="form-message">${cartCount ? 'Norēķins tiks pievienots nākamajā versijā.' : 'Pievieno detaļu grozam vispirms.'}</p>`) })
+document.querySelector('#clear-cart').addEventListener('click', () => { cartItems.length = 0; cartCount = 0; cartCountElement.textContent = '0'; renderCart() })
 document.querySelectorAll('a[href="#"]').forEach((link) => link.addEventListener('click', (event) => { event.preventDefault(); window.location.hash = 'listings' }))
 
 function renderPage() {
