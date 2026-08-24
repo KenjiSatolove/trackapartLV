@@ -15,10 +15,11 @@ const categories = [
 document.querySelector('#app').innerHTML = `
   <div class="announcement">KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ <span>BEZMAKSAS PIEGĀDE NO 150 €</span></div>
   <header class="site-header">
-    <a class="brand" href="#"><img src="image-removebg-preview.png" alt="TrackParts LV logo"></a>
+    <a class="brand" href="#home"><img src="image-removebg-preview.png" alt="TrackParts LV logo"></a>
     <nav class="main-nav"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#listings">Sludinājumi</a><a href="#sell">Pārdot detaļu</a><a href="#account">Mans konts</a><a href="#contact">Kontakti</a></nav>
-    <div class="header-actions"><button class="lang" type="button">LV <small>/ EN</small></button><button class="icon-button" aria-label="Meklēt">⌕</button><button class="icon-button user-button" aria-label="Mans konts">◎</button><button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button></div>
+    <div class="header-actions"><button class="lang" type="button">LV <small>/ EN</small></button><button class="icon-button search-trigger" type="button" aria-label="Meklēt">⌕</button><button class="icon-button user-button" type="button" aria-label="Mans konts">◎</button><button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button></div>
   </header>
+  <aside class="cart-panel" id="cart-panel"><button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button><div class="section-kicker">TAVS GROZS</div><h2>Atlasītās <em>detaļas.</em></h2><p id="cart-empty">Grozs ir tukšs.</p><button class="button button-dark" type="button" id="checkout-button">UZ NORĒĶINU ↗</button></aside>
 
   <main>
     <section class="hero">
@@ -27,19 +28,20 @@ document.querySelector('#app').innerHTML = `
       <div class="hero-stats"><div><strong>10k+</strong><span>DETAĻAS<br>NOLIKTAVĀ</span></div><div><strong>24h</strong><span>ĀTRA<br>IZSŪTĪŠANA</span></div><div><strong>EU</strong><span>PIEGĀDE<br>VISĀ EIROPĀ</span></div></div>
     </section>
 
-    <section class="search-section" id="catalog"><div class="section-kicker">01 / ATRODI SAVU DETAĻU</div><div class="search-heading"><h2>Ko tu meklē?</h2><p>Meklē pēc nosaukuma, OEM koda vai detaļas numura.</p></div><form class="search-box" id="search-form"><span>⌕</span><input id="search-input" placeholder="Piem., BMW F10 lukturis vai 63117203298"/><button type="submit">MEKLĒT <b>↗</b></button></form><div class="select-row"><label>MARKA<select><option>Visas markas</option><option>BMW</option><option>Audi</option><option>Mercedes-Benz</option></select></label><label>MODELIS<select><option>Visi modeļi</option><option>F10</option><option>E46</option><option>A4 B8</option></select></label><label>DETAĻAS TIPS<select><option>Visas kategorijas</option><option>Motora detaļas</option><option>Virsbūve</option><option>Salons</option></select></label><button class="filter-button" type="button">+ VAIRĀK FILTRU</button></div></section>
+    <section class="search-section" id="catalog"><div class="section-kicker">01 / ATRODI SAVU DETAĻU</div><div class="search-heading"><h2>Ko tu meklē?</h2><p>Meklē pēc nosaukuma, OEM koda vai detaļas numura.</p></div><form class="search-box" id="search-form"><span>⌕</span><input id="search-input" placeholder="Piem., BMW F10 lukturis vai 63117203298"/><button type="submit">MEKLĒT <b>↗</b></button></form><div class="select-row"><label>MARKA<select><option>Visas markas</option><option>BMW</option><option>Audi</option><option>Mercedes-Benz</option></select></label><label>MODELIS<select><option>Visi modeļi</option><option>F10</option><option>E46</option><option>A4 B8</option></select></label><label>DETAĻAS TIPS<select><option>Visas kategorijas</option><option>Motora detaļas</option><option>Virsbūve</option><option>Salons</option></select></label><button class="filter-button" id="more-filters" type="button">+ VAIRĀK FILTRU</button></div></section>
 
     <section class="brand-section"><div class="section-kicker">MARKAS, KO PAZĪSTAM</div><div class="brand-strip">${['BMW', 'AUDI', 'MERCEDES-BENZ', 'VOLKSWAGEN', 'VOLVO', 'TOYOTA', 'FORD', 'HONDA'].map((brand) => `<button type="button" data-brand="${brand.toLowerCase()}">${brand}</button>`).join('')}</div></section>
 
-    <section class="category-section"><div class="section-top"><div><div class="section-kicker">02 / IZPĒTI KATEGORIJAS</div><h2>Viss, kas vajadzīgs<br><em>tavam auto.</em></h2></div><a class="text-link" href="#">SKATĪT VISU <span>↗</span></a></div><div class="category-grid">${categories.map(([n, name, icon]) => `<a class="category" href="#"><span class="category-number">${n}</span><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a>`).join('')}</div></section>
+    <section class="category-section"><div class="section-top"><div><div class="section-kicker">02 / IZPĒTI KATEGORIJAS</div><h2>Viss, kas vajadzīgs<br><em>tavam auto.</em></h2></div><a class="text-link" href="#catalog">SKATĪT VISU <span>↗</span></a></div><div class="category-grid">${categories.map(([n, name, icon]) => `<a class="category" href="#catalog" data-category="${name.toLowerCase()}"><span class="category-number">${n}</span><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a>`).join('')}</div></section>
 
     <section class="product-section" id="new"><div class="section-top"><div><div class="section-kicker">03 / JAUNUMI NOLIKTAVĀ</div><h2>Pēdējie <em>atradumi.</em></h2></div><a class="text-link" href="#">SKATĪT VISUS <span>↗</span></a></div><div class="product-grid" id="product-grid">${products.map((product, index) => `<article class="product-card" data-name="${product.name.toLowerCase()} ${product.code.toLowerCase()}"><div class="product-image"><img src="${product.image}" alt="${product.name}"/><span class="product-tag">${product.tag}</span><button class="quick-add" data-index="${index}" aria-label="Pievienot grozam">+</button></div><div class="product-meta"><span>${product.type}</span><small>${product.code}</small></div><h3>${product.name}</h3><div class="product-bottom"><strong>${product.price},00 €</strong><button class="add-text" data-index="${index}">PIEVIENOT <span>↗</span></button></div></article>`).join('')}</div><p class="no-results" id="no-results">Neviena detaļa neatbilst meklējumam.</p></section>
+      <section class="product-section" id="new"><div class="section-top"><div><div class="section-kicker">03 / JAUNUMI NOLIKTAVĀ</div><h2>Pēdējie <em>atradumi.</em></h2></div><a class="text-link" href="#listings">SKATĪT VISUS <span>↗</span></a></div><div class="product-grid" id="product-grid">${products.map((product, index) => `<article class="product-card" data-name="${product.name.toLowerCase()} ${product.code.toLowerCase()}"><div class="product-image"><img src="${product.image}" alt="${product.name}"/><span class="product-tag">${product.tag}</span><button class="quick-add" data-index="${index}" aria-label="Pievienot grozam">+</button></div><div class="product-meta"><span>${product.type}</span><small>${product.code}</small></div><h3>${product.name}</h3><div class="product-bottom"><strong>${product.price},00 €</strong><button class="add-text" data-index="${index}">PIEVIENOT <span>↗</span></button></div></article>`).join('')}</div><p class="no-results" id="no-results">Neviena detaļa neatbilst meklējumam.</p></section>
 
     <section class="listings-section" id="listings"><div class="section-top"><div><div class="section-kicker">04 / KOPIENAS SLUDINĀJUMI</div><h2>Ko pārdod<br><em>citi.</em></h2></div><a class="text-link" href="#sell">PĀRDOT SAVU DETAĻU <span>↗</span></a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>
 
     <section class="trust-section"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katra detaļa tiek apskatīta pirms nosūtīšanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No mūsu noliktavas Rīgā līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Atbalsts 7 dienas</strong><p>Zini, ko pērc. Mēs palīdzēsim atrast pareizo.</p></div></section>
   </main>
-  <footer id="contact"><div class="footer-brand"><a class="brand" href="#"><img src="image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#catalog">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#">Piegāde</a><a href="#">Atgriešana</a><a href="#">Kontakti</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><span>INSTAGRAM ↗</span></div></footer>
+  <footer id="contact"><div class="footer-brand"><a class="brand" href="#home"><img src="image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#listings">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#contact">Piegāde</a><a href="#contact">Atgriešana</a><a href="#contact">Kontakti</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><a href="https://www.instagram.com" target="_blank" rel="noreferrer">INSTAGRAM ↗</a></div></footer>
 `
 
 let cartCount = 0
@@ -54,10 +56,18 @@ function bindProductButtons() {
   document.querySelectorAll('[data-index]').forEach((button) => button.addEventListener('click', () => {
     cartCount += 1
     cartCountElement.textContent = cartCount
+    document.querySelector('#cart-empty').textContent = `${cartCount} detaļa${cartCount === 1 ? '' : 's'} pievienota grozam.`
     button.textContent = '✓'
     setTimeout(() => { button.textContent = button.classList.contains('quick-add') ? '+' : 'PIEVIENOT ↗' }, 900)
   }))
 }
+
+document.querySelector('.search-trigger').addEventListener('click', () => { window.location.hash = 'home'; setTimeout(() => document.querySelector('#search-input')?.focus(), 50) })
+document.querySelector('.user-button').addEventListener('click', () => { window.location.hash = 'account' })
+document.querySelector('.cart-button').addEventListener('click', () => document.querySelector('#cart-panel').classList.toggle('is-open'))
+document.querySelector('.cart-close').addEventListener('click', () => document.querySelector('#cart-panel').classList.remove('is-open'))
+document.querySelector('#checkout-button').addEventListener('click', () => { document.querySelector('#cart-empty').textContent = cartCount ? 'Norēķins tiks pievienots nākamajā versijā.' : 'Pievieno detaļu grozam vispirms.' })
+document.querySelectorAll('a[href="#"]').forEach((link) => link.addEventListener('click', (event) => { event.preventDefault(); window.location.hash = 'listings' }))
 
 function renderPage() {
   const route = window.location.hash.slice(1) || 'home'
@@ -91,6 +101,7 @@ function renderPage() {
   }
   if (form) form.addEventListener('submit', (event) => { event.preventDefault(); runCatalogFilter() })
   document.querySelectorAll('.select-row select').forEach((select) => select.addEventListener('change', runCatalogFilter))
+  document.querySelector('#more-filters')?.addEventListener('click', (event) => { event.currentTarget.textContent = event.currentTarget.textContent.includes('VAIRĀK') ? '- MAZĀK FILTRU' : '+ VAIRĀK FILTRU'; document.querySelector('.select-row').classList.toggle('expanded') })
   document.querySelectorAll('[data-brand]').forEach((button) => button.addEventListener('click', () => { document.querySelector('#search-input').value = button.dataset.brand; runCatalogFilter(); document.querySelector('#product-grid').scrollIntoView({ behavior: 'smooth' }) }))
 }
 
@@ -101,7 +112,7 @@ const fallbackListings = [
 ]
 
 const listingsPage = `<section class="page-hero"><div class="section-kicker">04 / KOPIENAS TIRGUS</div><h1>Redzi, ko citi<br><em>pārdod.</em></h1><p>Īstas detaļas no TrackParts kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.</p></section><section class="listings-section listings-page"><div class="section-top"><div><div class="section-kicker">AKTĪVIE SLUDINĀJUMI</div><h2>Jaunākie <em>sludinājumi.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
-const listingDetailPage = `<section class="detail-page"><a class="back-link" href="#listings">← ATPAKAĻ UZ SLUDINĀJUMIEM</a><div class="detail-layout"><div><div class="section-kicker">SLUDINĀJUMA INFORMĀCIJA</div><h1 id="detail-title">Ielādē...</h1><p id="detail-description" class="detail-description"></p></div><aside class="seller-panel"><span class="product-tag">AKTĪVS SLUDINĀJUMS</span><strong id="detail-price"></strong><div class="detail-data" id="detail-data"></div><hr><small>PĀRDEVĒJS</small><h3 id="detail-seller"></h3><a id="detail-phone" class="seller-contact" href="#"></a><a class="seller-contact" href="mailto:hello@trackparts.lv">RAKSTĪT E-PASTU ↗</a></aside></div></section>`
+const listingDetailPage = `<section class="detail-page"><a class="back-link" href="#listings">← ATPAKAĻ UZ SLUDINĀJUMIEM</a><div class="detail-layout"><div><div class="section-kicker">SLUDINĀJUMA INFORMĀCIJA</div><h1 id="detail-title">Ielādē...</h1><p id="detail-description" class="detail-description"></p></div><aside class="seller-panel"><span class="product-tag">AKTĪVS SLUDINĀJUMS</span><strong id="detail-price"></strong><div class="detail-data" id="detail-data"></div><hr><small>PĀRDEVĒJS</small><h3 id="detail-seller"></h3><a id="detail-phone" class="seller-contact" href="mailto:hello@trackparts.lv">SAZINĀTIES ↗</a><a class="seller-contact" href="mailto:hello@trackparts.lv">RAKSTĪT E-PASTU ↗</a></aside></div></section>`
 
 async function loadListings() {
   const targets = document.querySelectorAll('#listing-table')
