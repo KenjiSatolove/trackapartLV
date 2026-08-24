@@ -4,6 +4,11 @@
 :root { --ink: #0a0a0a; --paper: #ffffff; --line: #d8d8d8; --orange: #e10600; --muted: #707070; font: 15px/1.45 'Space Grotesk', sans-serif; color: var(--ink); background: var(--paper); font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); }
+.hero-wheel { display: none; }
+.hero-visual img { position: absolute; inset: 0 0 0 8%; width: 92%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.15); opacity: .84; clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%); }
+.hero-visual:after { content: ''; position: absolute; inset: 0 0 0 8%; background: linear-gradient(90deg, var(--ink), transparent 35%), linear-gradient(0deg, rgba(10,10,10,.55), transparent); pointer-events: none; }
+.hero-label, .hero-spec { z-index: 1; }
+.page-hero h1, .hero h1 { font-weight: 700; }
 a { color: inherit; text-decoration: none; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
