@@ -178,17 +178,23 @@ const translations = {
   'Pārbaudītas lietotas auto detaļas. Atrastas ātri, nosūtītas droši.': 'Checked used car parts. Found fast, shipped safely.', 'SKATĪT KATALOGU': 'BROWSE CATALOG',
   'DETAĻAS NOLIKTAVĀ': 'PARTS IN STOCK', 'ĀTRA IZ SŪTĪŠANA': 'FAST SHIPPING', 'PIEGĀDE VISĀ EIROPĀ': 'SHIPPING ACROSS EUROPE',
   'ATRODI SAVU DETAĻU': 'FIND YOUR PART', 'Ko tu meklē?': 'What are you looking for?', 'Meklē pēc nosaukuma, OEM koda vai detaļas numura.': 'Search by name, OEM code or part number.',
+  'MEKLĒT': 'SEARCH', 'VAIRĀK FILTRU': 'MORE FILTERS', 'Visas markas': 'All brands', 'Visi modeļi': 'All models', 'Visas kategorijas': 'All categories',
   'JAUNUMI NOLIKTAVĀ': 'NEW IN STOCK', 'Pēdējie': 'Latest', 'atradumi.': 'finds.', 'KOPIENAS SLUDINĀJUMI': 'COMMUNITY LISTINGS', 'Ko pārdod': 'What others', 'citi.': 'sell.',
   'Pārbaudīta kvalitāte': 'Checked quality', 'Piegāde Eiropā': 'European shipping', 'Atbalsts 7 dienas': 'Support 7 days', 'Rīga, Latvija': 'Riga, Latvia',
 }
 let english = false
+const originalText = new WeakMap()
 function translatePage() {
-  document.querySelectorAll('body *').forEach((element) => {
-    if (element.children.length) return
-    const original = element.dataset.lvText || element.textContent.trim()
-    if (!original) return
-    if (!element.dataset.lvText) element.dataset.lvText = original
-    element.textContent = english ? (translations[original] || original) : element.dataset.lvText
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+  const textNodes = []
+  let node
+  while ((node = walker.nextNode())) textNodes.push(node)
+  textNodes.forEach((textNode) => {
+    const original = originalText.get(textNode) || textNode.nodeValue.trim()
+    if (!original || textNode.parentElement?.tagName === 'SCRIPT') return
+    if (!originalText.has(textNode)) originalText.set(textNode, original)
+    const translated = english ? (translations[original] || original) : originalText.get(textNode)
+    textNode.nodeValue = textNode.nodeValue.replace(textNode.nodeValue.trim(), translated)
   })
   document.querySelectorAll('input[placeholder]').forEach((input) => {
     if (!input.dataset.lvPlaceholder) input.dataset.lvPlaceholder = input.placeholder
