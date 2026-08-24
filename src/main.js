@@ -2,10 +2,10 @@ import './style.css'
 import { supabase } from './lib/supabase.js'
 
 const products = [
-  { name: 'BMW F10 priekšējais kreisais lukturis', type: 'Lietota detaļa', price: 249, code: 'USED-BMW-F10-00152', image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs' },
-  { name: 'BMW E46 M3 aizmugurējais tilts', type: 'Lietota detaļa', price: 390, code: 'USED-BMW-E46-00881', image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85', tag: 'Pēdējais gabals' },
-  { name: 'Audi A4 B8 2.0 TDI turbīna', type: 'Lietota detaļa', price: 185, code: 'USED-AUD-B8-00304', image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=85', tag: 'Pārbaudīta' },
-  { name: 'Mercedes-Benz W204 AMG bremžu suports', type: 'Lietota detaļa', price: 129, code: 'USED-MER-W204-00027', image: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs' },
+  { name: 'BMW F10 priekšējais kreisais lukturis', type: 'Lietota detaļa', price: 249, code: 'USED-BMW-F10-00152', image: 'https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs' },
+  { name: 'BMW E46 M3 aizmugurējais tilts', type: 'Lietota detaļa', price: 390, code: 'USED-BMW-E46-00881', image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=85', tag: 'Pēdējais gabals' },
+  { name: 'Audi A4 B8 2.0 TDI turbīna', type: 'Lietota detaļa', price: 185, code: 'USED-AUD-B8-00304', image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=900&q=85', tag: 'Pārbaudīta' },
+  { name: 'Mercedes-Benz W204 AMG bremžu suports', type: 'Lietota detaļa', price: 129, code: 'USED-MER-W204-00027', image: 'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=900&q=85', tag: 'Ļoti labs' },
 ]
 
 const categories = [
@@ -23,7 +23,7 @@ document.querySelector('#app').innerHTML = `
   <main>
     <section class="hero">
       <div class="hero-copy"><p class="eyebrow">DETĀĻAS, KURĀM VAR UZTICĒTIES</p><h1>Tava automašīna.<br><em>Mūsu detaļas.</em></h1><p class="hero-text">Pārbaudītas lietotas auto detaļas. Atrastas ātri, nosūtītas droši.</p><a class="button button-light" href="#catalog">SKATĪT KATALOGU <span>↗</span></a></div>
-      <div class="hero-visual"><img src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=90" alt="Autosporta auto trasē"><div class="hero-label">EST. 2024 <i></i> RĪGA, LV</div><div class="hero-spec">01 <span>TRACKPARTS</span></div></div>
+      <div class="hero-visual"><img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=90" alt="Autosporta auto trasē"><div class="hero-label">EST. 2024 <i></i> RĪGA, LV</div><div class="hero-spec">01 <span>TRACKPARTS</span></div></div>
       <div class="hero-stats"><div><strong>10k+</strong><span>DETAĻAS<br>NOLIKTAVĀ</span></div><div><strong>24h</strong><span>ĀTRA<br>IZSŪTĪŠANA</span></div></div>
     </section>
 

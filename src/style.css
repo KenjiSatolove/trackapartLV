@@ -5,7 +5,9 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); }
 .hero-wheel { display: none; }
-.hero-visual img { position: absolute; inset: 0 0 0 8%; width: 92%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.15); opacity: .84; clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%); }
+.hero-copy, .hero-visual { position: relative; z-index: 2; }
+.hero-visual { min-height: 390px; }
+.hero-visual img { position: absolute; inset: 18px 0 0 8%; width: 92%; height: calc(100% - 18px); object-fit: cover; filter: grayscale(1) contrast(1.15); opacity: .84; clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%); }
 .hero-visual:after { content: ''; position: absolute; inset: 0 0 0 8%; background: linear-gradient(90deg, var(--ink), transparent 35%), linear-gradient(0deg, rgba(10,10,10,.55), transparent); pointer-events: none; }
 .hero-label, .hero-spec { z-index: 1; }
 .page-hero h1, .hero h1 { font-weight: 700; }
