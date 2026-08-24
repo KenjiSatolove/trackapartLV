@@ -68,6 +68,7 @@ create policy "Users can update their listings" on public.listings for update us
 create policy "Users can delete their listings" on public.listings for delete using (auth.uid() = user_id);
 create policy "Public can view categories" on public.categories for select using (true);
 create policy "Users can manage own profile" on public.profiles for all using (auth.uid() = id) with check (auth.uid() = id);
+create policy "Public can view seller profiles" on public.profiles for select using (true);
 create policy "Public can view listing images" on public.listing_images for select using (true);
 create policy "Owners can manage listing images" on public.listing_images for all using (exists (select 1 from public.listings where id = listing_id and user_id = auth.uid()));
 create policy "Users can manage own favorites" on public.favorites for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

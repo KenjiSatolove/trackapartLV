@@ -66,11 +66,12 @@ function renderPage() {
     account: `<section class="page-hero"><div class="section-kicker">05 / TAVS KONTS</div><h1>Pieslēdzies.<br><em>Pārdod.</em></h1><p>Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.</p></section><section class="form-section"><form class="site-form" id="auth-form"><div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Ienākt vai <em>reģistrēties.</em></h2><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><div class="form-actions"><button class="button button-dark" type="submit">IELOGOTIES ↗</button><button class="text-button" id="signup-button" type="button">IZVEIDOT KONTU</button></div><p class="form-message" id="auth-message"></p></form></section>`,
     sell: `<section class="page-hero"><div class="section-kicker">06 / JAUNS SLUDINĀJUMS</div><h1>Ieliec detaļu<br><em>uz ceļa.</em></h1><p>Aizpildi informāciju, pievieno bildes un sasniedz cilvēku, kuram tā vajadzīga.</p></section><section class="form-section"><form class="site-form listing-form" id="listing-form"><div class="section-kicker">DETAĻAS INFORMĀCIJA</div><h2>Ko tu <em>pārdod?</em></h2><label>NOSAUKUMS<input name="title" required placeholder="Piem., BMW E46 priekšējais lukturis"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required placeholder="250"></label><label>OEM NUMURS<input name="oem_number" placeholder="63117203298"></label></div><div class="form-two"><label>MARKA<input name="brand" placeholder="BMW"></label><label>MODELIS<input name="model" placeholder="E46"></label></div><div class="form-two"><label>GADS<input name="production_year" type="number" min="1950" max="2030" placeholder="2014"></label><label>DZINĒJS<input name="engine" placeholder="530d / 3.0 TDI"></label></div><div class="form-two"><label>KATEGORIJA<select name="category"><option>Virsbūve</option><option>Dzinējs</option><option>Salons</option><option>Balstiekārta</option><option>Elektrība</option></select></label><label>ATRAŠANĀS VIETA<input name="location" placeholder="Rīga, noliktava B3"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good">Ļoti labs</option><option value="good">Labs</option><option value="defect">Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="5" placeholder="Apraksti detaļas stāvokli un zināmos defektus"></textarea></label><label>BILDES<input name="images" type="file" accept="image/*" multiple required></label><div class="form-actions"><button class="button button-dark" type="submit">PUBLICĒT SLUDINĀJUMU ↗</button></div><p class="form-message" id="listing-message"></p></form></section>`,
   }
-  document.querySelector('main').innerHTML = route === 'home' ? homeMarkup : (route === 'listings' ? listingsPage : (pages[route] || pages.catalog))
+  document.querySelector('main').innerHTML = route === 'home' ? homeMarkup : (route === 'listings' ? listingsPage : (route.startsWith('listing-') ? listingDetailPage : (pages[route] || pages.catalog)))
   document.querySelectorAll('.main-nav a').forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${route}`))
   bindProductButtons()
   bindRouteForms(route)
   loadListings()
+  if (route.startsWith('listing-')) loadListingDetail(route.replace('listing-', ''))
   const form = document.querySelector('#search-form')
   if (form) form.addEventListener('submit', (event) => {
     event.preventDefault()
@@ -82,12 +83,13 @@ function renderPage() {
 }
 
 const fallbackListings = [
-  { title: 'BMW E90 priekšējais bamperis M-pack', brand: 'BMW', model: 'E90', condition: 'Ļoti labs', price: 180, location: 'Rīga' },
-  { title: 'Audi A6 C7 3.0 TDI dzinējs', brand: 'Audi', model: 'A6 C7', condition: 'Pārbaudīts', price: 950, location: 'Jelgava' },
-  { title: 'VW Golf 7 GTI priekšējie sēdekļi', brand: 'Volkswagen', model: 'Golf 7', condition: 'Labs', price: 320, location: 'Rīga' },
+  { id: 'demo-1', title: 'BMW E90 priekšējais bamperis M-pack', brand: 'BMW', model: 'E90', condition: 'Ļoti labs', price: 180, location: 'Rīga', description: 'Taisns un gatavs uzstādīšanai. M-pack dizains, bez lieliem defektiem.', seller: 'Riga Performance Parts', phone: '+371 2000 0000' },
+  { id: 'demo-2', title: 'Audi A6 C7 3.0 TDI dzinējs', brand: 'Audi', model: 'A6 C7', condition: 'Pārbaudīts', price: 950, location: 'Jelgava', description: 'Pilns dzinējs no ejoša auto. Var vienoties par apskati.', seller: 'Andris K.', phone: '+371 2555 1234' },
+  { id: 'demo-3', title: 'VW Golf 7 GTI priekšējie sēdekļi', brand: 'Volkswagen', model: 'Golf 7', condition: 'Labs', price: 320, location: 'Rīga', description: 'GTI salona priekšējie sēdekļi labā stāvoklī.', seller: 'Mārtiņš', phone: '+371 2888 4567' },
 ]
 
-const listingsPage = `<section class="page-hero"><div class="section-kicker">04 / KOPIENAS TIRGUS</div><h1>Redzi, ko citi<br><em>pārdod.</em></h1><p>Īstas detaļas no TrackParts kopienas. Meklē pēc auto, OEM koda vai atrašanās vietas.</p></section><section class="listings-section listings-page"><div class="section-top"><div><div class="section-kicker">AKTĪVIE SLUDINĀJUMI</div><h2>Jaunākie <em>sludinājumi.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
+const listingsPage = `<section class="page-hero"><div class="section-kicker">04 / KOPIENAS TIRGUS</div><h1>Redzi, ko citi<br><em>pārdod.</em></h1><p>Īstas detaļas no TrackParts kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.</p></section><section class="listings-section listings-page"><div class="section-top"><div><div class="section-kicker">AKTĪVIE SLUDINĀJUMI</div><h2>Jaunākie <em>sludinājumi.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
+const listingDetailPage = `<section class="detail-page"><a class="back-link" href="#listings">← ATPAKAĻ UZ SLUDINĀJUMIEM</a><div class="detail-layout"><div><div class="section-kicker">SLUDINĀJUMA INFORMĀCIJA</div><h1 id="detail-title">Ielādē...</h1><p id="detail-description" class="detail-description"></p></div><aside class="seller-panel"><span class="product-tag">AKTĪVS SLUDINĀJUMS</span><strong id="detail-price"></strong><div class="detail-data" id="detail-data"></div><hr><small>PĀRDEVĒJS</small><h3 id="detail-seller"></h3><a id="detail-phone" class="seller-contact" href="#"></a><a class="seller-contact" href="mailto:hello@trackparts.lv">RAKSTĪT E-PASTU ↗</a></aside></div></section>`
 
 async function loadListings() {
   const targets = document.querySelectorAll('#listing-table')
@@ -99,8 +101,29 @@ async function loadListings() {
   }
   const conditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
   targets.forEach((target) => {
-    target.innerHTML = `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row) => `<a class="listing-row" href="#catalog"><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}`
+    target.innerHTML = `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" href="#listing-${row.id || `demo-${index + 1}`}" ><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}`
   })
+}
+
+async function loadListingDetail(id) {
+  let listing = fallbackListings.find((item) => item.id === id)
+  if (supabase && !listing) {
+    const { data } = await supabase.from('listings').select('id, title, description, price, condition, brand, model, production_year, engine, location, user_id').eq('id', id).single()
+    if (data) {
+      listing = { ...data, seller: 'Lietotājs', phone: 'Sazinies e-pastā' }
+      const { data: profile } = await supabase.from('profiles').select('display_name, phone').eq('id', data.user_id).single()
+      if (profile) listing = { ...listing, seller: profile.display_name || 'Lietotājs', phone: profile.phone || 'Sazinies e-pastā' }
+    }
+  }
+  if (!listing) { document.querySelector('#detail-title').textContent = 'Sludinājums nav atrasts'; return }
+  document.querySelector('#detail-title').textContent = listing.title
+  document.querySelector('#detail-description').textContent = listing.description || 'Pārdevējs nav pievienojis aprakstu.'
+  document.querySelector('#detail-price').textContent = `${Number(listing.price).toFixed(2).replace('.', ',')} €`
+  document.querySelector('#detail-data').innerHTML = `<span>AUTO<strong>${listing.brand || '-'} ${listing.model || ''}</strong></span><span>STĀVOKLIS<strong>${listing.condition || 'Nav norādīts'}</strong></span><span>ATRAŠANĀS VIETA<strong>${listing.location || 'Nav norādīta'}</strong></span>`
+  document.querySelector('#detail-seller').textContent = listing.seller || 'Privāts pārdevējs'
+  const phone = document.querySelector('#detail-phone')
+  phone.textContent = `${listing.phone || 'Sazināties ar pārdevēju'} ↗`
+  if (listing.phone?.startsWith('+')) phone.href = `tel:${listing.phone.replaceAll(' ', '')}`
 }
 
 function bindRouteForms(route) {
