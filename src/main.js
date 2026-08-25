@@ -108,6 +108,7 @@ function renderPage() {
   bindProductButtons()
   bindRouteForms(route)
   loadListings()
+  if (route.startsWith('category-')) loadCategoryListings(route.replace('category-', '').replaceAll('-', ' '))
   if (route.startsWith('listing-')) loadListingDetail(route.replace('listing-', ''))
   if (route.startsWith('product-')) loadProductDetail(route.replace('product-', ''))
   const form = document.querySelector('#search-form')
@@ -132,9 +133,9 @@ function renderPage() {
 }
 
 const fallbackListings = [
-  { id: 'demo-1', title: 'BMW E90 priekšējais bamperis M-pack', brand: 'BMW', model: 'E90', condition: 'Ļoti labs', price: 180, location: 'Rīga', description: 'Taisns un gatavs uzstādīšanai. M-pack dizains, bez lieliem defektiem.', seller: 'Riga Performance Parts', phone: '+371 2000 0000' },
-  { id: 'demo-2', title: 'Audi A6 C7 3.0 TDI dzinējs', brand: 'Audi', model: 'A6 C7', condition: 'Pārbaudīts', price: 950, location: 'Jelgava', description: 'Pilns dzinējs no ejoša auto. Var vienoties par apskati.', seller: 'Andris K.', phone: '+371 2555 1234' },
-  { id: 'demo-3', title: 'VW Golf 7 GTI priekšējie sēdekļi', brand: 'Volkswagen', model: 'Golf 7', condition: 'Labs', price: 320, location: 'Rīga', description: 'GTI salona priekšējie sēdekļi labā stāvoklī.', seller: 'Mārtiņš', phone: '+371 2888 4567' },
+  { id: 'demo-1', title: 'BMW E90 priekšējais bamperis M-pack', brand: 'BMW', model: 'E90', category: 'Virsbūve', condition: 'Ļoti labs', price: 180, location: 'Rīga', description: 'Taisns un gatavs uzstādīšanai. M-pack dizains, bez lieliem defektiem.', seller: 'Riga Performance Parts', phone: '+371 2000 0000' },
+  { id: 'demo-2', title: 'Audi A6 C7 3.0 TDI dzinējs', brand: 'Audi', model: 'A6 C7', category: 'Dzinējs', condition: 'Pārbaudīts', price: 950, location: 'Jelgava', description: 'Pilns dzinējs no ejoša auto. Var vienoties par apskati.', seller: 'Andris K.', phone: '+371 2555 1234' },
+  { id: 'demo-3', title: 'VW Golf 7 GTI priekšējie sēdekļi', brand: 'Volkswagen', model: 'Golf 7', category: 'Salons', condition: 'Labs', price: 320, location: 'Rīga', description: 'GTI salona priekšējie sēdekļi labā stāvoklī.', seller: 'Mārtiņš', phone: '+371 2888 4567' },
 ]
 
 const listingsPage = `<section class="page-hero"><div class="section-kicker">04 / KOPIENAS TIRGUS</div><h1>Redzi, ko citi<br><em>pārdod.</em></h1><p>Īstas detaļas no TrackParts kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.</p></section><section class="listings-section listings-page"><div class="section-top"><div><div class="section-kicker">AKTĪVIE SLUDINĀJUMI</div><h2>Jaunākie <em>sludinājumi.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
@@ -143,9 +144,9 @@ const productDetailPage = `<section class="detail-page product-detail"><a class=
 
 function categoryPage(categoryName) {
   categoryName = categoryName.replace('and', '&')
-  const ids = categoryProducts[categoryName] || products.map((product) => product.id)
+  const ids = categoryProducts[categoryName] || []
   const matchingProducts = products.filter((product) => ids.includes(product.id))
-  return `<section class="page-hero"><a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a><div class="section-kicker">KATEGORIJA / ${categoryName.toUpperCase()}</div><h1>${categoryName}<br><em>detaļas.</em></h1><p>Atlasīti piemēri no TrackParts kataloga. Atver preci, lai redzētu visu tehnisko informāciju.</p></section><section class="product-section category-products"><div class="section-top"><div><div class="section-kicker">KATALOGA PIEMĒRI</div><h2>${matchingProducts.length} prece${matchingProducts.length === 1 ? '' : 's'} <em>atrasta.</em></h2></div><a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a></div><div class="product-grid">${matchingProducts.map((product, index) => `<article class="product-card category-product-card" data-product-id="${product.id}"><div class="product-image"><span class="product-tag">${product.tag}</span><button class="quick-add" data-index="${products.indexOf(product)}" aria-label="Pievienot grozam">+</button></div><div class="product-meta"><span>${product.type}</span><small>${product.code}</small></div><h3>${product.name}</h3><div class="product-bottom"><strong>${product.price},00 €</strong><button class="add-text" data-index="${products.indexOf(product)}">PIEVIENOT <span>↗</span></button></div></article>`).join('')}</div></section>`
+  return `<section class="page-hero"><a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a><div class="section-kicker">KATEGORIJA / ${categoryName.toUpperCase()}</div><h1>${categoryName}<br><em>detaļas.</em></h1><p>Šeit redzamas tikai ${categoryName} detaļas no kataloga un kopienas sludinājumiem.</p></section><section class="product-section category-products"><div class="section-top"><div><div class="section-kicker">TRACKPARTS KATALOGS</div><h2>Kataloga <em>preces.</em></h2></div><a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a></div><div class="product-grid">${matchingProducts.map((product) => `<article class="product-card category-product-card" data-product-id="${product.id}"><div class="product-image"><span class="product-tag">${product.tag}</span><button class="quick-add" data-index="${products.indexOf(product)}" aria-label="Pievienot grozam">+</button></div><div class="product-meta"><span>${product.type}</span><small>${product.code}</small></div><h3>${product.name}</h3><div class="product-bottom"><strong>${product.price},00 €</strong><button class="add-text" data-index="${products.indexOf(product)}">PIEVIENOT <span>↗</span></button></div></article>`).join('')}</div></section><section class="listings-section category-listings"><div class="section-top"><div><div class="section-kicker">KOPIENAS SLUDINĀJUMI / ${categoryName.toUpperCase()}</div><h2>Citi pārdod <em>${categoryName}.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT ŠEIT ↗</a></div><div class="listing-table" id="category-listing-table"><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
 }
 
 function loadProductDetail(id) {
@@ -170,6 +171,19 @@ async function loadListings() {
   targets.forEach((target) => {
     target.innerHTML = `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" href="#listing-${row.id || `demo-${index + 1}`}" ><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}`
   })
+}
+
+async function loadCategoryListings(categoryName) {
+  const target = document.querySelector('#category-listing-table')
+  if (!target) return
+  const normalized = categoryName.replace('and', '&').toLowerCase()
+  let rows = fallbackListings.filter((row) => row.category?.toLowerCase() === normalized)
+  if (supabase) {
+    const { data } = await supabase.from('listings').select('id, title, brand, model, condition, price, location, category').eq('status', 'active').ilike('category', categoryName).order('created_at', { ascending: false }).limit(8)
+    if (data?.length) rows = data
+  }
+  const conditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
+  target.innerHTML = rows.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" href="#listing-${row.id || `demo-${index + 1}`}" ><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Šajā kategorijā pašlaik nav aktīvu sludinājumu.</p>'
 }
 
 async function loadListingDetail(id) {
@@ -221,7 +235,7 @@ function bindRouteForms(route) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { message.textContent = 'Lai ievietotu sludinājumu, vispirms ielogojies.'; window.location.hash = 'account'; return }
     const formData = new FormData(listingForm)
-    const { data: listing, error } = await supabase.from('listings').insert({ user_id: user.id, title: formData.get('title'), price: Number(formData.get('price')), oem_number: formData.get('oem_number'), brand: formData.get('brand'), model: formData.get('model'), production_year: Number(formData.get('production_year')) || null, engine: formData.get('engine'), location: formData.get('location'), condition: formData.get('condition'), description: formData.get('description'), status: 'pending' }).select().single()
+    const { data: listing, error } = await supabase.from('listings').insert({ user_id: user.id, title: formData.get('title'), price: Number(formData.get('price')), oem_number: formData.get('oem_number'), brand: formData.get('brand'), model: formData.get('model'), production_year: Number(formData.get('production_year')) || null, engine: formData.get('engine'), category: formData.get('category'), location: formData.get('location'), condition: formData.get('condition'), description: formData.get('description'), status: 'pending' }).select().single()
     if (error) { message.textContent = error.message; return }
     const files = [...formData.getAll('images')].filter((file) => file.size)
     for (const [index, file] of files.entries()) {
