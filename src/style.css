@@ -5,7 +5,21 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); }
 .hero { border-bottom: 6px solid var(--orange); }
-.cart-panel { position: fixed; z-index: 20; top: 0; right: 0; width: min(390px, 100vw); height: 100vh; padding: 95px 35px 35px; background: var(--ink); color: #fff; transform: translateX(105%); transition: transform .25s ease; box-shadow: -15px 0 40px rgba(0,0,0,.18); }.cart-panel.is-open { transform: translateX(0); }.cart-panel h2 { margin: 18px 0 20px; }.cart-panel h2 em { color: var(--orange); font-style: normal; }.cart-panel p { color: #aaa; border-top: 1px solid #363636; padding-top: 20px; }.cart-close { position: absolute; right: 25px; top: 24px; border: 0; background: none; color: #fff; font-size: 28px; }.select-row.expanded:after { content: 'Cena, pieejamība, ražotājs'; grid-column: 1 / -1; border-top: 1px dashed var(--line); padding-top: 14px; color: var(--muted); font: 10px 'DM Mono'; }
+.cart-panel { position: fixed; z-index: 20; top: 0; right: 0; width: min(390px, 100vw); height: 100vh; padding: 95px 35px 35px; background: var(--ink); color: #fff; transform: translateX(105%); transition: transform .25s ease; box-shadow: -15px 0 40px rgba(0,0,0,.18); }.cart-panel.is-open { transform: translateX(0); }.cart-panel h2 { margin: 18px 0 20px; }.cart-panel h2 em { color: var(--orange); font-style: normal; }.cart-panel p { color: #aaa; border-top: 1px solid #363636; padding-top: 20px; }.cart-close { position: absolute; right: 25px; top: 24px; border: 0; background: none; color: #fff; font-size: 28px; }.extra-filters { display: none; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 14px; }
+.extra-filters.is-open { display: grid; }
+.extra-filters label { font: 9px 'DM Mono'; color: var(--muted); }
+.extra-filters input, .extra-filters select { display: block; width: 100%; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 10px 0; outline: none; }
+@media (max-width: 800px) { .extra-filters { grid-template-columns: 1fr 1fr; } }
+.admin-product-form { background: #fff; border: 1px solid var(--line); padding: 18px; margin-top: 14px; max-width: 640px; }
+.admin-product-form h3 { margin: 0 0 14px; font-size: 15px; }
+.admin-product-form label { display: block; margin-top: 12px; color: var(--muted); font: 10px 'DM Mono'; }
+.admin-product-form input, .admin-product-form select { display: block; width: 100%; margin-top: 6px; padding: 9px; border: 1px solid var(--line); }
+.admin-product-form .form-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.admin-product-form .form-actions { margin-top: 16px; display: flex; gap: 12px; align-items: center; }
+.stock-edit input { width: 55px; padding: 4px; border: 1px solid var(--line); }
+#checkout-form label { display: block; margin-top: 14px; font: 9px 'DM Mono'; color: #aaa; }
+#checkout-form input, #checkout-form textarea { display: block; width: 100%; margin-top: 6px; padding: 10px; background: #2a2a2a; border: 1px solid #3a3a3a; color: #fff; }
+#checkout-form .form-actions { margin-top: 16px; }
 .cart-items { max-height: 55vh; overflow-y: auto; border-top: 1px solid #363636; }.cart-item { display: flex; justify-content: space-between; gap: 16px; padding: 18px 0; border-bottom: 1px solid #363636; }.cart-item strong { display: block; max-width: 210px; font-size: 14px; line-height: 1.25; }.cart-item small { display: block; margin-top: 7px; color: #777; font: 8px 'DM Mono'; }.cart-item b { flex: 0 0 auto; color: #fff; font-size: 14px; }.cart-summary { display: flex; justify-content: space-between; border-top: 2px solid var(--orange); margin-top: 24px; padding-top: 15px; font: 10px 'DM Mono'; }.cart-summary strong { font-size: 18px; font-family: 'Space Grotesk'; }.cart-panel .button { width: 100%; justify-content: space-between; }.cart-panel .text-button { display: block; margin: 18px auto 0; }
 .hero:before { content: '07'; position: absolute; right: 4%; top: 40px; color: rgba(255,255,255,.035); font: 700 22vw/.8 'Space Grotesk'; letter-spacing: -.12em; pointer-events: none; }
 .hero:after { content: ''; position: absolute; right: -7%; bottom: 94px; width: 48%; height: 7px; background: var(--orange); transform: rotate(-28deg); box-shadow: 0 16px 0 rgba(225,6,0,.24), 0 -16px 0 rgba(225,6,0,.5); pointer-events: none; }
