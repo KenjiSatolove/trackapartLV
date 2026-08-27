@@ -585,23 +585,38 @@ function recoveryFormMarkup() {
   return `<div class="section-kicker">JAUNA PAROLE</div><h2>Uzstādi <em>jaunu paroli.</em></h2><form id="recovery-form" class="site-form"><label>JAUNĀ PAROLE<input name="password" type="password" minlength="6" required></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT PAROLI ↗</button></div><p class="form-message" id="recovery-message"></p></form>`
 }
 
-function myListingFormMarkup(listing) {
+function myListingFormMarkup(listing, existingImages) {
   const l = listing || {}
-  return `<form class="admin-product-form" id="my-listing-form"><h3>Rediģēt sludinājumu</h3><input type="hidden" name="id" value="${l.id}"><label>NOSAUKUMS<input name="title" required value="${l.title || ''}"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required value="${l.price ?? ''}"></label><label>OEM NUMURS<input name="oem_number" value="${l.oem_number || ''}"></label></div><div class="form-two"><label>MARKA<input name="brand" value="${l.brand || ''}"></label><label>MODELIS<input name="model" value="${l.model || ''}"></label></div><div class="form-two"><label>GADS<input name="production_year" type="number" min="1950" max="2030" value="${l.production_year || ''}"></label><label>DZINĒJS<input name="engine" value="${l.engine || ''}"></label></div><div class="form-two"><label>KATEGORIJA<select name="category">${CATEGORIES.map((c) => { const value = c[1] === 'Riteņi & diski' ? 'Riteņi un diski' : c[1]; return `<option ${l.category === value ? 'selected' : ''}>${value}</option>` }).join('')}</select></label><label>ATRAŠANĀS VIETA<input name="location" value="${l.location || ''}"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good" ${l.condition === 'very_good' ? 'selected' : ''}>Ļoti labs</option><option value="good" ${l.condition === 'good' ? 'selected' : ''}>Labs</option><option value="defect" ${l.condition === 'defect' ? 'selected' : ''}>Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="4">${l.description || ''}</textarea></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT ↗</button><button class="text-button" type="button" id="my-listing-cancel">ATCELT</button></div><p class="admin-note" id="my-listing-message"></p></form>`
+  const images = existingImages || []
+  return `<form class="admin-product-form" id="my-listing-form"><h3>Rediģēt sludinājumu</h3><input type="hidden" name="id" value="${l.id}"><label>NOSAUKUMS<input name="title" required value="${l.title || ''}"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required value="${l.price ?? ''}"></label><label>OEM NUMURS<input name="oem_number" value="${l.oem_number || ''}"></label></div><div class="form-two"><label>MARKA<input name="brand" value="${l.brand || ''}"></label><label>MODELIS<input name="model" value="${l.model || ''}"></label></div><div class="form-two"><label>GADS<input name="production_year" type="number" min="1950" max="2030" value="${l.production_year || ''}"></label><label>DZINĒJS<input name="engine" value="${l.engine || ''}"></label></div><div class="form-two"><label>KATEGORIJA<select name="category">${CATEGORIES.map((c) => { const value = c[1] === 'Riteņi & diski' ? 'Riteņi un diski' : c[1]; return `<option ${l.category === value ? 'selected' : ''}>${value}</option>` }).join('')}</select></label><label>ATRAŠANĀS VIETA<input name="location" value="${l.location || ''}"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good" ${l.condition === 'very_good' ? 'selected' : ''}>Ļoti labs</option><option value="good" ${l.condition === 'good' ? 'selected' : ''}>Labs</option><option value="defect" ${l.condition === 'defect' ? 'selected' : ''}>Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="4">${l.description || ''}</textarea></label>${images.length ? `<label>ESOŠĀS BILDES<div class="admin-listing-images">${images.map((url) => `<img src="${url}" alt="">`).join('')}</div></label>` : ''}<label>PIEVIENOT BILDES<input name="images" type="file" accept="image/*" multiple></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT ↗</button><button class="text-button" type="button" id="my-listing-cancel">ATCELT</button></div><p class="admin-note" id="my-listing-message"></p></form>`
 }
 
-function bindMyListingForm(listing, userId) {
+async function bindMyListingForm(listing, userId) {
   const holder = document.querySelector('#my-listing-form-holder')
   if (!holder) return
-  holder.innerHTML = myListingFormMarkup(listing)
+  let existingImagePaths = []
+  let existingImageUrls = []
+  if (listing) {
+    const { data: images } = await supabase.from('listing_images').select('storage_path').eq('listing_id', listing.id).order('sort_order')
+    existingImagePaths = images || []
+    existingImageUrls = existingImagePaths.map((image) => supabase.storage.from('listing-images').getPublicUrl(image.storage_path).data.publicUrl)
+  }
+  holder.innerHTML = myListingFormMarkup(listing, existingImageUrls)
   document.querySelector('#my-listing-cancel').addEventListener('click', () => { holder.innerHTML = '' })
   document.querySelector('#my-listing-form').addEventListener('submit', async (event) => {
     event.preventDefault()
     const message = document.querySelector('#my-listing-message')
     const data = new FormData(event.target)
+    const listingId = data.get('id')
     const row = { title: data.get('title'), price: Number(data.get('price')), oem_number: data.get('oem_number'), brand: data.get('brand'), model: data.get('model'), production_year: Number(data.get('production_year')) || null, engine: data.get('engine'), category: data.get('category'), location: data.get('location'), condition: data.get('condition'), description: data.get('description') }
-    const { error } = await supabase.from('listings').update(row).eq('id', data.get('id')).eq('user_id', userId)
+    const { error } = await supabase.from('listings').update(row).eq('id', listingId).eq('user_id', userId)
     if (error) { message.textContent = error.message; return }
+    const files = [...data.getAll('images')].filter((file) => file.size)
+    for (const [index, file] of files.entries()) {
+      const path = `${userId}/${listingId}/${Date.now()}-${file.name}`
+      const upload = await supabase.storage.from('listing-images').upload(path, file)
+      if (!upload.error) await supabase.from('listing_images').insert({ listing_id: listingId, storage_path: path, sort_order: existingImagePaths.length + index })
+    }
     holder.innerHTML = ''
     await loadMyListings(userId)
   })
@@ -764,7 +779,7 @@ const translations = {
   'Aizpildi informāciju, pievieno bildes un sasniedz cilvēku, kuram tā vajadzīga.': 'Fill in the details, add photos, and reach the person who needs it.',
   'DETAĻAS INFORMĀCIJA': 'PART INFORMATION', 'Ko tu': 'What are', 'pārdod?': 'you selling?',
   'NOSAUKUMS': 'TITLE', 'CENA (€)': 'PRICE (€)', 'OEM NUMURS': 'OEM NUMBER', 'DZINĒJS': 'ENGINE', 'KATEGORIJA': 'CATEGORY', 'ATRAŠANĀS VIETA': 'LOCATION',
-  'APRAKSTS': 'DESCRIPTION', 'BILDES': 'PHOTOS', 'PUBLICĒT SLUDINĀJUMU ↗': 'PUBLISH LISTING ↗',
+  'APRAKSTS': 'DESCRIPTION', 'BILDES': 'PHOTOS', 'PUBLICĒT SLUDINĀJUMU ↗': 'PUBLISH LISTING ↗', 'ESOŠĀS BILDES': 'EXISTING PHOTOS', 'PIEVIENOT BILDES': 'ADD PHOTOS',
   '04 / KOPIENAS TIRGUS': '04 / COMMUNITY MARKETPLACE', 'Redzi, ko citi': 'See what others', 'pārdod.': 'are selling.',
   "Īstas detaļas no TrackParts kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.": 'Real parts from the TrackParts community. Open a listing to see the seller and get in touch.',
   'AKTĪVIE SLUDINĀJUMI': 'ACTIVE LISTINGS', 'Jaunākie': 'Latest', 'sludinājumi.': 'listings.',
