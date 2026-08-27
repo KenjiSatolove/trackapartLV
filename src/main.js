@@ -141,18 +141,19 @@ function homeMarkup() {
       <div class="hero-visual"><img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=90" alt="Autosporta auto trasē"><div class="hero-label">EST. 2024 <i></i> RĪGA, LV</div><div class="hero-spec">01 <span>TRACKPARTS</span></div></div>
       <div class="hero-stats"><div><strong>10k+</strong><span>DETAĻAS<br>NOLIKTAVĀ</span></div><div><strong>24h</strong><span>ĀTRA<br>IZSŪTĪŠANA</span></div><div><strong>EU</strong><span>PIEGĀDE<br>VISĀ EIROPĀ</span></div></div>
     </section>
+    <div class="racing-stripe"></div>
 
-    <section class="search-section" id="catalog"><div class="section-kicker">01 / ATRODI SAVU DETAĻU</div><div class="search-heading"><h2>Ko tu meklē?</h2><p>Meklē pēc nosaukuma, OEM koda vai detaļas numura.</p></div>${searchBoxMarkup()}</section>
+    <section class="search-section reveal" id="catalog"><div class="section-kicker">01 / ATRODI SAVU DETAĻU</div><div class="search-heading"><h2>Ko tu meklē?</h2><p>Meklē pēc nosaukuma, OEM koda vai detaļas numura.</p></div>${searchBoxMarkup()}</section>
 
-    <section class="brand-section"><div class="section-kicker">MARKAS, KO PAZĪSTAM</div><div class="brand-strip">${['BMW', 'AUDI', 'MERCEDES-BENZ', 'VOLKSWAGEN', 'VOLVO', 'TOYOTA', 'FORD', 'HONDA'].map((brand) => `<button type="button" data-brand="${brand.toLowerCase()}">${brand}</button>`).join('')}</div></section>
+    <section class="brand-section reveal"><div class="section-kicker">MARKAS, KO PAZĪSTAM</div><div class="brand-strip">${['BMW', 'AUDI', 'MERCEDES-BENZ', 'VOLKSWAGEN', 'VOLVO', 'TOYOTA', 'FORD', 'HONDA'].map((brand) => `<button type="button" data-brand="${brand.toLowerCase()}">${brand}</button>`).join('')}</div></section>
 
-    <section class="category-section"><div class="section-top"><div><div class="section-kicker">02 / IZPĒTI KATEGORIJAS</div><h2>Viss, kas vajadzīgs<br><em>tavam auto.</em></h2></div><a class="text-link" href="#catalog">SKATĪT VISU <span>↗</span></a></div><div class="category-grid">${CATEGORIES.map(([n, name, icon, value]) => `<a class="category" href="#category-${value.replaceAll(' ', '-')}"><span class="category-number">${n}</span><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a>`).join('')}</div></section>
+    <section class="category-section reveal"><div class="section-top"><div><div class="section-kicker">02 / IZPĒTI KATEGORIJAS</div><h2>Viss, kas vajadzīgs<br><em>tavam auto.</em></h2></div><a class="text-link" href="#catalog">SKATĪT VISU <span>↗</span></a></div><div class="category-grid">${CATEGORIES.map(([n, name, icon, value]) => `<a class="category" href="#category-${value.replaceAll(' ', '-')}"><span class="category-number">${n}</span><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a>`).join('')}</div></section>
 
-    <section class="product-section" id="new"><div class="section-top"><div><div class="section-kicker">03 / JAUNUMI NOLIKTAVĀ</div><h2>Pēdējie <em>atradumi.</em></h2></div><a class="text-link" href="#listings">SKATĪT VISUS <span>↗</span></a></div>${productGridMarkup(products.slice(0, 8))}</section>
+    <section class="product-section reveal" id="new"><div class="section-top"><div><div class="section-kicker">03 / JAUNUMI NOLIKTAVĀ</div><h2>Pēdējie <em>atradumi.</em></h2></div><a class="text-link" href="#listings">SKATĪT VISUS <span>↗</span></a></div>${productGridMarkup(products.slice(0, 8))}</section>
 
-    <section class="listings-section" id="listings"><div class="section-top"><div><div class="section-kicker">04 / KOPIENAS SLUDINĀJUMI</div><h2>Ko pārdod<br><em>citi.</em></h2></div><a class="text-link" href="#sell">PĀRDOT SAVU DETAĻU <span>↗</span></a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>
+    <section class="listings-section reveal" id="listings"><div class="section-top"><div><div class="section-kicker">04 / KOPIENAS SLUDINĀJUMI</div><h2>Ko pārdod<br><em>citi.</em></h2></div><a class="text-link" href="#sell">PĀRDOT SAVU DETAĻU <span>↗</span></a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>
 
-    <section class="trust-section"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katra detaļa tiek apskatīta pirms nosūtīšanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No mūsu noliktavas Rīgā līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Atbalsts 7 dienas</strong><p>Zini, ko pērc. Mēs palīdzēsim atrast pareizo.</p></div></section>
+    <section class="trust-section reveal"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katra detaļa tiek apskatīta pirms nosūtīšanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No mūsu noliktavas Rīgā līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Atbalsts 7 dienas</strong><p>Zini, ko pērc. Mēs palīdzēsim atrast pareizo.</p></div></section>
   `
 }
 
@@ -168,6 +169,8 @@ document.querySelector('#app').innerHTML = `
   <div class="modal-overlay" id="auth-modal-overlay" hidden><div class="auth-modal"><button class="modal-close" id="auth-modal-close" type="button" aria-label="Aizvērt">×</button><div class="auth-modal-tabs"><button class="auth-tab active" data-auth-tab="login" type="button">IELOGOTIES</button><button class="auth-tab" data-auth-tab="signup" type="button">REĢISTRĒTIES</button></div><h2 class="auth-modal-title">Sveicināts <em>TrackParts.</em></h2><form class="site-form" id="auth-modal-form" data-mode="login"><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><label class="consent-label" id="auth-modal-consent-row" hidden><input type="checkbox" name="consent"> Piekrītu <a href="#terms">Lietošanas noteikumiem</a> un <a href="#privacy">Privātuma politikai</a>.</label><div class="form-actions"><button class="button button-dark" type="submit" id="auth-modal-submit">IELOGOTIES ↗</button><button class="text-button" id="auth-modal-forgot" type="button">AIZMIRSI PAROLI?</button></div><p class="form-message" id="auth-modal-message"></p></form></div></div>
 
   <div class="cookie-notice" id="cookie-notice" hidden><p>Šī vietne izmanto tikai tehniski nepieciešamu lokālo glabātuvi, lai uzturētu tavu pieslēgšanās sesiju. Uzzini vairāk mūsu <a href="#privacy">Privātuma politikā</a>.</p><button class="button button-light" type="button" id="cookie-notice-accept">SAPRATU</button></div>
+
+  <div class="lightbox-overlay" id="lightbox-overlay" hidden><button class="lightbox-close" id="lightbox-close" type="button" aria-label="Aizvērt">×</button><img id="lightbox-image" src="" alt=""><button class="gallery-arrow gallery-prev" id="lightbox-prev" type="button" aria-label="Iepriekšējā bilde">‹</button><button class="gallery-arrow gallery-next" id="lightbox-next" type="button" aria-label="Nākamā bilde">›</button></div>
 
   <main></main>
   <footer id="contact"><div class="footer-brand"><a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#listings">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#contact">Piegāde</a><a href="#contact">Atgriešana</a><a href="#contact">Kontakti</a><a href="#terms">Lietošanas noteikumi</a><a href="#privacy">Privātuma politika</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><a href="https://www.instagram.com" target="_blank" rel="noreferrer">INSTAGRAM ↗</a></div></footer>
@@ -315,9 +318,9 @@ document.querySelector('#clear-cart').addEventListener('click', () => { cartItem
 function renderPage() {
   const route = window.location.hash.slice(1) || 'home'
   const pages = {
-    catalog: `<section class="page-hero"><div class="section-kicker">02 / PREČU KATALOGS</div><h1>Atrodi detaļu.<br><em>Uztaisi ātrāku.</em></h1><p>Oriģinālas un pārbaudītas detaļas ielas auto, trases projektam un servisam.</p></section><section class="search-section"><div class="section-kicker">FILTRĒ KATALOGU</div>${searchBoxMarkup()}</section><section class="product-section catalog-page"><div class="section-top"><div><div class="section-kicker">VISAS DETAĻAS</div><h2>Noliktavā <em>tagad.</em></h2></div><span class="catalog-count">${products.length} <span>PRECES</span></span></div>${productGridMarkup(products)}</section>`,
-    about: `<section class="page-hero about-hero"><div class="section-kicker">03 / PAR TRACKPARTS</div><h1>Built for the<br><em>road ahead.</em></h1><p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p></section><section class="story-section"><div class="section-kicker">MŪSU PIEEJA</div><h2>Nevis detaļu kaudze.<br><em>Īstais atradums.</em></h2><div class="story-grid"><p>TrackParts sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p><p>Mūsu noliktavā katram kodam ir sava vieta, statuss un vēsture. Mazāk minēšanas, vairāk laika uz ceļa.</p></div></section><section class="trust-section"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katrs produkts tiek apskatīts pirms pārdošanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No Rīgas līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Cilvēcīgs atbalsts</strong><p>Palīdzēsim atrast pareizo detaļu.</p></div></section>`,
-    contact: `<section class="page-hero contact-hero"><div class="section-kicker">04 / SAZINĀSIMIES</div><h1>Ir jautājums?<br><em>Dod ziņu.</em></h1><p>Neatrodi detaļu katalogā? Atsūti VIN, OEM kodu vai bildi, un mēs paskatīsimies.</p></section><section class="contact-section"><div><div class="section-kicker">RAKSTI MUMS</div><h2>Atbildēsim<br><em>ātri.</em></h2></div><div class="contact-list"><a href="mailto:hello@trackparts.lv"><small>E-PASTS</small>hello@trackparts.lv ↗</a><a href="tel:+37120000000"><small>TELEFONS</small>+371 2000 0000 ↗</a><div><small>ATRODI MŪS</small>Rīga, Latvija</div></div></section>`,
+    catalog: `<section class="page-hero"><div class="section-kicker">02 / PREČU KATALOGS</div><h1>Atrodi detaļu.<br><em>Uztaisi ātrāku.</em></h1><p>Oriģinālas un pārbaudītas detaļas ielas auto, trases projektam un servisam.</p></section><section class="search-section reveal"><div class="section-kicker">FILTRĒ KATALOGU</div>${searchBoxMarkup()}</section><section class="product-section catalog-page reveal"><div class="section-top"><div><div class="section-kicker">VISAS DETAĻAS</div><h2>Noliktavā <em>tagad.</em></h2></div><span class="catalog-count">${products.length} <span>PRECES</span></span></div>${productGridMarkup(products)}</section>`,
+    about: `<section class="page-hero about-hero"><div class="section-kicker">03 / PAR TRACKPARTS</div><h1>Built for the<br><em>road ahead.</em></h1><p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p></section><section class="story-section reveal"><div class="section-kicker">MŪSU PIEEJA</div><h2>Nevis detaļu kaudze.<br><em>Īstais atradums.</em></h2><div class="story-grid"><p>TrackParts sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p><p>Mūsu noliktavā katram kodam ir sava vieta, statuss un vēsture. Mazāk minēšanas, vairāk laika uz ceļa.</p></div></section><section class="trust-section reveal"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katrs produkts tiek apskatīts pirms pārdošanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No Rīgas līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Cilvēcīgs atbalsts</strong><p>Palīdzēsim atrast pareizo detaļu.</p></div></section>`,
+    contact: `<section class="page-hero contact-hero"><div class="section-kicker">04 / SAZINĀSIMIES</div><h1>Ir jautājums?<br><em>Dod ziņu.</em></h1><p>Neatrodi detaļu katalogā? Atsūti VIN, OEM kodu vai bildi, un mēs paskatīsimies.</p></section><section class="contact-section reveal"><div><div class="section-kicker">RAKSTI MUMS</div><h2>Atbildēsim<br><em>ātri.</em></h2></div><div class="contact-list"><a href="mailto:hello@trackparts.lv"><small>E-PASTS</small>hello@trackparts.lv ↗</a><a href="tel:+37120000000"><small>TELEFONS</small>+371 2000 0000 ↗</a><div><small>ATRODI MŪS</small>Rīga, Latvija</div></div></section>`,
     terms: `<section class="page-hero"><div class="section-kicker">LIETOŠANAS NOTEIKUMI</div><h1>Noteikumi.<br><em>Skaidri un godīgi.</em></h1><p>Šie noteikumi regulē TrackParts interneta veikala un sludinājumu platformas lietošanu.</p></section><section class="legal-page">
       <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
       <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
@@ -380,6 +383,43 @@ function renderPage() {
   if (route === 'admin') bindAdminPage()
   if (route === 'account') initAccountPage()
   if (english) translatePage()
+  initScrollReveal()
+}
+
+function animateCountUp(el) {
+  const match = el.textContent.trim().match(/^(\d+)(.*)$/)
+  if (!match) return
+  const target = Number(match[1])
+  const suffix = match[2]
+  const duration = 1100
+  const start = performance.now()
+  const tick = (now) => {
+    const progress = Math.min((now - start) / duration, 1)
+    const eased = 1 - Math.pow(1 - progress, 3)
+    el.textContent = `${Math.round(target * eased)}${suffix}`
+    if (progress < 1) requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+}
+
+function initScrollReveal() {
+  if (!('IntersectionObserver' in window)) { document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-visible')); return }
+  const sectionObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      entry.target.classList.add('is-visible')
+      obs.unobserve(entry.target)
+    })
+  }, { threshold: 0.15 })
+  document.querySelectorAll('main .reveal').forEach((el) => sectionObserver.observe(el))
+  const statObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      animateCountUp(entry.target)
+      obs.unobserve(entry.target)
+    })
+  }, { threshold: 0.6 })
+  document.querySelectorAll('.hero-stats strong').forEach((el) => statObserver.observe(el))
 }
 
 const fallbackListings = [
@@ -527,7 +567,7 @@ function galleryMarkup(images) {
 
 function bindGallery(container, images) {
   const imgs = (images || []).filter(Boolean)
-  if (!container || imgs.length < 2) return
+  if (!container || !imgs.length) return
   let index = 0
   const img = container.querySelector('.gallery-main img')
   const dots = container.querySelectorAll('.gallery-dot')
@@ -539,12 +579,46 @@ function bindGallery(container, images) {
   container.querySelector('.gallery-prev')?.addEventListener('click', () => show(index - 1))
   container.querySelector('.gallery-next')?.addEventListener('click', () => show(index + 1))
   dots.forEach((dot) => dot.addEventListener('click', () => show(Number(dot.dataset.dot))))
+  img.addEventListener('click', () => openLightbox(imgs, index))
 }
+
+let lightboxImages = []
+let lightboxIndex = 0
+
+function openLightbox(images, startIndex) {
+  lightboxImages = images
+  lightboxIndex = startIndex || 0
+  document.querySelector('#lightbox-image').src = lightboxImages[lightboxIndex]
+  const hasMultiple = lightboxImages.length > 1
+  document.querySelector('#lightbox-prev').hidden = !hasMultiple
+  document.querySelector('#lightbox-next').hidden = !hasMultiple
+  document.querySelector('#lightbox-overlay').hidden = false
+}
+
+function closeLightbox() {
+  document.querySelector('#lightbox-overlay').hidden = true
+}
+
+function showLightboxImage(i) {
+  lightboxIndex = (i + lightboxImages.length) % lightboxImages.length
+  document.querySelector('#lightbox-image').src = lightboxImages[lightboxIndex]
+}
+
+document.querySelector('#lightbox-close').addEventListener('click', closeLightbox)
+document.querySelector('#lightbox-overlay').addEventListener('click', (event) => { if (event.target.id === 'lightbox-overlay') closeLightbox() })
+document.querySelector('#lightbox-prev').addEventListener('click', () => showLightboxImage(lightboxIndex - 1))
+document.querySelector('#lightbox-next').addEventListener('click', () => showLightboxImage(lightboxIndex + 1))
+document.addEventListener('keydown', (event) => {
+  if (document.querySelector('#lightbox-overlay').hidden) return
+  if (event.key === 'Escape') closeLightbox()
+  if (event.key === 'ArrowLeft') showLightboxImage(lightboxIndex - 1)
+  if (event.key === 'ArrowRight') showLightboxImage(lightboxIndex + 1)
+})
 
 function categoryPage(categoryValue) {
   const label = CATEGORIES.find((c) => c[3] === categoryValue)?.[1] || categoryValue
   const matchingProducts = products.filter((product) => (product.category || '').toLowerCase() === categoryValue).sort((a, b) => a.name.localeCompare(b.name, 'lv'))
-  return `<section class="page-hero"><a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a><div class="section-kicker">KATEGORIJA / <span>${label}</span></div><h1>${label}<br><em>detaļas.</em></h1><p>Šeit redzamas tikai <span>${label}</span> detaļas no kataloga un kopienas sludinājumiem.</p></section><section class="product-section category-products"><div class="section-top"><div><div class="section-kicker">TRACKPARTS KATALOGS</div><h2>Kataloga <em>preces.</em></h2></div><a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a></div>${matchingProducts.length ? productGridMarkup(matchingProducts) : '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'}</section><section class="listings-section category-listings"><div class="section-top"><div><div class="section-kicker">KOPIENAS SLUDINĀJUMI / <span>${label}</span></div><h2>Citi pārdod <em><span>${label}</span>.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT ŠEIT ↗</a></div><div class="listing-table" id="category-listing-table"><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
+  return `<section class="page-hero"><a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a><div class="section-kicker">KATEGORIJA / <span>${label}</span></div><h1>${label}<br><em>detaļas.</em></h1><p>Šeit redzamas tikai <span>${label}</span> detaļas no kataloga un kopienas sludinājumiem.</p></section><section class="product-section category-products reveal"><div class="section-top"><div><div class="section-kicker">TRACKPARTS KATALOGS</div><h2>Kataloga <em>preces.</em></h2></div><a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a></div>${matchingProducts.length ? productGridMarkup(matchingProducts) : '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'}</section><section class="listings-section category-listings reveal"><div class="section-top"><div><div class="section-kicker">KOPIENAS SLUDINĀJUMI / <span>${label}</span></div><h2>Citi pārdod <em><span>${label}</span>.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT ŠEIT ↗</a></div><div class="listing-table" id="category-listing-table"><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
 }
 
 function loadProductDetail(id) {
@@ -645,13 +719,15 @@ async function bindMyListingForm(listing, userId) {
     const { error } = await supabase.from('listings').update(row).eq('id', listingId).eq('user_id', userId)
     if (error) { message.textContent = error.message; return }
     const files = [...data.getAll('images')].filter((file) => file.size)
-    let uploadError = null
-    for (const [index, file] of files.entries()) {
-      const path = `${userId}/${listingId}/${Date.now()}-${file.name}`
+    if (files.length) message.textContent = `Augšupielādē ${files.length} ${files.length === 1 ? 'bildi' : 'bildes'}...`
+    const uploadResults = await Promise.all(files.map(async (file, index) => {
+      const path = `${userId}/${listingId}/${Date.now()}-${index}-${file.name}`
       const upload = await supabase.storage.from('listing-images').upload(path, file)
-      if (upload.error) { uploadError = upload.error; continue }
+      if (upload.error) return upload.error
       await supabase.from('listing_images').insert({ listing_id: listingId, storage_path: path, sort_order: existingImagePaths.length + index })
-    }
+      return null
+    }))
+    const uploadError = uploadResults.find(Boolean)
     if (uploadError) { message.textContent = `Izmaiņas saglabātas, bet bildes neizdevās augšupielādēt: ${uploadError.message}`; return }
     holder.innerHTML = ''
     await loadMyListings(userId)
@@ -741,13 +817,15 @@ function bindRouteForms(route) {
     const { data: listing, error } = await supabase.from('listings').insert({ user_id: user.id, title: formData.get('title'), price: Number(formData.get('price')), oem_number: formData.get('oem_number'), brand: formData.get('brand'), model: formData.get('model'), production_year: Number(formData.get('production_year')) || null, engine: formData.get('engine'), category: formData.get('category'), location: formData.get('location'), condition: formData.get('condition'), description: formData.get('description'), status: 'active' }).select().single()
     if (error) { message.textContent = error.message; return }
     const files = [...formData.getAll('images')].filter((file) => file.size)
-    let uploadError = null
-    for (const [index, file] of files.entries()) {
-      const path = `${user.id}/${listing.id}/${Date.now()}-${file.name}`
+    if (files.length) message.textContent = `Augšupielādē ${files.length} ${files.length === 1 ? 'bildi' : 'bildes'}...`
+    const uploadResults = await Promise.all(files.map(async (file, index) => {
+      const path = `${user.id}/${listing.id}/${Date.now()}-${index}-${file.name}`
       const upload = await supabase.storage.from('listing-images').upload(path, file)
-      if (upload.error) { uploadError = upload.error; continue }
+      if (upload.error) return upload.error
       await supabase.from('listing_images').insert({ listing_id: listing.id, storage_path: path, sort_order: index })
-    }
+      return null
+    }))
+    const uploadError = uploadResults.find(Boolean)
     message.textContent = uploadError ? `Sludinājums publicēts, bet bildes neizdevās augšupielādēt: ${uploadError.message}` : 'Sludinājums publicēts! Pārvaldi to savā kontā (Mans konts).'
     listingForm.reset()
   })
