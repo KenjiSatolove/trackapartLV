@@ -298,9 +298,9 @@ function bindAdminProductForm(existingProduct) {
 async function renderAdminTab(tab) {
   const content = document.querySelector('#admin-content')
   if (!content) return
-  const { count: pendingCount } = await supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'pending')
-  document.querySelector('#pending-badge').textContent = pendingCount || 0
-  if (tab === 'dashboard') content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">OVERVIEW</span><h2>Inventory overview</h2></div><span class="admin-user">Owner / ${new Date().toLocaleDateString('lv-LV')}</span></div><div class="admin-metrics"><div><span>Products in stock</span><strong>${products.length}</strong></div><div><span>Low stock</span><strong class="warning">${products.filter((p) => Number(p.stock) <= 2).length}</strong></div><div><span>Pending listings</span><strong>${pendingCount || 0}</strong></div></div><div class="admin-table"><div class="admin-table-head"><span>Part</span><span>Category</span><span>Stock</span><span>Price</span></div>${products.slice(0, 4).map((product) => `<div class="admin-table-row"><strong>${product.name}</strong><span>${product.category}</span><span>${stockLabel(product.stock)}</span><b>${Number(product.price).toFixed(0)} €</b></div>`).join('')}</div>`
+  const { count: listingCount } = await supabase.from('listings').select('*', { count: 'exact', head: true }).neq('status', 'removed')
+  document.querySelector('#pending-badge').textContent = listingCount || 0
+  if (tab === 'dashboard') content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">OVERVIEW</span><h2>Inventory overview</h2></div><span class="admin-user">Owner / ${new Date().toLocaleDateString('lv-LV')}</span></div><div class="admin-metrics"><div><span>Products in stock</span><strong>${products.length}</strong></div><div><span>Low stock</span><strong class="warning">${products.filter((p) => Number(p.stock) <= 2).length}</strong></div><div><span>Community listings</span><strong>${listingCount || 0}</strong></div></div><div class="admin-table"><div class="admin-table-head"><span>Part</span><span>Category</span><span>Stock</span><span>Price</span></div>${products.slice(0, 4).map((product) => `<div class="admin-table-row"><strong>${product.name}</strong><span>${product.category}</span><span>${stockLabel(product.stock)}</span><b>${Number(product.price).toFixed(0)} €</b></div>`).join('')}</div>`
   if (tab === 'products') {
     content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">INVENTORY</span><h2>Products</h2></div><button class="admin-action" id="admin-add-product">+ Add product</button></div><input class="admin-search" id="admin-product-search" placeholder="Search by name or OEM code"><div id="admin-product-form-holder"></div><div class="admin-table cols-5"><div class="admin-table-head"><span>Part</span><span>Category</span><span>Stock</span><span>Price</span><span>Actions</span></div>${products.map((product) => `<div class="admin-table-row" data-search="${(product.name + ' ' + (product.oem || '')).toLowerCase()}"><strong>${product.name}</strong><span>${product.category}</span><span class="stock-edit"><input type="number" min="0" value="${product.stock}" data-stock-id="${product.id}"></span><b>${Number(product.price).toFixed(0)} €</b><span class="row-actions"><button class="row-action" data-edit-id="${product.id}">Edit</button><button class="row-action" data-delete-id="${product.id}">Delete</button></span></div>`).join('')}</div><p class="admin-note" id="admin-products-message"></p>`
     document.querySelector('#admin-product-search').addEventListener('input', (event) => {
@@ -333,7 +333,7 @@ async function renderAdminTab(tab) {
     content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">FULFILLMENT</span><h2>Orders</h2></div></div><div class="admin-metrics"><div><span>Orders today</span><strong>${todayOrders.length}</strong></div><div><span>Awaiting shipment</span><strong class="warning">${orders?.filter((o) => o.status === 'pending').length || 0}</strong></div><div><span>Revenue today</span><strong>${revenueToday.toFixed(0)} €</strong></div></div><div class="admin-table cols-5">${orders?.length ? `<div class="admin-table-head"><span>Order</span><span>Items</span><span>Buyer</span><span>Total</span><span>Status</span></div>${orders.map((order) => `<div class="admin-table-row"><code>#${order.id}</code><span>${(itemsByOrder[order.id] || []).join(', ') || '-'}</span><span>${order.buyer_name}</span><b>${Number(order.total).toFixed(2)} €</b><select class="admin-select" data-order-status="${order.id}">${['pending', 'paid', 'shipped', 'completed', 'cancelled'].map((status) => `<option ${order.status === status ? 'selected' : ''}>${status}</option>`).join('')}</select></div>`).join('')}` : '<p class="admin-note">Vēl nav neviena pasūtījuma. Norēķinu / apmaksas sistēma tiks pievienota vēlāk — tagad klienti nosūta pasūtījuma pieprasījumu, un jūs sazināties, lai vienotos par apmaksu.</p>'}</div>`
     document.querySelectorAll('[data-order-status]').forEach((select) => select.addEventListener('change', async () => { await supabase.from('orders').update({ status: select.value }).eq('id', select.dataset.orderStatus) }))
   }
-  if (tab === 'listings') { const { data: rows } = await supabase.from('listings').select('id, title, brand, model, price, location').eq('status', 'pending').order('created_at', { ascending: false }); content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">MODERATION</span><h2>Community listings</h2></div><span class="admin-count">${rows?.length || 0} pending</span></div><div class="moderation-list">${rows?.length ? rows.map((row) => `<div class="moderation-row"><div><strong>${row.title}</strong><small>${row.brand || '-'} ${row.model || ''} · ${row.location || '-'} · ${row.price} €</small></div><div><button class="approve-button" data-listing-action="active" data-listing-id="${row.id}">Approve</button><button class="reject-button" data-listing-action="removed" data-listing-id="${row.id}">Reject</button></div></div>`).join('') : '<p class="admin-note">No pending listings.</p>'}</div>` }
+  if (tab === 'listings') { const { data: rows } = await supabase.from('listings').select('id, title, brand, model, price, location, status').neq('status', 'removed').order('created_at', { ascending: false }).limit(50); content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">COMMUNITY</span><h2>Community listings</h2></div><span class="admin-count">${rows?.length || 0} listings</span></div><p class="admin-note">New listings publish automatically — remove any that don't belong.</p><div class="moderation-list">${rows?.length ? rows.map((row) => `<div class="moderation-row"><div><strong>${row.title}</strong><small>${row.brand || '-'} ${row.model || ''} · ${row.location || '-'} · ${row.price} € · <span class="status-pill">${row.status}</span></small></div><div>${row.status === 'pending' ? `<button class="approve-button" data-listing-action="active" data-listing-id="${row.id}">Approve</button>` : ''}<button class="reject-button" data-listing-action="removed" data-listing-id="${row.id}">Remove</button></div></div>`).join('') : '<p class="admin-note">No community listings yet.</p>'}</div>` }
   if (tab === 'tasks') content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">OPERATIONS</span><h2>Team tasks</h2></div><button class="admin-action" id="admin-add-employee">+ Add employee</button></div><p class="admin-note">Šis ir demonstrācijas saraksts. Reāla darbinieku pārvaldība tiks pievienota vēlāk — pagaidām darbiniekus pievieno tieši Supabase Authentication panelī un piešķir tiem lomu (manager / warehouse / fulfillment) profiles tabulā.</p><div class="admin-table"><div class="admin-table-head"><span>Name</span><span>Role</span><span>Current task</span><span>Status</span></div>${[['Deniss', 'Owner', 'Reviewing pending listings', 'Active'], ['Andris', 'Warehouse staff', 'Restocking wheels & tires shelf', 'Active'], ['Laura', 'Order fulfillment', 'Packing recent orders', 'Away']].map((person) => `<div class="admin-table-row"><strong>${person[0]}</strong><span>${person[1]}</span><span>${person[2]}</span><span class="status-pill">${person[3]}</span></div>`).join('')}</div>`
   if (tab === 'settings') content.innerHTML = `<div class="admin-heading"><div><span class="admin-overline">CONFIGURATION</span><h2>Settings</h2></div></div><div class="settings-card"><h3>Account</h3><label>Admin e-mail<input value="${(await supabase.auth.getUser()).data.user?.email || ''}" readonly></label><label>Role<input value="Owner" readonly></label></div><div class="settings-card"><h3>Store</h3><label>Low stock alert threshold<input value="2" readonly></label><label>Free shipping threshold<input value="150 €" readonly></label><p class="admin-note">Šie iestatījumi pagaidām ir fiksēti kodā. Konfigurējama veikala iestatījumu tabula tiks pievienota vēlāk.</p></div>`
   document.querySelectorAll('[data-listing-action]').forEach((button) => button.addEventListener('click', async () => { await supabase.from('listings').update({ status: button.dataset.listingAction }).eq('id', button.dataset.listingId); renderAdminTab('listings') }))
@@ -409,6 +409,42 @@ function recoveryFormMarkup() {
   return `<div class="section-kicker">JAUNA PAROLE</div><h2>Uzstādi <em>jaunu paroli.</em></h2><form id="recovery-form" class="site-form"><label>JAUNĀ PAROLE<input name="password" type="password" minlength="6" required></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT PAROLI ↗</button></div><p class="form-message" id="recovery-message"></p></form>`
 }
 
+function myListingFormMarkup(listing) {
+  const l = listing || {}
+  return `<form class="admin-product-form" id="my-listing-form"><h3>Rediģēt sludinājumu</h3><input type="hidden" name="id" value="${l.id}"><label>NOSAUKUMS<input name="title" required value="${l.title || ''}"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required value="${l.price ?? ''}"></label><label>OEM NUMURS<input name="oem_number" value="${l.oem_number || ''}"></label></div><div class="form-two"><label>MARKA<input name="brand" value="${l.brand || ''}"></label><label>MODELIS<input name="model" value="${l.model || ''}"></label></div><div class="form-two"><label>GADS<input name="production_year" type="number" min="1950" max="2030" value="${l.production_year || ''}"></label><label>DZINĒJS<input name="engine" value="${l.engine || ''}"></label></div><div class="form-two"><label>KATEGORIJA<select name="category">${CATEGORIES.map((c) => { const value = c[1] === 'Riteņi & diski' ? 'Riteņi un diski' : c[1]; return `<option ${l.category === value ? 'selected' : ''}>${value}</option>` }).join('')}</select></label><label>ATRAŠANĀS VIETA<input name="location" value="${l.location || ''}"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good" ${l.condition === 'very_good' ? 'selected' : ''}>Ļoti labs</option><option value="good" ${l.condition === 'good' ? 'selected' : ''}>Labs</option><option value="defect" ${l.condition === 'defect' ? 'selected' : ''}>Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="4">${l.description || ''}</textarea></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT ↗</button><button class="text-button" type="button" id="my-listing-cancel">ATCELT</button></div><p class="admin-note" id="my-listing-message"></p></form>`
+}
+
+function bindMyListingForm(listing, userId) {
+  const holder = document.querySelector('#my-listing-form-holder')
+  if (!holder) return
+  holder.innerHTML = myListingFormMarkup(listing)
+  document.querySelector('#my-listing-cancel').addEventListener('click', () => { holder.innerHTML = '' })
+  document.querySelector('#my-listing-form').addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const message = document.querySelector('#my-listing-message')
+    const data = new FormData(event.target)
+    const row = { title: data.get('title'), price: Number(data.get('price')), oem_number: data.get('oem_number'), brand: data.get('brand'), model: data.get('model'), production_year: Number(data.get('production_year')) || null, engine: data.get('engine'), category: data.get('category'), location: data.get('location'), condition: data.get('condition'), description: data.get('description') }
+    const { error } = await supabase.from('listings').update(row).eq('id', data.get('id')).eq('user_id', userId)
+    if (error) { message.textContent = error.message; return }
+    holder.innerHTML = ''
+    await loadMyListings(userId)
+  })
+}
+
+async function loadMyListings(userId) {
+  const holder = document.querySelector('#my-listings')
+  if (!holder) return
+  const { data: rows } = await supabase.from('listings').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+  const statusNames = { pending: 'Gaida apstiprinājumu', active: 'Aktīvs', reserved: 'Rezervēts', sold: 'Pārdots', removed: 'Noņemts' }
+  holder.innerHTML = `<div id="my-listing-form-holder"></div>${rows?.length ? `<div class="admin-table cols-5"><div class="admin-table-head"><span>SLUDINĀJUMS</span><span>AUTO</span><span>CENA</span><span>STATUSS</span><span>DARBĪBAS</span></div>${rows.map((row) => `<div class="admin-table-row"><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><b>${Number(row.price).toFixed(0)} €</b><span class="status-pill">${statusNames[row.status] || row.status}</span><span class="row-actions"><button class="row-action" data-my-edit-id="${row.id}">Rediģēt</button><button class="row-action" data-my-remove-id="${row.id}">Dzēst</button></span></div>`).join('')}</div>` : '<p class="listing-loading">Tev vēl nav neviena sludinājuma.</p>'}`
+  document.querySelectorAll('[data-my-edit-id]').forEach((button) => button.addEventListener('click', () => bindMyListingForm(rows.find((row) => row.id.toString() === button.dataset.myEditId), userId)))
+  document.querySelectorAll('[data-my-remove-id]').forEach((button) => button.addEventListener('click', async () => {
+    if (!window.confirm('Dzēst šo sludinājumu?')) return
+    await supabase.from('listings').delete().eq('id', button.dataset.myRemoveId).eq('user_id', userId)
+    await loadMyListings(userId)
+  }))
+}
+
 async function initAccountPage() {
   const holder = document.querySelector('#account-content')
   if (!holder || !supabase) return
@@ -425,11 +461,19 @@ async function initAccountPage() {
   }
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
-  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('display_name, phone, city, username').eq('id', user.id).single()
   const confirmedBanner = pendingAuthEvent === 'confirmed' ? '<p class="form-message">E-pasts apstiprināts — tu esi ielogojies!</p>' : ''
   pendingAuthEvent = null
-  holder.innerHTML = `<div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Sveiks, <em>${profile?.display_name || user.email}!</em></h2>${confirmedBanner}<p><span>Tu esi ielogojies kā</span> <b>${user.email}</b>.</p><div class="form-actions"><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a><button class="text-button" id="logout-button" type="button">IZIET</button></div>`
+  holder.innerHTML = `<div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Sveiks, <em>${profile?.display_name || user.email}!</em></h2>${confirmedBanner}<p><span>Tu esi ielogojies kā</span> <b>${user.email}</b>.</p><form class="site-form" id="profile-form"><label>VĀRDS<input name="display_name" value="${profile?.display_name || ''}"></label><div class="form-two"><label>TĀLRUNIS<input name="phone" value="${profile?.phone || ''}"></label><label>PILSĒTA<input name="city" value="${profile?.city || ''}"></label></div><label>LIETOTĀJVĀRDS<input name="username" value="${profile?.username || ''}"></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT IZMAIŅAS ↗</button></div><p class="form-message" id="profile-message"></p></form><div class="form-actions"><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a><button class="text-button" id="logout-button" type="button">IZIET</button></div><div class="section-kicker">MANI SLUDINĀJUMI</div><h2>Tavi <em>sludinājumi.</em></h2><div id="my-listings"><p class="listing-loading">Ielādējam sludinājumus...</p></div>`
   document.querySelector('#logout-button').addEventListener('click', async () => { await supabase.auth.signOut(); window.location.hash = 'home'; renderPage() })
+  document.querySelector('#profile-form').addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const message = document.querySelector('#profile-message')
+    const data = new FormData(event.target)
+    const { error } = await supabase.from('profiles').update({ display_name: data.get('display_name'), phone: data.get('phone'), city: data.get('city'), username: data.get('username') || null }).eq('id', user.id)
+    message.textContent = error ? error.message : 'Profils saglabāts.'
+  })
+  await loadMyListings(user.id)
 }
 
 function bindRouteForms(route) {
@@ -466,7 +510,7 @@ function bindRouteForms(route) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { message.textContent = 'Lai ievietotu sludinājumu, vispirms ielogojies.'; window.location.hash = 'account'; return }
     const formData = new FormData(listingForm)
-    const { data: listing, error } = await supabase.from('listings').insert({ user_id: user.id, title: formData.get('title'), price: Number(formData.get('price')), oem_number: formData.get('oem_number'), brand: formData.get('brand'), model: formData.get('model'), production_year: Number(formData.get('production_year')) || null, engine: formData.get('engine'), category: formData.get('category'), location: formData.get('location'), condition: formData.get('condition'), description: formData.get('description'), status: 'pending' }).select().single()
+    const { data: listing, error } = await supabase.from('listings').insert({ user_id: user.id, title: formData.get('title'), price: Number(formData.get('price')), oem_number: formData.get('oem_number'), brand: formData.get('brand'), model: formData.get('model'), production_year: Number(formData.get('production_year')) || null, engine: formData.get('engine'), category: formData.get('category'), location: formData.get('location'), condition: formData.get('condition'), description: formData.get('description'), status: 'active' }).select().single()
     if (error) { message.textContent = error.message; return }
     const files = [...formData.getAll('images')].filter((file) => file.size)
     for (const [index, file] of files.entries()) {
@@ -474,7 +518,7 @@ function bindRouteForms(route) {
       const upload = await supabase.storage.from('listing-images').upload(path, file)
       if (!upload.error) await supabase.from('listing_images').insert({ listing_id: listing.id, storage_path: path, sort_order: index })
     }
-    message.textContent = 'Sludinājums nosūtīts moderācijai.'
+    message.textContent = 'Sludinājums publicēts! Pārvaldi to savā kontā (Mans konts).'
     listingForm.reset()
   })
   if (route === 'sell') supabase.auth.getUser().then(({ data: { user } }) => { if (!user) document.querySelector('#listing-message').textContent = 'Ielogojies, lai publicētu sludinājumu.' })
@@ -528,6 +572,11 @@ const translations = {
   'IELOGOTIES ↗': 'SIGN IN ↗', 'IZVEIDOT KONTU': 'CREATE ACCOUNT', 'AIZMIRSI PAROLI?': 'FORGOT PASSWORD?',
   'Sveiks,': 'Hi,', 'Tu esi ielogojies kā': "You're signed in as", 'PĀRDOT DETAĻU ↗': 'SELL A PART ↗', 'IZIET': 'LOG OUT',
   "E-pasts apstiprināts — tu esi ielogojies!": "Email confirmed — you're signed in!",
+  'VĀRDS': 'NAME', 'PILSĒTA': 'CITY', 'LIETOTĀJVĀRDS': 'USERNAME', 'SAGLABĀT IZMAIŅAS ↗': 'SAVE CHANGES ↗', 'Profils saglabāts.': 'Profile saved.',
+  'MANI SLUDINĀJUMI': 'MY LISTINGS', 'Tavi': 'Your', 'Rediģēt sludinājumu': 'Edit listing', 'SAGLABĀT ↗': 'SAVE ↗', 'ATCELT': 'CANCEL',
+  'SLUDINĀJUMS': 'LISTING', 'STATUSS': 'STATUS', 'DARBĪBAS': 'ACTIONS', 'Rediģēt': 'Edit', 'Dzēst': 'Delete', 'Tev vēl nav neviena sludinājuma.': "You don't have any listings yet.",
+  'Gaida apstiprinājumu': 'Awaiting approval', 'Aktīvs': 'Active', 'Rezervēts': 'Reserved', 'Pārdots': 'Sold', 'Noņemts': 'Removed',
+  'Sludinājums publicēts! Pārvaldi to savā kontā (Mans konts).': 'Listing published! Manage it from your account (My account).',
   'JAUNA PAROLE': 'NEW PASSWORD', 'Uzstādi': 'Set', 'jaunu paroli.': 'a new password.', 'JAUNĀ PAROLE': 'NEW PASSWORD', 'SAGLABĀT PAROLI ↗': 'SAVE PASSWORD ↗',
   '06 / JAUNS SLUDINĀJUMS': '06 / NEW LISTING', 'Ieliec detaļu': 'Put your part', 'uz ceļa.': 'on the road.',
   'Aizpildi informāciju, pievieno bildes un sasniedz cilvēku, kuram tā vajadzīga.': 'Fill in the details, add photos, and reach the person who needs it.',
