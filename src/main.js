@@ -63,28 +63,40 @@ function slugify(text) {
 
 function stockLabel(stock) { return `${stock ?? 0} gab.` }
 
-function productCardMarkup(product) {
+function productCardMarkup(product, index) {
   const dataName = [product.name, product.code, product.oem, product.brand, product.model, product.category, product.condition].filter(Boolean).join(' ').toLowerCase()
-  return `<article class="product-card" data-product-id="${product.id}" data-name="${dataName}" data-price="${product.price}" data-category="${(product.category || '').toLowerCase()}" data-brand="${(product.brand || '').toLowerCase()}"><div class="product-image"><img src="${product.image || ''}" alt="${product.name}"/><span class="product-tag">${product.tag || product.condition || ''}</span><button class="quick-add" data-id="${product.id}" aria-label="Pievienot grozam">+</button></div><div class="product-meta"><span>${product.type}</span><small>${product.code || ''}</small></div><h3>${product.name}</h3><div class="product-bottom"><strong>${Number(product.price).toFixed(2).replace('.', ',')} €</strong><button class="add-text" data-id="${product.id}">PIEVIENOT <span>↗</span></button></div></article>`
+  return `<article class="product-card" data-product-id="${product.id}" data-name="${dataName}" data-price="${product.price}" data-category="${(product.category || '').toLowerCase()}" data-brand="${(product.brand || '').toLowerCase()}" data-model="${(product.model || '').toLowerCase()}" data-order="${index ?? 0}"><div class="product-image"><img src="${product.image || ''}" alt="${product.name}"/><span class="product-tag">${product.tag || product.condition || ''}</span><button class="quick-add" data-id="${product.id}" aria-label="Pievienot grozam">+</button></div><div class="product-meta"><span>${product.type}</span><small>${product.code || ''}</small></div><h3>${product.name}</h3><div class="product-bottom"><strong>${Number(product.price).toFixed(2).replace('.', ',')} €</strong><button class="add-text" data-id="${product.id}">PIEVIENOT <span>↗</span></button></div></article>`
 }
 
 function productGridMarkup(list) {
-  return `<div class="product-grid" id="product-grid">${list.map(productCardMarkup).join('')}</div><p class="no-results" id="no-results" ${list.length ? 'hidden' : ''}>Neviena detaļa neatbilst meklējumam.</p>`
+  return `<div class="product-grid" id="product-grid">${list.map((product, index) => productCardMarkup(product, index)).join('')}</div><p class="no-results" id="no-results" ${list.length ? 'hidden' : ''}>Neviena detaļa neatbilst meklējumam.</p>`
 }
 
 function searchBoxMarkup() {
   const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))].sort()
   const models = [...new Set(products.map((p) => p.model).filter(Boolean))].sort()
-  return `<form class="search-box" id="search-form"><span>⌕</span><input id="search-input" placeholder="Piem., BMW F10 lukturis vai 63117203298"/><button type="submit">MEKLĒT <b>↗</b></button></form><div class="select-row"><label>MARKA<select id="filter-brand"><option value="">Visas markas</option>${brands.map((b) => `<option value="${b.toLowerCase()}">${b}</option>`).join('')}</select></label><label>MODELIS<select id="filter-model"><option value="">Visi modeļi</option>${models.map((m) => `<option value="${m.toLowerCase()}">${m}</option>`).join('')}</select></label><label>DETAĻAS TIPS<select id="filter-category"><option value="">Visas kategorijas</option>${CATEGORIES.map((c) => `<option value="${c[3]}">${c[1]}</option>`).join('')}</select></label><button class="filter-button" id="more-filters" type="button">+ VAIRĀK FILTRU</button></div><div class="extra-filters" id="extra-filters"><label>STĀVOKLIS<select id="filter-condition"><option value="">Jebkurš</option><option value="ļoti labs">Ļoti labs</option><option value="labs">Labs</option><option value="pārbaudīt">Pārbaudīts</option><option value="ar defektu">Ar defektu</option></select></label><label>CENA NO (€)<input id="filter-price-min" type="number" min="0" placeholder="0"></label><label>CENA LĪDZ (€)<input id="filter-price-max" type="number" min="0" placeholder="1000"></label><label>GADS<input id="filter-year" placeholder="Piem., 2012"></label></div>`
+  return `<form class="search-box" id="search-form"><span>⌕</span><input id="search-input" placeholder="Piem., BMW F10 lukturis vai 63117203298"/><button type="submit">MEKLĒT <b>↗</b></button></form><div class="select-row"><label>MARKA<select id="filter-brand"><option value="">Visas markas</option>${brands.map((b) => `<option value="${b.toLowerCase()}">${b}</option>`).join('')}</select></label><label>MODELIS<select id="filter-model"><option value="">Visi modeļi</option>${models.map((m) => `<option value="${m.toLowerCase()}">${m}</option>`).join('')}</select></label><label>DETAĻAS TIPS<select id="filter-category"><option value="">Visas kategorijas</option>${CATEGORIES.map((c) => `<option value="${c[3]}">${c[1]}</option>`).join('')}</select></label><label>KĀRTOT<select id="sort-select"><option value="">Jaunākie</option><option value="price-asc">Cena: no zemākās</option><option value="price-desc">Cena: no augstākās</option></select></label><button class="filter-button" id="more-filters" type="button">+ VAIRĀK FILTRU</button></div><div class="extra-filters" id="extra-filters"><label>STĀVOKLIS<select id="filter-condition"><option value="">Jebkurš</option><option value="ļoti labs">Ļoti labs</option><option value="labs">Labs</option><option value="pārbaudīt">Pārbaudīts</option><option value="ar defektu">Ar defektu</option></select></label><label>CENA NO (€)<input id="filter-price-min" type="number" min="0" placeholder="0"></label><label>CENA LĪDZ (€)<input id="filter-price-max" type="number" min="0" placeholder="1000"></label><label>GADS<input id="filter-year" placeholder="Piem., 2012"></label></div>`
 }
 
 function bindCatalogFilters() {
   const form = document.querySelector('#search-form')
   if (!form) return
+  const brandSelect = document.querySelector('#filter-brand')
+  const modelSelect = document.querySelector('#filter-model')
+  const modelsByBrand = {}
+  products.forEach((p) => { if (p.brand && p.model) { const key = p.brand.toLowerCase(); (modelsByBrand[key] ??= new Set()).add(p.model) } })
+  const allModels = [...new Set(products.map((p) => p.model).filter(Boolean))].sort()
+  const refreshModelOptions = () => {
+    const brand = brandSelect?.value || ''
+    const models = brand ? [...(modelsByBrand[brand] || [])].sort() : allModels
+    const current = modelSelect.value
+    modelSelect.innerHTML = `<option value="">Visi modeļi</option>${models.map((m) => `<option value="${m.toLowerCase()}">${m}</option>`).join('')}`
+    if (models.some((m) => m.toLowerCase() === current)) modelSelect.value = current
+  }
   const run = () => {
     const query = document.querySelector('#search-input').value.trim().toLowerCase()
-    const brand = document.querySelector('#filter-brand')?.value || ''
-    const model = document.querySelector('#filter-model')?.value || ''
+    const brand = brandSelect?.value || ''
+    const model = modelSelect?.value || ''
     const category = document.querySelector('#filter-category')?.value || ''
     const condition = document.querySelector('#filter-condition')?.value || ''
     const priceMin = Number(document.querySelector('#filter-price-min')?.value) || 0
@@ -94,15 +106,30 @@ function bindCatalogFilters() {
     document.querySelectorAll('.product-card').forEach((card) => {
       const text = card.dataset.name
       const price = Number(card.dataset.price)
-      const matches = (!query || text.includes(query)) && (!brand || card.dataset.brand === brand) && (!model || text.includes(model)) && (!category || card.dataset.category === category) && (!condition || text.includes(condition)) && price >= priceMin && price <= priceMax && (!year || text.includes(year))
+      const matches = (!query || text.includes(query)) && (!brand || card.dataset.brand === brand) && (!model || card.dataset.model === model) && (!category || card.dataset.category === category) && (!condition || text.includes(condition)) && price >= priceMin && price <= priceMax && (!year || text.includes(year))
       card.hidden = !matches
       if (matches) visible += 1
     })
     const noResults = document.querySelector('#no-results')
     if (noResults) noResults.hidden = visible !== 0
   }
+  const sort = () => {
+    const grid = document.querySelector('#product-grid')
+    if (!grid) return
+    const sortValue = document.querySelector('#sort-select')?.value || ''
+    const cards = [...grid.querySelectorAll('.product-card')]
+    cards.sort((a, b) => {
+      if (sortValue === 'price-asc') return Number(a.dataset.price) - Number(b.dataset.price)
+      if (sortValue === 'price-desc') return Number(b.dataset.price) - Number(a.dataset.price)
+      return Number(a.dataset.order) - Number(b.dataset.order)
+    })
+    cards.forEach((card) => grid.appendChild(card))
+  }
   form.addEventListener('submit', (event) => { event.preventDefault(); run() })
-  document.querySelectorAll('#filter-brand, #filter-model, #filter-category, #filter-condition, #filter-price-min, #filter-price-max, #filter-year').forEach((el) => el.addEventListener('input', run))
+  document.querySelectorAll('#filter-category, #filter-condition, #filter-price-min, #filter-price-max, #filter-year').forEach((el) => el.addEventListener('input', run))
+  brandSelect?.addEventListener('change', () => { refreshModelOptions(); run() })
+  modelSelect?.addEventListener('change', run)
+  document.querySelector('#sort-select')?.addEventListener('change', sort)
   document.querySelector('#more-filters')?.addEventListener('click', (event) => { event.currentTarget.textContent = event.currentTarget.textContent.includes('VAIRĀK') ? '- MAZĀK FILTRU' : '+ VAIRĀK FILTRU'; document.querySelector('#extra-filters')?.classList.toggle('is-open') })
   document.querySelectorAll('[data-brand]').forEach((button) => button.addEventListener('click', () => { document.querySelector('#search-input').value = button.dataset.brand; run(); document.querySelector('#product-grid')?.scrollIntoView({ behavior: 'smooth' }) }))
 }
@@ -138,8 +165,12 @@ document.querySelector('#app').innerHTML = `
   </header>
   <aside class="cart-panel" id="cart-panel"><button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button><div class="section-kicker">TAVS GROZS</div><h2>Atlasītās <em>detaļas.</em></h2><div id="cart-view"><div class="cart-items" id="cart-items"><p id="cart-empty">Grozs ir tukšs.</p></div><div class="cart-summary"><span>KOPĀ</span><strong id="cart-total">0,00 €</strong></div><button class="button button-dark" type="button" id="checkout-button">UZ NORĒĶINU ↗</button><button class="text-button" type="button" id="clear-cart">NOTĪRĪT GROZU</button></div><div id="checkout-view" hidden></div></aside>
 
+  <div class="modal-overlay" id="auth-modal-overlay" hidden><div class="auth-modal"><button class="modal-close" id="auth-modal-close" type="button" aria-label="Aizvērt">×</button><div class="auth-modal-tabs"><button class="auth-tab active" data-auth-tab="login" type="button">IELOGOTIES</button><button class="auth-tab" data-auth-tab="signup" type="button">REĢISTRĒTIES</button></div><h2 class="auth-modal-title">Sveicināts <em>TrackParts.</em></h2><form class="site-form" id="auth-modal-form" data-mode="login"><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><label class="consent-label" id="auth-modal-consent-row" hidden><input type="checkbox" name="consent"> Piekrītu <a href="#terms">Lietošanas noteikumiem</a> un <a href="#privacy">Privātuma politikai</a>.</label><div class="form-actions"><button class="button button-dark" type="submit" id="auth-modal-submit">IELOGOTIES ↗</button><button class="text-button" id="auth-modal-forgot" type="button">AIZMIRSI PAROLI?</button></div><p class="form-message" id="auth-modal-message"></p></form></div></div>
+
+  <div class="cookie-notice" id="cookie-notice" hidden><p>Šī vietne izmanto tikai tehniski nepieciešamu lokālo glabātuvi, lai uzturētu tavu pieslēgšanās sesiju. Uzzini vairāk mūsu <a href="#privacy">Privātuma politikā</a>.</p><button class="button button-light" type="button" id="cookie-notice-accept">SAPRATU</button></div>
+
   <main></main>
-  <footer id="contact"><div class="footer-brand"><a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#listings">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#contact">Piegāde</a><a href="#contact">Atgriešana</a><a href="#contact">Kontakti</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><a href="https://www.instagram.com" target="_blank" rel="noreferrer">INSTAGRAM ↗</a></div></footer>
+  <footer id="contact"><div class="footer-brand"><a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#listings">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#contact">Piegāde</a><a href="#contact">Atgriešana</a><a href="#contact">Kontakti</a><a href="#terms">Lietošanas noteikumi</a><a href="#privacy">Privātuma politika</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><a href="https://www.instagram.com" target="_blank" rel="noreferrer">INSTAGRAM ↗</a></div></footer>
 `
 
 let cartCount = 0
@@ -206,9 +237,79 @@ document.querySelector('#checkout-button').addEventListener('click', () => {
 })
 
 document.querySelector('.search-trigger').addEventListener('click', () => { window.location.hash = 'home'; setTimeout(() => document.querySelector('#search-input')?.focus(), 50) })
-document.querySelector('.user-button').addEventListener('click', () => { window.location.hash = 'account' })
+document.querySelector('.user-button').addEventListener('click', async () => {
+  if (!supabase) { window.location.hash = 'account'; return }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) { window.location.hash = 'account' } else { openAuthModal('login') }
+})
 document.querySelector('.cart-button').addEventListener('click', () => document.querySelector('#cart-panel').classList.toggle('is-open'))
 document.querySelector('.cart-close').addEventListener('click', () => document.querySelector('#cart-panel').classList.remove('is-open'))
+
+try {
+  if (!localStorage.getItem('cookieNoticeDismissed')) document.querySelector('#cookie-notice').hidden = false
+} catch { /* localStorage unavailable (private browsing) — skip the notice */ }
+document.querySelector('#cookie-notice-accept').addEventListener('click', () => {
+  document.querySelector('#cookie-notice').hidden = true
+  try { localStorage.setItem('cookieNoticeDismissed', '1') } catch { /* ignore */ }
+})
+
+function openAuthModal(mode) {
+  const overlay = document.querySelector('#auth-modal-overlay')
+  if (!overlay) return
+  overlay.hidden = false
+  setAuthModalTab(mode || 'login')
+  setTimeout(() => document.querySelector('#auth-modal-overlay input[name="email"]')?.focus(), 50)
+}
+
+function closeAuthModal() {
+  const overlay = document.querySelector('#auth-modal-overlay')
+  if (overlay) overlay.hidden = true
+  const message = document.querySelector('#auth-modal-message')
+  if (message) message.textContent = ''
+  document.querySelector('#auth-modal-form')?.reset()
+}
+
+function setAuthModalTab(mode) {
+  document.querySelectorAll('.auth-tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.authTab === mode))
+  document.querySelector('#auth-modal-submit').textContent = mode === 'signup' ? 'IZVEIDOT KONTU ↗' : 'IELOGOTIES ↗'
+  document.querySelector('#auth-modal-form').dataset.mode = mode
+  document.querySelector('#auth-modal-message').textContent = ''
+  const consentRow = document.querySelector('#auth-modal-consent-row')
+  consentRow.hidden = mode !== 'signup'
+  consentRow.querySelector('input').required = mode === 'signup'
+  if (mode !== 'signup') consentRow.querySelector('input').checked = false
+}
+
+if (supabase) {
+  document.querySelector('#auth-modal-close').addEventListener('click', closeAuthModal)
+  document.querySelector('#auth-modal-overlay').addEventListener('click', (event) => { if (event.target.id === 'auth-modal-overlay') closeAuthModal() })
+  document.querySelectorAll('.auth-tab').forEach((tab) => tab.addEventListener('click', () => setAuthModalTab(tab.dataset.authTab)))
+  document.querySelector('#auth-modal-forgot').addEventListener('click', async () => {
+    const email = new FormData(document.querySelector('#auth-modal-form')).get('email')
+    const message = document.querySelector('#auth-modal-message')
+    if (!email) { message.textContent = 'Ievadi e-pastu, lai atjaunotu paroli.'; return }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${SITE_URL}#account` })
+    message.textContent = error ? error.message : 'Paroles atjaunošanas saite nosūtīta uz e-pastu.'
+  })
+  document.querySelector('#auth-modal-form').addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const form = event.target
+    const data = new FormData(form)
+    const message = document.querySelector('#auth-modal-message')
+    if (!data.get('email') || !data.get('password')) { message.textContent = 'Ievadi e-pastu un paroli.'; return }
+    if (form.dataset.mode === 'signup') {
+      if (!data.get('consent')) { message.textContent = 'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.'; return }
+      const { error } = await supabase.auth.signUp({ email: data.get('email'), password: data.get('password'), options: { emailRedirectTo: `${SITE_URL}#account` } })
+      message.textContent = error ? error.message : 'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.'
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email: data.get('email'), password: data.get('password') })
+      if (error) { message.textContent = error.message; return }
+      closeAuthModal()
+      window.location.hash = 'account'
+      renderPage()
+    }
+  })
+}
 document.querySelector('#clear-cart').addEventListener('click', () => { cartItems.length = 0; cartCount = 0; cartCountElement.textContent = '0'; renderCart() })
 
 function renderPage() {
@@ -217,7 +318,54 @@ function renderPage() {
     catalog: `<section class="page-hero"><div class="section-kicker">02 / PREČU KATALOGS</div><h1>Atrodi detaļu.<br><em>Uztaisi ātrāku.</em></h1><p>Oriģinālas un pārbaudītas detaļas ielas auto, trases projektam un servisam.</p></section><section class="search-section"><div class="section-kicker">FILTRĒ KATALOGU</div>${searchBoxMarkup()}</section><section class="product-section catalog-page"><div class="section-top"><div><div class="section-kicker">VISAS DETAĻAS</div><h2>Noliktavā <em>tagad.</em></h2></div><span class="catalog-count">${products.length} <span>PRECES</span></span></div>${productGridMarkup(products)}</section>`,
     about: `<section class="page-hero about-hero"><div class="section-kicker">03 / PAR TRACKPARTS</div><h1>Built for the<br><em>road ahead.</em></h1><p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p></section><section class="story-section"><div class="section-kicker">MŪSU PIEEJA</div><h2>Nevis detaļu kaudze.<br><em>Īstais atradums.</em></h2><div class="story-grid"><p>TrackParts sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p><p>Mūsu noliktavā katram kodam ir sava vieta, statuss un vēsture. Mazāk minēšanas, vairāk laika uz ceļa.</p></div></section><section class="trust-section"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katrs produkts tiek apskatīts pirms pārdošanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No Rīgas līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Cilvēcīgs atbalsts</strong><p>Palīdzēsim atrast pareizo detaļu.</p></div></section>`,
     contact: `<section class="page-hero contact-hero"><div class="section-kicker">04 / SAZINĀSIMIES</div><h1>Ir jautājums?<br><em>Dod ziņu.</em></h1><p>Neatrodi detaļu katalogā? Atsūti VIN, OEM kodu vai bildi, un mēs paskatīsimies.</p></section><section class="contact-section"><div><div class="section-kicker">RAKSTI MUMS</div><h2>Atbildēsim<br><em>ātri.</em></h2></div><div class="contact-list"><a href="mailto:hello@trackparts.lv"><small>E-PASTS</small>hello@trackparts.lv ↗</a><a href="tel:+37120000000"><small>TELEFONS</small>+371 2000 0000 ↗</a><div><small>ATRODI MŪS</small>Rīga, Latvija</div></div></section>`,
-    account: `<section class="page-hero"><div class="section-kicker">05 / TAVS KONTS</div><h1>Pieslēdzies.<br><em>Pārdod.</em></h1><p>Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.</p></section><section class="form-section"><div id="account-content"><form class="site-form" id="auth-form"><div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Ienākt vai <em>reģistrēties.</em></h2><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><div class="form-actions"><button class="button button-dark" type="submit">IELOGOTIES ↗</button><button class="text-button" id="signup-button" type="button">IZVEIDOT KONTU</button><button class="text-button" id="forgot-password" type="button">AIZMIRSI PAROLI?</button></div><p class="form-message" id="auth-message"></p></form></div></section>`,
+    terms: `<section class="page-hero"><div class="section-kicker">LIETOŠANAS NOTEIKUMI</div><h1>Noteikumi.<br><em>Skaidri un godīgi.</em></h1><p>Šie noteikumi regulē TrackParts interneta veikala un sludinājumu platformas lietošanu.</p></section><section class="legal-page">
+      <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
+      <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
+      <h3>1. Vispārīga informācija</h3>
+      <p>Šo tīmekļa vietni ("TrackParts", "mēs") uztur [UZŅĒMUMA NOSAUKUMS / KOMERSANTA VĀRDS, REĢ. NR. XXXXXXXXXXX, JURIDISKĀ ADRESE], turpmāk — "Pārdevējs" vai "Operators". Lietojot vietni, tu piekrīti šiem noteikumiem. Ja nepiekrīti, lūdzu, nelieto vietni.</p>
+      <h3>2. Konta reģistrācija</h3>
+      <p>Reģistrējoties tu apliecini, ka sniegtā informācija ir patiesa un ka tev ir vismaz 18 gadu, vai arī rīkojies ar likumiskā pārstāvja piekrišanu. Tu esi atbildīgs par sava konta datu konfidencialitāti un visām darbībām, kas veiktas, izmantojot tavu kontu.</p>
+      <h3>3. Pasūtījumi un cenas</h3>
+      <p>Cenas norādītas eiro (€) un, ja piemērojams, ietver PVN. Interneta apmaksa pašlaik nav pieejama — pēc pasūtījuma pieprasījuma nosūtīšanas mēs sazināmies ar tevi pa e-pastu, lai vienotos par apmaksu un piegādi. Līgums starp pusēm uzskatāms par noslēgtu tikai pēc abpusējas apmaksas un piegādes nosacījumu apstiprināšanas.</p>
+      <h3>4. Atteikuma tiesības (14 dienas)</h3>
+      <p>Ja esi patērētājs (fiziska persona, kas pērk ārpus savas saimnieciskās darbības), tev ir tiesības atteikties no pirkuma 14 kalendāro dienu laikā no preces saņemšanas dienas, nenorādot iemeslu, saskaņā ar Patērētāju tiesību aizsardzības likumu un ES Direktīvu 2011/83/ES. Lai izmantotu šīs tiesības, raksti mums uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>. Nauda tiek atmaksāta 14 dienu laikā pēc preces saņemšanas atpakaļ. Preces atpakaļsūtīšanas izmaksas sedz pircējs, ja vien nav norādīts citādi. Prece jāatdod tādā stāvoklī, kāds nepieciešams tās īpašību un darbības pārbaudei.</p>
+      <h3>5. Kopienas sludinājumi</h3>
+      <p>Reģistrēti lietotāji var publicēt savus sludinājumus. Par sludinājuma saturu, precizitāti un preces stāvokli atbild attiecīgais lietotājs — TrackParts darbojas kā starpnieks (informācijas sabiedrības pakalpojumu sniedzējs) un neveic katras detaļas fizisku pārbaudi pirms publicēšanas. Aizliegts publicēt maldinošu, nelikumīgu vai trešo personu tiesības aizskarošu saturu. Mēs paturam tiesības noņemt sludinājumus, kas pārkāpj šos noteikumus.</p>
+      <h3>6. Atbildības ierobežojums</h3>
+      <p>Mēs nenesam atbildību par netiešiem zaudējumiem, kas radušies vietnes lietošanas rezultātā, izņemot gadījumos, kad atbildību nevar ierobežot saskaņā ar piemērojamiem tiesību aktiem (piemēram, par miesas bojājumiem vai krāpšanu).</p>
+      <h3>7. Strīdu risināšana</h3>
+      <p>Šiem noteikumiem piemērojami Latvijas Republikas tiesību akti. Ja rodas strīds, vispirms sazinies ar mums tieši. Patērētāji var vērsties arī Patērētāju tiesību aizsardzības centrā (<a href="https://www.ptac.gov.lv" target="_blank" rel="noreferrer">ptac.gov.lv</a>) vai izmantot ES Strīdu izšķiršanas tiešsaistes platformu (<a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noreferrer">ec.europa.eu/consumers/odr</a>).</p>
+      <h3>8. Grozījumi</h3>
+      <p>Mēs varam šos noteikumus laiku pa laikam atjaunot. Būtiskas izmaiņas tiks paziņotas vietnē. Turpinot lietot vietni pēc izmaiņām, tu piekrīti atjauninātajiem noteikumiem.</p>
+      <h3>9. Kontakti</h3>
+      <p>Jautājumu gadījumā raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a> vai zvani +371 2000 0000.</p>
+    </section>`,
+    privacy: `<section class="page-hero"><div class="section-kicker">PRIVĀTUMA POLITIKA</div><h1>Tavi dati.<br><em>Mūsu atbildība.</em></h1><p>Šī politika izskaidro, kādus personas datus TrackParts apstrādā un kāpēc, saskaņā ar Vispārīgo datu aizsardzības regulu (VDAR/GDPR).</p></section><section class="legal-page">
+      <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
+      <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
+      <h3>1. Pārzinis</h3>
+      <p>Par tavu personas datu apstrādi atbild [UZŅĒMUMA NOSAUKUMS / KOMERSANTA VĀRDS, REĢ. NR. XXXXXXXXXXX, JURIDISKĀ ADRESE]. Jautājumos par datu apstrādi raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>.</p>
+      <h3>2. Kādus datus mēs apstrādājam</h3>
+      <ul>
+        <li>Konta dati: e-pasts, parole (šifrētā veidā), lietotājvārds, vārds, tālrunis, pilsēta.</li>
+        <li>Sludinājumu dati: viss, ko norādi, publicējot sludinājumu (nosaukums, cena, apraksts, fotogrāfijas, atrašanās vieta).</li>
+        <li>Pasūtījumu dati: vārds, e-pasts, tālrunis, piegādes adrese, piezīmes.</li>
+        <li>Tehniskie dati: pieslēgšanās sesijas informācija, ko pārlūkprogramma glabā lokāli, lai tu paliktu ielogojies.</li>
+      </ul>
+      <h3>3. Apstrādes nolūki un tiesiskais pamats</h3>
+      <p>Datus apstrādājam, lai izpildītu ar tevi noslēgto līgumu (konta izveide, pasūtījumu un sludinājumu apstrāde) — VDAR 6. panta 1. daļas (b) punkts, kā arī lai nodrošinātu vietnes drošību un novērstu ļaunprātīgu izmantošanu — leģitīmās intereses, VDAR 6. panta 1. daļas (f) punkts. Mēs nesūtām mārketinga e-pastus un neizmantojam tavus datus reklāmas mērķiem.</p>
+      <h3>4. Datu glabāšanas termiņš</h3>
+      <p>Datus glabājam, kamēr tavs konts ir aktīvs. Ja pieprasi konta dzēšanu, tavus personas datus dzēšam vai anonimizējam saprātīgā termiņā, izņemot datus, kurus mums jāglabā ilgāk saskaņā ar likumu (piemēram, grāmatvedības dokumentus).</p>
+      <h3>5. Datu saņēmēji</h3>
+      <p>Tavus datus glabā un apstrādā Supabase (datubāzes, autentifikācijas un faila glabāšanas pakalpojumu sniedzējs) kā mūsu datu apstrādātājs. Datus nepārdodam un nekopīgojam ar trešajām personām reklāmas nolūkos.</p>
+      <h3>6. Tavas tiesības</h3>
+      <p>Tev ir tiesības pieprasīt piekļuvi saviem datiem, to labošanu, dzēšanu, apstrādes ierobežošanu, iebilst pret apstrādi un saņemt datus pārnesamā formātā. Lai izmantotu šīs tiesības, raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>. Ja uzskati, ka tavas tiesības ir pārkāptas, vari iesniegt sūdzību Datu valsts inspekcijā (<a href="https://www.dvi.gov.lv" target="_blank" rel="noreferrer">dvi.gov.lv</a>).</p>
+      <h3>7. Sīkdatnes un lokālā glabātuve</h3>
+      <p>Vietne izmanto tikai tehniski nepieciešamu pārlūkprogrammas lokālo glabātuvi (local storage), lai uzturētu tavu pieslēgšanās sesiju. Mēs neizmantojam analītikas vai reklāmas sīkdatnes.</p>
+      <h3>8. Kontakti</h3>
+      <p>Jautājumu vai lūgumu gadījumā par saviem datiem raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>.</p>
+    </section>`,
+    account: `<section class="page-hero"><div class="section-kicker">05 / TAVS KONTS</div><h1>Pieslēdzies.<br><em>Pārdod.</em></h1><p>Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.</p></section><section class="form-section"><div id="account-content"><form class="site-form" id="auth-form"><div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Ienākt vai <em>reģistrēties.</em></h2><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><label class="consent-label"><input type="checkbox" name="consent"> Piekrītu <a href="#terms">Lietošanas noteikumiem</a> un <a href="#privacy">Privātuma politikai</a> (nepieciešams, veidojot jaunu kontu).</label><div class="form-actions"><button class="button button-dark" type="submit">IELOGOTIES ↗</button><button class="text-button" id="signup-button" type="button">IZVEIDOT KONTU</button><button class="text-button" id="forgot-password" type="button">AIZMIRSI PAROLI?</button></div><p class="form-message" id="auth-message"></p></form></div></section>`,
     sell: `<section class="page-hero"><div class="section-kicker">06 / JAUNS SLUDINĀJUMS</div><h1>Ieliec detaļu<br><em>uz ceļa.</em></h1><p>Aizpildi informāciju, pievieno bildes un sasniedz cilvēku, kuram tā vajadzīga.</p></section><section class="form-section"><form class="site-form listing-form" id="listing-form"><div class="section-kicker">DETAĻAS INFORMĀCIJA</div><h2>Ko tu <em>pārdod?</em></h2><label>NOSAUKUMS<input name="title" required placeholder="Piem., BMW E46 priekšējais lukturis"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required placeholder="250"></label><label>OEM NUMURS<input name="oem_number" placeholder="63117203298"></label></div><div class="form-two"><label>MARKA<input name="brand" placeholder="BMW"></label><label>MODELIS<input name="model" placeholder="E46"></label></div><div class="form-two"><label>GADS<input name="production_year" type="number" min="1950" max="2030" placeholder="2014"></label><label>DZINĒJS<input name="engine" placeholder="530d / 3.0 TDI"></label></div><div class="form-two"><label>KATEGORIJA<select name="category">${CATEGORIES.map((c) => `<option>${c[1] === 'Riteņi & diski' ? 'Riteņi un diski' : c[1]}</option>`).join('')}</select></label><label>ATRAŠANĀS VIETA<input name="location" placeholder="Rīga, noliktava B3"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good">Ļoti labs</option><option value="good">Labs</option><option value="defect">Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="5" placeholder="Apraksti detaļas stāvokli un zināmos defektus"></textarea></label><label>BILDES<input name="images" type="file" accept="image/*" multiple required></label><div class="form-actions"><button class="button button-dark" type="submit">PUBLICĒT SLUDINĀJUMU ↗</button></div><p class="form-message" id="listing-message"></p></form></section>`,
   }
   document.querySelector('main').innerHTML = route === 'home' ? homeMarkup() : (route === 'admin' ? adminPage : (route === 'listings' ? listingsPage : (route.startsWith('listing-') ? listingDetailPage : (route.startsWith('product-') ? productDetailPage : (route.startsWith('category-') ? categoryPage(route.replace('category-', '').replaceAll('-', ' ')) : (pages[route] || pages.catalog))))))
@@ -520,6 +668,7 @@ function bindRouteForms(route) {
     document.querySelector('#signup-button').addEventListener('click', async () => {
       const data = new FormData(authForm)
       if (!data.get('email') || !data.get('password')) { authMessage.textContent = 'Ievadi e-pastu un paroli, lai izveidotu kontu.'; return }
+      if (!data.get('consent')) { authMessage.textContent = 'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.'; return }
       const { error } = await supabase.auth.signUp({ email: data.get('email'), password: data.get('password'), options: { emailRedirectTo: `${SITE_URL}#account` } })
       authMessage.textContent = error ? error.message : 'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.'
     })
@@ -536,7 +685,7 @@ function bindRouteForms(route) {
     event.preventDefault()
     const message = document.querySelector('#listing-message')
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { message.textContent = 'Lai ievietotu sludinājumu, vispirms ielogojies.'; window.location.hash = 'account'; return }
+    if (!user) { message.textContent = 'Lai ievietotu sludinājumu, vispirms ielogojies.'; openAuthModal('login'); return }
     const formData = new FormData(listingForm)
     const { data: listing, error } = await supabase.from('listings').insert({ user_id: user.id, title: formData.get('title'), price: Number(formData.get('price')), oem_number: formData.get('oem_number'), brand: formData.get('brand'), model: formData.get('model'), production_year: Number(formData.get('production_year')) || null, engine: formData.get('engine'), category: formData.get('category'), location: formData.get('location'), condition: formData.get('condition'), description: formData.get('description'), status: 'active' }).select().single()
     if (error) { message.textContent = error.message; return }
@@ -570,6 +719,7 @@ const translations = {
   'DETAĻAS': 'PARTS', 'NOLIKTAVĀ': 'IN STOCK', 'ĀTRA': 'FAST', 'IZSŪTĪŠANA': 'SHIPPING', 'PIEGĀDE': 'SHIPPING', 'VISĀ EIROPĀ': 'ACROSS EUROPE',
   '01 / ATRODI SAVU DETAĻU': '01 / FIND YOUR PART', 'Ko tu meklē?': 'What are you looking for?', 'Meklē pēc nosaukuma, OEM koda vai detaļas numura.': 'Search by name, OEM code or part number.',
   'MEKLĒT': 'SEARCH', 'MARKA': 'BRAND', 'Visas markas': 'All brands', 'MODELIS': 'MODEL', 'Visi modeļi': 'All models', 'DETAĻAS TIPS': 'PART TYPE', 'Visas kategorijas': 'All categories',
+  'KĀRTOT': 'SORT', 'Cena: no zemākās': 'Price: low to high', 'Cena: no augstākās': 'Price: high to low',
   '+ VAIRĀK FILTRU': '+ MORE FILTERS', '- MAZĀK FILTRU': '- FEWER FILTERS', 'STĀVOKLIS': 'CONDITION', 'Jebkurš': 'Any', 'Ļoti labs': 'Very good', 'Labs': 'Good', 'Pārbaudīts': 'Tested', 'Pārbaudīta': 'Tested', 'Ar defektu': 'Has a defect',
   'CENA NO (€)': 'PRICE FROM (€)', 'CENA LĪDZ (€)': 'PRICE TO (€)', 'GADS': 'YEAR',
   'MARKAS, KO PAZĪSTAM': 'BRANDS WE KNOW',
@@ -597,7 +747,11 @@ const translations = {
   '05 / TAVS KONTS': '05 / YOUR ACCOUNT', 'Pieslēdzies.': 'Sign in.', 'Pārdod.': 'Sell.',
   'Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.': 'Create an account to post parts and manage your listings.',
   'LIETOTĀJA PIEKĻUVE': 'USER ACCESS', 'Ienākt vai': 'Sign in or', 'reģistrēties.': 'sign up.', 'PAROLE': 'PASSWORD',
-  'IELOGOTIES ↗': 'SIGN IN ↗', 'IZVEIDOT KONTU': 'CREATE ACCOUNT', 'AIZMIRSI PAROLI?': 'FORGOT PASSWORD?',
+  'IELOGOTIES ↗': 'SIGN IN ↗', 'IZVEIDOT KONTU': 'CREATE ACCOUNT', 'IZVEIDOT KONTU ↗': 'CREATE ACCOUNT ↗', 'AIZMIRSI PAROLI?': 'FORGOT PASSWORD?',
+  'IELOGOTIES': 'SIGN IN', 'REĢISTRĒTIES': 'SIGN UP', 'Sveicināts': 'Welcome to', 'TrackParts.': 'TrackParts.',
+  'Ievadi e-pastu un paroli.': 'Enter your email and password.', 'Ievadi e-pastu, lai atjaunotu paroli.': 'Enter your email to reset your password.',
+  'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.': 'Account created. Check your email and click the confirmation link.',
+  'Paroles atjaunošanas saite nosūtīta uz e-pastu.': 'Password reset link sent to your email.',
   'Sveiks,': 'Hi,', 'Tu esi ielogojies kā': "You're signed in as", 'PĀRDOT DETAĻU ↗': 'SELL A PART ↗', 'IZIET': 'LOG OUT',
   "E-pasts apstiprināts — tu esi ielogojies!": "Email confirmed — you're signed in!",
   'VĀRDS': 'NAME', 'PILSĒTA': 'CITY', 'LIETOTĀJVĀRDS': 'USERNAME', 'SAGLABĀT IZMAIŅAS ↗': 'SAVE CHANGES ↗', 'Profils saglabāts.': 'Profile saved.',
@@ -624,6 +778,13 @@ const translations = {
   '← ATPAKAĻ UZ SĀKUMU': '← BACK TO HOME', 'Citi pārdod': 'Others sell', 'Pievieno detaļu grozam vispirms.': 'Add a part to your cart first.',
   'VEIKALS': 'SHOP', 'Jaunas detaļas': 'New parts', 'Lietotas detaļas': 'Used parts', 'Kategorijas': 'Categories',
   'PALĪDZĪBA': 'HELP', 'Piegāde': 'Delivery', 'Atgriešana': 'Returns', 'RUNĀSIM': "LET'S TALK",
+  'Lietošanas noteikumi': 'Terms of use', 'Privātuma politika': 'Privacy policy',
+  'LIETOŠANAS NOTEIKUMI': 'TERMS OF USE', 'Noteikumi.': 'Terms.', 'Skaidri un godīgi.': 'Clear and fair.', 'Šie noteikumi regulē TrackParts interneta veikala un sludinājumu platformas lietošanu.': 'These terms govern the use of the TrackParts online store and listings platform.',
+  'PRIVĀTUMA POLITIKA': 'PRIVACY POLICY', 'Tavi dati.': 'Your data.', 'Mūsu atbildība.': 'Our responsibility.', 'Šī politika izskaidro, kādus personas datus TrackParts apstrādā un kāpēc, saskaņā ar Vispārīgo datu aizsardzības regulu (VDAR/GDPR).': 'This policy explains what personal data TrackParts processes and why, in accordance with the General Data Protection Regulation (GDPR).',
+  'Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.': 'This document is only available in Latvian. Contact us if you need a translation.',
+  'Piekrītu': 'I agree to the', 'un': 'and', 'Privātuma politikai': 'Privacy Policy', 'Lietošanas noteikumiem': 'Terms of Use', '(nepieciešams, veidojot jaunu kontu).': '(required when creating a new account).',
+  'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.': 'You must agree to the Terms of Use and Privacy Policy to create an account.',
+  'Šī vietne izmanto tikai tehniski nepieciešamu lokālo glabātuvi, lai uzturētu tavu pieslēgšanās sesiju. Uzzini vairāk mūsu': 'This site only uses technically necessary local storage to keep you signed in. Learn more in our', 'SAPRATU': 'GOT IT', 'Privātuma politikā': 'Privacy Policy',
   'Auto detaļas bez liekām': 'Car parts without the', 'rūpēm.': 'hassle.',
 }
 const placeholderTranslations = {
