@@ -13,10 +13,12 @@ body { margin: 0; background: var(--paper); }
 .admin-product-form { background: #fff; border: 1px solid var(--line); padding: 18px; margin-top: 14px; max-width: 640px; }
 .admin-product-form h3 { margin: 0 0 14px; font-size: 15px; }
 .admin-product-form label { display: block; margin-top: 12px; color: var(--muted); font: 10px 'DM Mono'; }
-.admin-product-form input, .admin-product-form select { display: block; width: 100%; margin-top: 6px; padding: 9px; border: 1px solid var(--line); }
+.admin-product-form input, .admin-product-form select, .admin-product-form textarea { display: block; width: 100%; margin-top: 6px; padding: 9px; border: 1px solid var(--line); font: inherit; }
 .admin-product-form .form-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .admin-product-form .form-actions { margin-top: 16px; display: flex; gap: 12px; align-items: center; }
 .stock-edit input { width: 55px; padding: 4px; border: 1px solid var(--line); }
+.row-actions { display: flex; gap: 6px; }
+.admin-table.cols-5 .admin-table-head, .admin-table.cols-5 .admin-table-row { grid-template-columns: 1.7fr 1.3fr 1fr .8fr .9fr; }
 #checkout-form label { display: block; margin-top: 14px; font: 9px 'DM Mono'; color: #aaa; }
 #checkout-form input, #checkout-form textarea { display: block; width: 100%; margin-top: 6px; padding: 10px; background: #2a2a2a; border: 1px solid #3a3a3a; color: #fff; }
 #checkout-form .form-actions { margin-top: 16px; }
