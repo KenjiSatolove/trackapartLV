@@ -804,6 +804,21 @@ function loadProductDetail(id) {
   document.querySelector('#product-add').addEventListener('click', () => { addToCart(product); document.querySelector('#product-add').textContent = '✓ PIEVIENOTS GROZAM' })
 }
 
+async function fetchListingThumbnails(rows) {
+  const thumbs = {}
+  const realIds = []
+  rows.forEach((row) => {
+    if (row.images?.length) thumbs[row.id] = row.images[0]
+    else if (row.id && !row.id.toString().startsWith('demo-')) realIds.push(row.id)
+  })
+  if (supabase && realIds.length) {
+    const { data } = await supabase.from('listing_images').select('listing_id, storage_path').in('listing_id', realIds).order('sort_order')
+    ;(data || []).forEach((img) => { if (!thumbs[img.listing_id]) thumbs[img.listing_id] = supabase.storage.from('listing-images').getPublicUrl(img.storage_path).data.publicUrl })
+  }
+  return thumbs
+}
+function listingThumbMarkup(url) { return `<span class="listing-thumb">${url ? `<img src="${url}" alt="">` : ''}</span>` }
+
 async function loadListings() {
   const targets = document.querySelectorAll('#listing-table')
   if (!targets.length) return
@@ -814,8 +829,9 @@ async function loadListings() {
     if (data?.length) rows = data
   }
   const conditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
+  const thumbs = await fetchListingThumbnails(rows)
   targets.forEach((target) => {
-    target.innerHTML = `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" data-search="${[row.title, row.brand, row.model].filter(Boolean).join(' ').toLowerCase()}" href="#listing-${row.id || `demo-${index + 1}`}" ><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}`
+    target.innerHTML = `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" data-search="${[row.title, row.brand, row.model].filter(Boolean).join(' ').toLowerCase()}" href="#listing-${row.id || `demo-${index + 1}`}" ><div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${row.title}</strong></div><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}`
   })
   bindListingsFilter()
 }
@@ -839,7 +855,8 @@ async function loadCategoryListings(categoryValue) {
     if (data?.length) rows = data
   }
   const conditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
-  target.innerHTML = rows.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" href="#listing-${row.id || `demo-${index + 1}`}" ><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Šajā kategorijā pašlaik nav aktīvu sludinājumu.</p>'
+  const thumbs = await fetchListingThumbnails(rows)
+  target.innerHTML = rows.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" href="#listing-${row.id || `demo-${index + 1}`}" ><div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${row.title}</strong></div><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Šajā kategorijā pašlaik nav aktīvu sludinājumu.</p>'
 }
 
 async function loadListingDetail(id) {
@@ -935,6 +952,7 @@ async function loadSellerProfile(id) {
   ])
   const reviewerIds = [...new Set((reviews || []).map((r) => r.reviewer_id))]
   const { data: reviewers } = reviewerIds.length ? await supabase.from('profiles').select('id, display_name').in('id', reviewerIds) : { data: [] }
+  const thumbs = await fetchListingThumbnails(listings || [])
   if (!document.querySelector('#seller-name')) return // navigated away while these were loading
 
   document.querySelector('#seller-name').textContent = profile?.display_name || 'Pārdevējs'
@@ -943,7 +961,7 @@ async function loadSellerProfile(id) {
   document.querySelector('#seller-meta').textContent = [profile?.city, reviews?.length ? `${avg.toFixed(1)} ★ (${reviews.length})` : 'Vēl nav atsauksmju', profile?.created_at ? `Pievienojies ${new Date(profile.created_at).toLocaleDateString('lv-LV')}` : ''].filter(Boolean).join(' · ')
 
   const sellerConditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
-  document.querySelector('#seller-listings').innerHTML = listings?.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${listings.map((row) => `<a class="listing-row" href="#listing-${row.id}"><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${sellerConditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Šim pārdevējam pašlaik nav aktīvu sludinājumu.</p>'
+  document.querySelector('#seller-listings').innerHTML = listings?.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${listings.map((row) => `<a class="listing-row" href="#listing-${row.id}"><div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${row.title}</strong></div><span>${row.brand || '-'} ${row.model || ''}</span><span>${sellerConditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Šim pārdevējam pašlaik nav aktīvu sludinājumu.</p>'
 
   const reviewsHolder = document.querySelector('#seller-reviews')
   if (reviews?.length) {
@@ -1086,7 +1104,8 @@ async function loadMyFavorites(userId) {
   const { data: rows } = await supabase.from('listings').select('id, title, brand, model, price, condition, status').in('id', favorites.map((f) => f.listing_id))
   const active = (rows || []).filter((row) => row.status !== 'removed')
   const favConditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
-  holder.innerHTML = active.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${active.map((row) => `<a class="listing-row" href="#listing-${row.id}"><strong>${row.title}</strong><span>${row.brand || '-'} ${row.model || ''}</span><span>${favConditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Tev vēl nav neviena saglabāta sludinājuma.</p>'
+  const thumbs = await fetchListingThumbnails(active)
+  holder.innerHTML = active.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${active.map((row) => `<a class="listing-row" href="#listing-${row.id}"><div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${row.title}</strong></div><span>${row.brand || '-'} ${row.model || ''}</span><span>${favConditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Tev vēl nav neviena saglabāta sludinājuma.</p>'
 }
 
 function bindRouteForms(route) {
