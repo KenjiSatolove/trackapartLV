@@ -15,7 +15,7 @@ if (window.location.hash.includes('error=') || window.location.hash.includes('er
   window.location.hash = 'account'
 }
 if (supabase) {
-  supabase.auth.onAuthStateChange((event) => {
+  supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
       pendingAuthEvent = 'recovery'
       if (window.location.hash !== '#account') window.location.hash = 'account'; else renderPage()
@@ -23,6 +23,8 @@ if (supabase) {
       pendingAuthEvent = 'confirmed'
       if (window.location.hash !== '#account') window.location.hash = 'account'; else renderPage()
     }
+    if (event === 'SIGNED_IN' && session?.user) switchCartOwner(session.user.id)
+    else if (event === 'SIGNED_OUT') switchCartOwner(null)
   })
 }
 
@@ -184,11 +186,40 @@ let cartCount = 0
 const cartItems = []
 const cartCountElement = document.querySelector('#cart-count')
 
+let cartOwner = 'guest'
+function cartStorageKey(owner) { return `trackparts-cart:${owner}` }
+function persistCart() {
+  try { localStorage.setItem(cartStorageKey(cartOwner), JSON.stringify(cartItems.map((product) => product.id))) } catch { /* storage unavailable (private mode, quota) */ }
+}
+function loadCartForOwner(owner) {
+  cartOwner = owner || 'guest'
+  cartItems.length = 0
+  try {
+    const ids = JSON.parse(localStorage.getItem(cartStorageKey(cartOwner)) || '[]')
+    ids.forEach((id) => { const product = products.find((item) => item.id === id); if (product) cartItems.push(product) })
+  } catch { /* corrupt storage, start empty */ }
+  cartCount = cartItems.length
+  cartCountElement.textContent = cartCount
+  renderCart()
+}
+function switchCartOwner(userId) {
+  const nextOwner = userId || 'guest'
+  if (nextOwner !== 'guest' && cartOwner === 'guest' && cartItems.length) {
+    try {
+      const existing = JSON.parse(localStorage.getItem(cartStorageKey(nextOwner)) || '[]')
+      localStorage.setItem(cartStorageKey(nextOwner), JSON.stringify([...existing, ...cartItems.map((product) => product.id)]))
+      localStorage.removeItem(cartStorageKey('guest'))
+    } catch { /* storage unavailable */ }
+  }
+  loadCartForOwner(nextOwner)
+}
+
 function addToCart(product) {
   cartCount += 1
   cartItems.push(product)
   cartCountElement.textContent = cartCount
   renderCart()
+  persistCart()
 }
 
 function bindProductButtons() {
@@ -240,6 +271,7 @@ document.querySelector('#checkout-button').addEventListener('click', () => {
     cartCount = 0
     cartCountElement.textContent = '0'
     renderCart()
+    persistCart()
   })
 })
 
@@ -330,7 +362,7 @@ if (supabase) {
     }
   })
 }
-document.querySelector('#clear-cart').addEventListener('click', () => { cartItems.length = 0; cartCount = 0; cartCountElement.textContent = '0'; renderCart() })
+document.querySelector('#clear-cart').addEventListener('click', () => { cartItems.length = 0; cartCount = 0; cartCountElement.textContent = '0'; renderCart(); persistCart() })
 
 function renderPage() {
   const rawRoute = window.location.hash.slice(1) || 'home'
@@ -926,7 +958,11 @@ function playPageWipe(callback) {
 let english = false
 window.addEventListener('hashchange', () => playPageWipe(renderPage))
 renderPage()
-loadProducts().then(() => { if (!window.location.hash.includes('access_token')) renderPage() })
+loadProducts().then(async () => {
+  const owner = supabase ? (await supabase.auth.getUser()).data.user?.id : null
+  loadCartForOwner(owner)
+  if (!window.location.hash.includes('access_token')) renderPage()
+})
 
 const translations = {
   'Sākums': 'Home', 'Katalogs': 'Catalog', 'Sludinājumi': 'Listings', 'Pārdot detaļu': 'Sell a part', 'Mans konts': 'My account', 'Kontakti': 'Contact',
