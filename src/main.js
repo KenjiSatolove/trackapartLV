@@ -177,7 +177,7 @@ document.querySelector('#app').innerHTML = `
   <div class="lightbox-overlay" id="lightbox-overlay" hidden><button class="lightbox-close" id="lightbox-close" type="button" aria-label="Aizvērt">×</button><img id="lightbox-image" src="" alt=""><button class="gallery-arrow gallery-prev" id="lightbox-prev" type="button" aria-label="Iepriekšējā bilde">‹</button><button class="gallery-arrow gallery-next" id="lightbox-next" type="button" aria-label="Nākamā bilde">›</button></div>
 
   <main></main>
-  <footer id="contact"><div class="footer-brand"><a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#listings">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#contact">Piegāde</a><a href="#contact">Atgriešana</a><a href="#contact">Kontakti</a><a href="#terms">Lietošanas noteikumi</a><a href="#privacy">Privātuma politika</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><span>LV <small>/ EN</small></span><a href="https://www.instagram.com" target="_blank" rel="noreferrer">INSTAGRAM ↗</a></div></footer>
+  <footer id="contact"><div class="footer-brand"><a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a><p>Auto detaļas bez liekām<br>rūpēm.</p></div><div class="footer-column"><b>VEIKALS</b><a href="#catalog">Jaunas detaļas</a><a href="#listings">Lietotas detaļas</a><a href="#catalog">Kategorijas</a></div><div class="footer-column"><b>PALĪDZĪBA</b><a href="#contact">Piegāde</a><a href="#contact">Atgriešana</a><a href="#contact">Kontakti</a></div><div class="footer-contact"><b>RUNĀSIM</b><a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a><a href="tel:+37120000000">+371 2000 0000</a><p>Rīga, Latvija</p></div><div class="footer-bottom"><span>© 2024 TRACKPARTS</span><nav class="footer-legal"><a href="#terms">Lietošanas noteikumi</a><a href="#privacy">Privātuma politika</a><a href="#marketplace">Tirdzniecības noteikumi</a><a href="#safety">Drošība</a></nav><span>LV <small>/ EN</small></span><a href="https://www.instagram.com" target="_blank" rel="noreferrer">INSTAGRAM ↗</a></div></footer>
 `
 
 let cartCount = 0
@@ -386,6 +386,64 @@ function renderPage() {
       <p>Vietne izmanto tikai tehniski nepieciešamu pārlūkprogrammas lokālo glabātuvi (local storage), lai uzturētu tavu pieslēgšanās sesiju. Mēs neizmantojam analītikas vai reklāmas sīkdatnes.</p>
       <h3>8. Kontakti</h3>
       <p>Jautājumu vai lūgumu gadījumā par saviem datiem raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>.</p>
+    </section>`,
+    marketplace: `<section class="page-hero"><div class="section-kicker">TIRDZNIECĪBAS NOTEIKUMI</div><h1>Tirgus noteikumi.<br><em>Godīga spēle visiem.</em></h1><p>Papildu noteikumi, kas regulē detaļu ievietošanu un tirdzniecību TrackParts kopienas sludinājumos.</p></section><section class="legal-page">
+      <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
+      <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
+      <h3>1. Piemērošana</h3>
+      <p>Šie tirdzniecības noteikumi papildina TrackParts <a href="#terms">Lietošanas noteikumus</a> un attiecas konkrēti uz kopienas lietotāju ievietotajiem sludinājumiem (nevis uz precēm, ko tieši pārdod TrackParts katalogā). Publicējot vai apskatot sludinājumu, tu piekrīti šiem noteikumiem.</p>
+      <h3>2. Kas drīkst pārdot</h3>
+      <p>Sludinājumu var ievietot ikviens reģistrēts lietotājs, kuram ir vismaz 18 gadu un likumīgas tiesības pārdot norādīto detaļu (tā pieder tev vai tev ir īpašnieka atļauja to pārdot tavā vārdā).</p>
+      <h3>3. Ko drīkst ievietot</h3>
+      <ul>
+        <li>Tikai reālas, tev piederošas auto detaļas, kuru izcelsme ir likumīga.</li>
+        <li>Precīzu un patiesu aprakstu — stāvokli, defektus, OEM/ražotāja kodu, ja tas zināms.</li>
+        <li>Pašuzņemtas fotogrāfijas, kas parāda reālo preci, ne kopētas no interneta.</li>
+        <li>Godīgu, tirgum atbilstošu cenu.</li>
+      </ul>
+      <h3>4. Kas ir aizliegts</h3>
+      <ul>
+        <li>Zagtu, viltotu vai bez likumīga pamata iegūtu detaļu pārdošana.</li>
+        <li>Maldinošs vai apzināti nepatiess apraksts, cena vai fotogrāfijas.</li>
+        <li>Dublēti vai spama sludinājumi, kā arī sludinājumi par precēm, kas nav auto detaļas.</li>
+        <li>Kontaktinformācijas vākšana, uzmākšanās citiem lietotājiem vai mēģinājumi pārcelt darījumu ārpus platformas krāpnieciskā nolūkā.</li>
+        <li>Naida runa, aizskaroši vai citu personu tiesības pārkāpjoši materiāli.</li>
+      </ul>
+      <h3>5. TrackParts loma darījumā</h3>
+      <p>Kopienas sludinājumos TrackParts darbojas tikai kā starpnieks — savienojam pircēju ar pārdevēju, bet nepiedalāmies maksājumā, piegādē vai preces apskatē pirms publicēšanas. Vienošanās par cenu, apmaksu un nodošanu notiek tieši starp pircēju un pārdevēju, un abas puses par to ir pilnībā atbildīgas. Sk. arī mūsu <a href="#safety">Drošības ieteikumus</a> drošam darījumam.</p>
+      <h3>6. Moderācija un sludinājumu noņemšana</h3>
+      <p>Mēs paturam tiesības pārskatīt, rediģēt pieprasīt vai bez brīdinājuma noņemt sludinājumus, kas pārkāpj šos noteikumus, kā arī apturēt vai dzēst lietotāja kontu smagu vai atkārtotu pārkāpumu gadījumā (piemēram, aizdomas par zagtu preci vai krāpšanu).</p>
+      <h3>7. Ziņošana par pārkāpumiem</h3>
+      <p>Ja pamani sludinājumu vai lietotāju, kas pārkāpj šos noteikumus, raksti mums uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>, pievienojot sludinājuma saiti un īsu aprakstu.</p>
+      <h3>8. Kontakti</h3>
+      <p>Jautājumu gadījumā raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a> vai zvani +371 2000 0000.</p>
+    </section>`,
+    safety: `<section class="page-hero"><div class="section-kicker">DROŠĪBA</div><h1>Droši darījumi.<br><em>Tavai drošībai.</em></h1><p>Ieteikumi, kā droši pirkt un pārdot TrackParts kopienas sludinājumos.</p></section><section class="legal-page">
+      <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
+      <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
+      <h3>1. Vispārīgi</h3>
+      <p>Kopienas sludinājumos darījums notiek tieši starp diviem lietotājiem. TrackParts negarantē pārdevēja identitāti, preces stāvokli vai darījuma norisi. Šie ieteikumi palīdzēs samazināt risku, pērkot vai pārdodot.</p>
+      <h3>2. Pirms tikšanās</h3>
+      <p>Pārrunā detaļas ar otru pusi rakstiski — precīzu preces stāvokli, cenu un saderību (VIN, OEM numurs, modelis, gads). Lūdz papildu fotogrāfijas, ja kaut kas nav skaidrs.</p>
+      <h3>3. Tiekoties klātienē</h3>
+      <p>Izvēlies drošu, publisku un labi apgaismotu vietu, ideālā gadījumā dienas laikā. Ja iespējams, ņem līdzi kādu citu. Izvairies doties vienatnē uz nomaļu vietu, īpaši, ja darījuma summa ir liela.</p>
+      <h3>4. Pārbaudi preci pirms apmaksas</h3>
+      <p>Salīdzini detaļas numuru un stāvokli ar sludinājumā redzamo. Ja iespējams, pārbaudi detaļu vai pielaikojot to. Nemaksā, pirms neesi preci redzējis un apstiprinājis, ka tā atbilst aprakstam.</p>
+      <h3>5. Maksājumi</h3>
+      <p>Priekšroku dod skaidrai naudai pēc preces apskates vai citam drošam maksājuma veidam. Nekad nesūti avansu vai pilnu summu nepazīstamam pārdevējam, īpaši ar bankas pārskaitījumu, kriptovalūtu vai dāvanu kartēm, ja precīti neesi redzējis. Uzmanies no steidzināšanas ("jāmaksā tagad, citādi detaļu nopirks cits") — tas ir bieži sastopams krāpšanas paņēmiens. Nekad nedalies ar bankas kartes datiem, PIN kodiem vai vienreizējiem apstiprinājuma kodiem.</p>
+      <h3>6. Sūtīšana un attālināti darījumi</h3>
+      <p>Ja prece tiek sūtīta, izmanto izsekojamu kurjerpakalpojumu un vienojies par apmaksu tikai pēc sūtījuma apstiprināšanas. Esi piesardzīgs, ja cena šķiet neparasti zema salīdzinājumā ar tirgu — tas var liecināt par krāpšanu.</p>
+      <h3>7. Brīdinājuma pazīmes</h3>
+      <ul>
+        <li>Pārdevējs izvairās no zvana vai video sarunas.</li>
+        <li>Uzstāj uz maksājumu ārpus platformas vai pirms preces apskates.</li>
+        <li>Atsakās tikties klātienē vai sniegt papildu fotogrāfijas.</li>
+        <li>Prasa personisku finanšu informāciju, kas darījumam nav nepieciešama.</li>
+      </ul>
+      <h3>8. Ja kaut kas noiet greizi</h3>
+      <p>Raksti mums uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a> ar sludinājuma saiti un aprakstu, lai varam izvērtēt un rīkoties. Ja aizdomas par krāpšanu, vērsies arī Valsts policijā (tālr. 110) vai Patērētāju tiesību aizsardzības centrā (<a href="https://www.ptac.gov.lv" target="_blank" rel="noreferrer">ptac.gov.lv</a>).</p>
+      <h3>9. Atšķirība no veikala pirkumiem</h3>
+      <p>Kopienas sludinājumi ir darījumi starp privātpersonām un uz tiem <strong>neattiecas</strong> 14 dienu atteikuma tiesības, kas pieejamas, pērkot tieši no TrackParts kataloga (sk. <a href="#terms">Lietošanas noteikumu</a> 4. punktu). Pirms pirkuma pārliecinies, ka esi ar to iepazinies.</p>
     </section>`,
     account: `<section class="page-hero"><div class="section-kicker">05 / TAVS KONTS</div><h1>Pieslēdzies.<br><em>Pārdod.</em></h1><p>Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.</p></section><section class="form-section"><div id="account-content"><form class="site-form" id="auth-form"><div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Ienākt vai <em>reģistrēties.</em></h2><label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><label class="consent-label"><input type="checkbox" name="consent"><span>Piekrītu <a href="#terms">Lietošanas noteikumiem</a> un <a href="#privacy">Privātuma politikai</a> (nepieciešams, veidojot jaunu kontu).</span></label><div class="form-actions"><button class="button button-dark" type="submit">IELOGOTIES ↗</button><button class="text-button" id="signup-button" type="button">IZVEIDOT KONTU</button><button class="text-button" id="forgot-password" type="button">AIZMIRSI PAROLI?</button></div><p class="form-message" id="auth-message"></p></form></div></section>`,
     sell: `<section class="page-hero"><div class="section-kicker">06 / JAUNS SLUDINĀJUMS</div><h1>Ieliec detaļu<br><em>uz ceļa.</em></h1><p>Aizpildi informāciju, pievieno bildes un sasniedz cilvēku, kuram tā vajadzīga.</p></section><section class="form-section"><form class="site-form listing-form" id="listing-form"><div class="section-kicker">DETAĻAS INFORMĀCIJA</div><h2>Ko tu <em>pārdod?</em></h2><label>NOSAUKUMS<input name="title" required placeholder="Piem., BMW E46 priekšējais lukturis"></label><div class="form-two"><label>CENA (€)<input name="price" type="number" min="0" step="0.01" required placeholder="250"></label><label>OEM NUMURS<input name="oem_number" placeholder="63117203298"></label></div><div class="form-two"><label>MARKA<input name="brand" placeholder="BMW"></label><label>MODELIS<input name="model" placeholder="E46"></label></div><div class="form-two"><label>GADS<input name="production_year" type="number" min="1950" max="2030" placeholder="2014"></label><label>DZINĒJS<input name="engine" placeholder="530d / 3.0 TDI"></label></div><div class="form-two"><label>KATEGORIJA<select name="category">${CATEGORIES.map((c) => `<option>${c[1] === 'Riteņi & diski' ? 'Riteņi un diski' : c[1]}</option>`).join('')}</select></label><label>ATRAŠANĀS VIETA<input name="location" placeholder="Rīga, noliktava B3"></label></div><label>STĀVOKLIS<select name="condition"><option value="very_good">Ļoti labs</option><option value="good">Labs</option><option value="defect">Ar defektu</option></select></label><label>APRAKSTS<textarea name="description" rows="5" placeholder="Apraksti detaļas stāvokli un zināmos defektus"></textarea></label><label>BILDES<input name="images" type="file" accept="image/*" multiple required></label><div class="form-actions"><button class="button button-dark" type="submit">PUBLICĒT SLUDINĀJUMU ↗</button></div><p class="form-message" id="listing-message"></p></form></section>`,
@@ -945,6 +1003,9 @@ const translations = {
   'Lietošanas noteikumi': 'Terms of use', 'Privātuma politika': 'Privacy policy',
   'LIETOŠANAS NOTEIKUMI': 'TERMS OF USE', 'Noteikumi.': 'Terms.', 'Skaidri un godīgi.': 'Clear and fair.', 'Šie noteikumi regulē TrackParts interneta veikala un sludinājumu platformas lietošanu.': 'These terms govern the use of the TrackParts online store and listings platform.',
   'PRIVĀTUMA POLITIKA': 'PRIVACY POLICY', 'Tavi dati.': 'Your data.', 'Mūsu atbildība.': 'Our responsibility.', 'Šī politika izskaidro, kādus personas datus TrackParts apstrādā un kāpēc, saskaņā ar Vispārīgo datu aizsardzības regulu (VDAR/GDPR).': 'This policy explains what personal data TrackParts processes and why, in accordance with the General Data Protection Regulation (GDPR).',
+  'TIRDZNIECĪBAS NOTEIKUMI': 'MARKETPLACE RULES', 'Tirgus noteikumi.': 'Marketplace rules.', 'Godīga spēle visiem.': 'Fair play for everyone.', 'Papildu noteikumi, kas regulē detaļu ievietošanu un tirdzniecību TrackParts kopienas sludinājumos.': 'Additional rules governing listing and trading parts in TrackParts community listings.',
+  'DROŠĪBA': 'SAFETY', 'Droši darījumi.': 'Safe deals.', 'Tavai drošībai.': 'For your safety.', 'Ieteikumi, kā droši pirkt un pārdot TrackParts kopienas sludinājumos.': 'Tips for buying and selling safely in TrackParts community listings.',
+  'Tirdzniecības noteikumi': 'Marketplace rules', 'Drošība': 'Safety',
   'Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.': 'This document is only available in Latvian. Contact us if you need a translation.',
   'Piekrītu': 'I agree to the', 'un': 'and', 'Privātuma politikai': 'Privacy Policy', 'Lietošanas noteikumiem': 'Terms of Use', '(nepieciešams, veidojot jaunu kontu).': '(required when creating a new account).',
   'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.': 'You must agree to the Terms of Use and Privacy Policy to create an account.',
