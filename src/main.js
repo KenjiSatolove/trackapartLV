@@ -290,6 +290,7 @@ function renderCart() {
   const total = cartItems.reduce((sum, product) => sum + Number(product.price), 0)
   document.querySelector('#cart-total').textContent = `${total.toFixed(2).replace('.', ',')} €`
   items.innerHTML = cartItems.length ? cartItems.map((product) => `<div class="cart-item"><div><strong>${product.name}</strong><small>${product.code || ''}</small></div><b>${Number(product.price).toFixed(2).replace('.', ',')} €</b></div>`).join('') : '<p id="cart-empty">Grozs ir tukšs.</p>'
+  primeAndTranslate()
 }
 
 function checkoutFormMarkup() {
@@ -546,7 +547,7 @@ function renderPage() {
   if (route.startsWith('seller-')) loadSellerProfile(route.replace('seller-', ''))
   if (route === 'admin') bindAdminPage()
   if (route === 'account') initAccountPage()
-  if (english) translatePage()
+  if (english) { translatePage(); primeAndTranslate() }
   initScrollReveal()
 }
 
@@ -802,6 +803,7 @@ function loadProductDetail(id) {
   document.querySelector('#product-price').textContent = `${Number(product.price).toFixed(2).replace('.', ',')} €`
   document.querySelector('#product-data').innerHTML = `<span>OEM NUMURS<strong>${product.oem || '-'}</strong></span><span>RAŽOTĀJA KODS<strong>${product.code || '-'}</strong></span><span>RAŽOTĀJS<strong>${product.manufacturer || '-'}</strong></span><span>AUTO<strong>${product.brand || ''} ${product.model || ''}</strong></span><span>GADS / DZINĒJS<strong>${product.production_year || '-'} / ${product.engine || '-'}</strong></span><span>KATEGORIJA<strong>${product.category}</strong></span><span>STĀVOKLIS<strong>${product.condition || '-'}</strong></span><span>NOLIKTAVA<strong>${product.location || '-'} · Atlikums: ${stockLabel(product.stock)}</strong></span><span>SVARS / IZMĒRI<strong>${product.weight || '-'} · ${product.dimensions || '-'}</strong></span><span>GARANTIJA<strong>${product.warranty || '-'}</strong></span>`
   document.querySelector('#product-add').addEventListener('click', () => { addToCart(product); document.querySelector('#product-add').textContent = '✓ PIEVIENOTS GROZAM' })
+  primeAndTranslate()
 }
 
 async function fetchListingThumbnails(rows) {
@@ -834,6 +836,7 @@ async function loadListings() {
     target.innerHTML = `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" data-search="${[row.title, row.brand, row.model].filter(Boolean).join(' ').toLowerCase()}" href="#listing-${row.id || `demo-${index + 1}`}" ><div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${row.title}</strong></div><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}`
   })
   bindListingsFilter()
+  primeAndTranslate()
 }
 
 function bindListingsFilter() {
@@ -857,6 +860,7 @@ async function loadCategoryListings(categoryValue) {
   const conditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
   const thumbs = await fetchListingThumbnails(rows)
   target.innerHTML = rows.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows.map((row, index) => `<a class="listing-row" href="#listing-${row.id || `demo-${index + 1}`}" ><div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${row.title}</strong></div><span>${row.brand || '-'} ${row.model || ''}</span><span>${conditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Šajā kategorijā pašlaik nav aktīvu sludinājumu.</p>'
+  primeAndTranslate()
 }
 
 async function loadListingDetail(id) {
@@ -892,6 +896,7 @@ async function loadListingDetail(id) {
   phone.textContent = `${listing.phone || 'Sazināties ar pārdevēju'} ↗`
   if (listing.phone?.startsWith('+')) phone.href = `tel:${listing.phone.replaceAll(' ', '')}`
   await bindFavoriteToggle(listing)
+  primeAndTranslate()
 }
 
 async function bindFavoriteToggle(listing) {
@@ -978,6 +983,7 @@ async function loadSellerProfile(id) {
     formHolder.innerHTML = reviewFormMarkup(reviews?.find((r) => r.reviewer_id === user.id))
     bindReviewForm(id, user.id)
   }
+  primeAndTranslate()
 }
 
 function recoveryFormMarkup() {
@@ -1106,6 +1112,7 @@ async function loadMyFavorites(userId) {
   const favConditionNames = { very_good: 'Ļoti labs', good: 'Labs', defect: 'Ar defektu' }
   const thumbs = await fetchListingThumbnails(active)
   holder.innerHTML = active.length ? `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${active.map((row) => `<a class="listing-row" href="#listing-${row.id}"><div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${row.title}</strong></div><span>${row.brand || '-'} ${row.model || ''}</span><span>${favConditionNames[row.condition] || row.condition || 'Nav norādīts'}</span><b>${Number(row.price).toFixed(2).replace('.', ',')} €</b><span class="listing-arrow">↗</span></a>`).join('')}` : '<p class="listing-loading">Tev vēl nav neviena saglabāta sludinājuma.</p>'
+  primeAndTranslate()
 }
 
 function bindRouteForms(route) {
@@ -1280,6 +1287,60 @@ const placeholderTranslations = {
   'Apraksti detaļas stāvokli un zināmos defektus': "Describe the part's condition and any known defects",
   'Piem., 2012': 'E.g. 2012',
 }
+// Machine translation for dynamic content (product/listing names and
+// descriptions) that can't be hardcoded ahead of time. Uses the free,
+// keyless MyMemory API and a shared Supabase table so the first visitor
+// who views something in English pays the API call and everyone after
+// gets it instantly from the cache. Results are written into the same
+// `translations` dict translatePage() already reads, so reverting back
+// to Latvian works for free via its existing originalText tracking.
+const translationRequests = new Map()
+async function translateText(text) {
+  const key = (text || '').trim()
+  if (!key || /^[\d\s.,€%-]+$/.test(key)) return key
+  if (translations[key]) return translations[key]
+  if (translationRequests.has(key)) return translationRequests.get(key)
+  const request = (async () => {
+    if (supabase) {
+      const { data } = await supabase.from('translations_cache').select('translated_text').eq('source_text', key).maybeSingle()
+      if (data?.translated_text) return data.translated_text
+    }
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(key)}&langpair=lv|en&de=hello@trackparts.lv`)
+        const json = await res.json()
+        const translated = json?.responseData?.translatedText
+        if (translated && translated.toLowerCase() !== key.toLowerCase()) {
+          if (supabase) supabase.from('translations_cache').insert({ source_text: key, translated_text: translated }).then(() => {}, () => {})
+          return translated
+        }
+      } catch { /* offline or API hiccup */ }
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500)) // the free API is flaky, especially under concurrent load
+    }
+    return key
+  })()
+  translationRequests.set(key, request)
+  return request
+}
+const DYNAMIC_TRANSLATION_SELECTORS = '.product-card h3, #product-title, #product-description, .listing-title-cell strong, #detail-title, #detail-description, .cart-item strong'
+async function primeAndTranslate() {
+  if (!english) return
+  const texts = new Set()
+  document.querySelectorAll(DYNAMIC_TRANSLATION_SELECTORS).forEach((el) => { const t = el.textContent.trim(); if (t && !translations[t]) texts.add(t) })
+  const queue = [...texts]
+  // a few workers pulling from a shared queue, rather than firing every
+  // request at once — the free API is noticeably less reliable under a
+  // big concurrent burst than a few requests at a time
+  await Promise.all(Array.from({ length: 1 }, async () => {
+    while (queue.length) {
+      const text = queue.shift()
+      const translated = await translateText(text)
+      if (translated && translated !== text) translations[text] = translated
+      if (english) translatePage() // apply as each one resolves instead of waiting for the slowest
+    }
+  }))
+}
+
 const originalText = new WeakMap()
 function translatePage() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
@@ -1299,4 +1360,4 @@ function translatePage() {
   })
   document.querySelectorAll('.lang').forEach((languageButton) => { languageButton.innerHTML = english ? 'EN <small>/ LV</small>' : 'LV <small>/ EN</small>' })
 }
-document.querySelectorAll('.lang').forEach((languageButton) => languageButton.addEventListener('click', () => { english = !english; translatePage() }))
+document.querySelectorAll('.lang').forEach((languageButton) => languageButton.addEventListener('click', () => { english = !english; translatePage(); primeAndTranslate() }))
