@@ -158,6 +158,7 @@ function homeMarkup() {
 }
 
 document.querySelector('#app').innerHTML = `
+  <div class="page-wipe" id="page-wipe"></div>
   <div class="announcement">KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ <span>BEZMAKSA PIEGĀDE NO 150 €</span></div>
   <header class="site-header">
     <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
@@ -832,8 +833,29 @@ function bindRouteForms(route) {
   if (route === 'sell') supabase.auth.getUser().then(({ data: { user } }) => { if (!user) document.querySelector('#listing-message').textContent = 'Ielogojies, lai publicētu sludinājumu.' })
 }
 
+function playPageWipe(callback) {
+  const wipe = document.querySelector('#page-wipe')
+  if (!wipe || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { callback(); return }
+  wipe.classList.add('wipe-cover')
+  wipe.addEventListener('transitionend', function onCovered(e) {
+    if (e.propertyName !== 'transform') return
+    wipe.removeEventListener('transitionend', onCovered)
+    callback()
+    wipe.classList.remove('wipe-cover')
+    wipe.classList.add('wipe-reveal')
+    wipe.addEventListener('transitionend', function onRevealed(e2) {
+      if (e2.propertyName !== 'transform') return
+      wipe.removeEventListener('transitionend', onRevealed)
+      wipe.style.transition = 'none'
+      wipe.classList.remove('wipe-reveal')
+      wipe.offsetHeight
+      wipe.style.transition = ''
+    })
+  })
+}
+
 let english = false
-window.addEventListener('hashchange', renderPage)
+window.addEventListener('hashchange', () => playPageWipe(renderPage))
 renderPage()
 loadProducts().then(() => { if (!window.location.hash.includes('access_token')) renderPage() })
 
