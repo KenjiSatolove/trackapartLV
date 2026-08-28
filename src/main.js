@@ -158,7 +158,7 @@ function homeMarkup() {
 }
 
 document.querySelector('#app').innerHTML = `
-  <div class="page-wipe" id="page-wipe"></div>
+  <div class="page-wipe" id="page-wipe"><span class="wipe-row"></span><span class="wipe-row"></span><span class="wipe-row"></span></div>
   <div class="announcement">KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ <span>BEZMAKSA PIEGĀDE NO 150 €</span></div>
   <header class="site-header">
     <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
@@ -317,7 +317,9 @@ if (supabase) {
 document.querySelector('#clear-cart').addEventListener('click', () => { cartItems.length = 0; cartCount = 0; cartCountElement.textContent = '0'; renderCart() })
 
 function renderPage() {
-  const route = window.location.hash.slice(1) || 'home'
+  const rawRoute = window.location.hash.slice(1) || 'home'
+  let route = rawRoute
+  try { route = decodeURIComponent(rawRoute) } catch { /* malformed sequence, keep raw */ }
   const pages = {
     catalog: `<section class="page-hero"><div class="section-kicker">02 / PREČU KATALOGS</div><h1>Atrodi detaļu.<br><em>Uztaisi ātrāku.</em></h1><p>Oriģinālas un pārbaudītas detaļas ielas auto, trases projektam un servisam.</p></section><section class="search-section reveal"><div class="section-kicker">FILTRĒ KATALOGU</div>${searchBoxMarkup()}</section><section class="product-section catalog-page reveal"><div class="section-top"><div><div class="section-kicker">VISAS DETAĻAS</div><h2>Noliktavā <em>tagad.</em></h2></div><span class="catalog-count">${products.length} <span>PRECES</span></span></div>${productGridMarkup(products)}</section>`,
     about: `<section class="page-hero about-hero"><div class="section-kicker">03 / PAR TRACKPARTS</div><h1>Built for the<br><em>road ahead.</em></h1><p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p></section><section class="story-section reveal"><div class="section-kicker">MŪSU PIEEJA</div><h2>Nevis detaļu kaudze.<br><em>Īstais atradums.</em></h2><div class="story-grid"><p>TrackParts sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p><p>Mūsu noliktavā katram kodam ir sava vieta, statuss un vēsture. Mazāk minēšanas, vairāk laika uz ceļa.</p></div></section><section class="trust-section reveal"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katrs produkts tiek apskatīts pirms pārdošanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No Rīgas līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Cilvēcīgs atbalsts</strong><p>Palīdzēsim atrast pareizo detaļu.</p></div></section>`,
