@@ -163,7 +163,7 @@ footer { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 30px; pad
 .footer-bottom a { color: var(--muted); }
 .footer-bottom a:hover { color: var(--orange); }
 .footer-legal { display: flex; flex-wrap: wrap; gap: 18px; }
-.hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.hp-field { display: none; }
 .card-capped { display: none; }
 .show-more-button { display: block; margin: 40px auto 0; text-align: center; border: 1px solid var(--line); padding: 14px 30px; }
 .show-more-button:hover { border-color: var(--orange); color: var(--orange); }
