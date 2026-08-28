@@ -545,9 +545,9 @@ function initScrollReveal() {
 }
 
 const fallbackListings = [
-  { id: 'demo-1', title: 'BMW E90 priekšējais bamperis M-pack', brand: 'BMW', model: 'E90', category: 'Virsbūve', condition: 'Ļoti labs', price: 180, location: 'Rīga', description: 'Taisns un gatavs uzstādīšanai. M-pack dizains, bez lieliem defektiem.', seller: 'Riga Performance Parts', phone: '+371 2000 0000' },
-  { id: 'demo-2', title: 'Audi A6 C7 3.0 TDI dzinējs', brand: 'Audi', model: 'A6 C7', category: 'Dzinējs', condition: 'Pārbaudīts', price: 950, location: 'Jelgava', description: 'Pilns dzinējs no ejoša auto. Var vienoties par apskati.', seller: 'Andris K.', phone: '+371 2555 1234' },
-  { id: 'demo-3', title: 'VW Golf 7 GTI priekšējie sēdekļi', brand: 'Volkswagen', model: 'Golf 7', category: 'Salons', condition: 'Labs', price: 320, location: 'Rīga', description: 'GTI salona priekšējie sēdekļi labā stāvoklī.', seller: 'Mārtiņš', phone: '+371 2888 4567' },
+  { id: 'demo-1', title: 'BMW E90 priekšējais bamperis M-pack', brand: 'BMW', model: 'E90', category: 'Virsbūve', condition: 'Ļoti labs', price: 180, location: 'Rīga', description: 'Taisns un gatavs uzstādīšanai. M-pack dizains, bez lieliem defektiem.', seller: 'Riga Performance Parts', phone: '+371 2000 0000', images: ['https://images.unsplash.com/photo-1750730011436-51c66f9a22b0?auto=format&fit=crop&w=900&q=85', 'https://images.unsplash.com/photo-1676104881946-917c6898726c?auto=format&fit=crop&w=900&q=85'] },
+  { id: 'demo-2', title: 'Audi A6 C7 3.0 TDI dzinējs', brand: 'Audi', model: 'A6 C7', category: 'Dzinējs', condition: 'Pārbaudīts', price: 950, location: 'Jelgava', description: 'Pilns dzinējs no ejoša auto. Var vienoties par apskati.', seller: 'Andris K.', phone: '+371 2555 1234', images: ['https://images.unsplash.com/photo-1627508795178-e852bd067a72?auto=format&fit=crop&w=900&q=85', 'https://images.unsplash.com/photo-1671719833602-1b4204a74f5e?auto=format&fit=crop&w=900&q=85'] },
+  { id: 'demo-3', title: 'VW Golf 7 GTI priekšējie sēdekļi', brand: 'Volkswagen', model: 'Golf 7', category: 'Salons', condition: 'Labs', price: 320, location: 'Rīga', description: 'GTI salona priekšējie sēdekļi labā stāvoklī.', seller: 'Mārtiņš', phone: '+371 2888 4567', images: ['https://images.unsplash.com/photo-1684324286366-d4b241077b11?auto=format&fit=crop&w=900&q=85', 'https://images.unsplash.com/photo-1677917367471-6b098b6bcc96?auto=format&fit=crop&w=900&q=85'] },
 ]
 
 const listingsPage = `<section class="page-hero"><div class="section-kicker">04 / KOPIENAS TIRGUS</div><h1>Redzi, ko citi<br><em>pārdod.</em></h1><p>Īstas detaļas no TrackParts kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.</p></section><section class="listings-section listings-page"><div class="section-top"><div><div class="section-kicker">AKTĪVIE SLUDINĀJUMI</div><h2>Jaunākie <em>sludinājumi.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a></div><div class="listing-table" id="listing-table"><div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
@@ -793,7 +793,7 @@ async function loadListingDetail(id) {
     }
   }
   if (!listing) { document.querySelector('#detail-title').textContent = 'Sludinājums nav atrasts'; return }
-  let images = []
+  let images = listing.images || []
   if (supabase && !listing.id.toString().startsWith('demo-')) {
     const { data: imageRows } = await supabase.from('listing_images').select('storage_path').eq('listing_id', id).order('sort_order')
     images = (imageRows || []).map((row) => supabase.storage.from('listing-images').getPublicUrl(row.storage_path).data.publicUrl)
