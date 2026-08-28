@@ -158,7 +158,7 @@ function homeMarkup() {
 }
 
 document.querySelector('#app').innerHTML = `
-  <div class="page-wipe" id="page-wipe"><span class="wipe-row"></span><span class="wipe-row"></span><span class="wipe-row"></span></div>
+  <div class="page-wipe" id="page-wipe"></div>
   <div class="announcement">KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ <span>BEZMAKSA PIEGĀDE NO 150 €</span></div>
   <header class="site-header">
     <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
@@ -840,19 +840,12 @@ function playPageWipe(callback) {
   if (!wipe || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { callback(); return }
   wipe.classList.add('wipe-cover')
   wipe.addEventListener('transitionend', function onCovered(e) {
-    if (e.propertyName !== 'transform') return
+    if (e.propertyName !== 'opacity') return
     wipe.removeEventListener('transitionend', onCovered)
     callback()
+    const main = document.querySelector('main')
+    if (main) { main.classList.remove('route-fade'); void main.offsetWidth; main.classList.add('route-fade') }
     wipe.classList.remove('wipe-cover')
-    wipe.classList.add('wipe-reveal')
-    wipe.addEventListener('transitionend', function onRevealed(e2) {
-      if (e2.propertyName !== 'transform') return
-      wipe.removeEventListener('transitionend', onRevealed)
-      wipe.style.transition = 'none'
-      wipe.classList.remove('wipe-reveal')
-      wipe.offsetHeight
-      wipe.style.transition = ''
-    })
   })
 }
 
