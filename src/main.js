@@ -188,30 +188,43 @@ const cartCountElement = document.querySelector('#cart-count')
 
 let cartOwner = 'guest'
 function cartStorageKey(owner) { return `trackparts-cart:${owner}` }
-function persistCart() {
+async function persistCart() {
+  if (cartOwner !== 'guest' && supabase) {
+    try {
+      await supabase.from('cart_items').delete().eq('user_id', cartOwner)
+      if (cartItems.length) await supabase.from('cart_items').insert(cartItems.map((product) => ({ user_id: cartOwner, product_id: product.id })))
+    } catch { /* sync failed (e.g. migration_add_cart.sql not run yet); local state stays correct for this session */ }
+    return
+  }
   try { localStorage.setItem(cartStorageKey(cartOwner), JSON.stringify(cartItems.map((product) => product.id))) } catch { /* storage unavailable (private mode, quota) */ }
 }
-function loadCartForOwner(owner) {
+async function loadCartForOwner(owner) {
   cartOwner = owner || 'guest'
   cartItems.length = 0
-  try {
-    const ids = JSON.parse(localStorage.getItem(cartStorageKey(cartOwner)) || '[]')
-    ids.forEach((id) => { const product = products.find((item) => item.id === id); if (product) cartItems.push(product) })
-  } catch { /* corrupt storage, start empty */ }
+  if (cartOwner !== 'guest' && supabase) {
+    try {
+      const { data } = await supabase.from('cart_items').select('product_id').eq('user_id', cartOwner)
+      ;(data || []).forEach((row) => { const product = products.find((item) => item.id === row.product_id); if (product) cartItems.push(product) })
+    } catch { /* cart_items table not set up yet or request failed; show an empty cart */ }
+  } else {
+    try {
+      const ids = JSON.parse(localStorage.getItem(cartStorageKey(cartOwner)) || '[]')
+      ids.forEach((id) => { const product = products.find((item) => item.id === id); if (product) cartItems.push(product) })
+    } catch { /* corrupt storage, start empty */ }
+  }
   cartCount = cartItems.length
   cartCountElement.textContent = cartCount
   renderCart()
 }
-function switchCartOwner(userId) {
+async function switchCartOwner(userId) {
   const nextOwner = userId || 'guest'
-  if (nextOwner !== 'guest' && cartOwner === 'guest' && cartItems.length) {
+  if (nextOwner !== 'guest' && cartOwner === 'guest' && cartItems.length && supabase) {
     try {
-      const existing = JSON.parse(localStorage.getItem(cartStorageKey(nextOwner)) || '[]')
-      localStorage.setItem(cartStorageKey(nextOwner), JSON.stringify([...existing, ...cartItems.map((product) => product.id)]))
+      await supabase.from('cart_items').insert(cartItems.map((product) => ({ user_id: nextOwner, product_id: product.id })))
       localStorage.removeItem(cartStorageKey('guest'))
-    } catch { /* storage unavailable */ }
+    } catch { /* merge failed; guest items just won't carry over this time */ }
   }
-  loadCartForOwner(nextOwner)
+  await loadCartForOwner(nextOwner)
 }
 
 function addToCart(product) {
@@ -960,7 +973,7 @@ window.addEventListener('hashchange', () => playPageWipe(renderPage))
 renderPage()
 loadProducts().then(async () => {
   const owner = supabase ? (await supabase.auth.getUser()).data.user?.id : null
-  loadCartForOwner(owner)
+  await loadCartForOwner(owner)
   if (!window.location.hash.includes('access_token')) renderPage()
 })
 
