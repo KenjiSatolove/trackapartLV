@@ -654,7 +654,10 @@ async function showMfaEnroll() {
   const staleFactors = (existingFactors?.all || []).filter((f) => f.factor_type === 'totp' && f.status === 'unverified')
   for (const stale of staleFactors) await supabase.auth.mfa.unenroll({ factorId: stale.id })
   const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
-  if (error) { loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><p class="form-message">${escapeHtml(error.message)}</p>`; return }
+  if (error || !data?.totp?.qr_code || !data.totp.secret) {
+    loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><p class="form-message">${escapeHtml(error?.message || 'Neizdevās sagatavot 2FA iestatīšanu. Mēģini vēlreiz.')}</p>`
+    return
+  }
   const { id: factorId, totp } = data
   // Supabase's qr_code is either a data:/http(s): URI (safe to use as an <img> src) or raw
   // SVG/XML markup — sometimes with a leading <?xml ...?> declaration, so checking for a
@@ -1380,8 +1383,13 @@ async function translateText(text) {
     if (!supabase) return key
     const { data } = await supabase.from('translations_cache').select('translated_text').eq('source_text', key).maybeSingle()
     if (data?.translated_text) return data.translated_text
-    const { data: result } = await supabase.functions.invoke('translate-cache', { body: { source_text: key } })
+    const { data: result, error } = await supabase.functions.invoke('translate-cache', { body: { source_text: key } })
     if (result?.translated_text) return result.translated_text
+    // Falls back to the untranslated Latvian key either way, but this is
+    // otherwise a silent failure — most likely cause is the site running on
+    // an origin not in translate-cache's CORS allowlist (see cors.ts in
+    // both Edge Functions), so log it to make that diagnosable.
+    if (error) console.warn('translate-cache failed:', error.message || error)
     return key
   })()
   translationRequests.set(key, request)

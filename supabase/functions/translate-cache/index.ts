@@ -45,7 +45,9 @@ Deno.serve(async (req) => {
 
   let body: { source_text?: unknown }
   try {
-    body = await req.json()
+    const parsed = await req.json()
+    if (!parsed || typeof parsed !== "object") throw new Error("not an object")
+    body = parsed
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers })
   }
