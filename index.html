@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- frame-ancestors, sandbox and report-* directives are ignored in a meta tag per spec;
+         clickjacking protection needs an X-Frame-Options/CSP header from hosting, not this tag. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.supabase.co; connect-src 'self' https://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
     <meta name="description" content="Pārbaudītas lietotas auto detaļas Latvijā un piegāde visā Eiropā. Pērc no kataloga vai kopienas sludinājumiem, vai pārdod savu detaļu TrackParts." />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TrackParts" />

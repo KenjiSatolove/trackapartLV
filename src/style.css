@@ -94,6 +94,8 @@ body { margin: 0; background: var(--paper); }
 .auth-modal-title { margin: 0 0 22px; font-size: 27px; letter-spacing: -.04em; }
 .auth-modal .site-form { max-width: none; }
 .auth-modal .site-form label:first-of-type { margin-top: 0; }
+.mfa-qr { margin: 20px 0; }
+.mfa-qr svg, .mfa-qr img { display: block; width: 200px; height: 200px; }
 .consent-label { display: flex !important; align-items: flex-start; gap: 10px; margin-top: 20px !important; color: var(--muted); font: 12px 'Space Grotesk' !important; line-height: 1.5; text-transform: none; }
 .consent-label[hidden] { display: none !important; }
 .consent-label input { width: auto !important; margin: 3px 0 0 !important; flex: 0 0 auto; accent-color: var(--orange); }

@@ -621,11 +621,56 @@ function bindAdminPage() {
   supabase.auth.getSession().then(({ data }) => { if (data.session) loadAdminDashboard() })
 }
 
+// Admin roles require MFA (TOTP): once a role check passes, we also require
+// the session to be at assurance level aal2 before granting dashboard
+// access — an admin with no TOTP factor enrolled yet is walked through
+// enrollment first, one with a factor but a not-yet-verified session is
+// prompted for a code. This is app-side enforcement; TOTP also needs to be
+// enabled as an auth provider in the Supabase dashboard for enrollment to work.
+async function showMfaChallenge(factor) {
+  const loginPane = document.querySelector('#admin-login')
+  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><div class="section-kicker">DIVFAKTORU AUTENTIFIKĀCIJA</div><h1>Ievadi<br><em>kodu.</em></h1><p>Ievadi 6 ciparu kodu no savas autentifikācijas lietotnes.</p><form class="site-form" id="admin-mfa-form"><label>KODS<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label><button class="button button-dark" type="submit">APSTIPRINĀT ↗</button><p class="form-message" id="admin-mfa-message"></p></form>`
+  document.querySelector('#admin-mfa-form').addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const code = new FormData(event.target).get('code')
+    const message = document.querySelector('#admin-mfa-message')
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code })
+    if (error) { message.textContent = error.message; return }
+    await loadAdminDashboard()
+  })
+}
+
+async function showMfaEnroll() {
+  const loginPane = document.querySelector('#admin-login')
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+  if (error) { loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><p class="form-message">${escapeHtml(error.message)}</p>`; return }
+  const { id: factorId, totp } = data
+  const qrMarkup = totp.qr_code.startsWith('<svg') ? totp.qr_code : `<img src="${totp.qr_code}" alt="QR kods" width="200" height="200">`
+  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><div class="section-kicker">OBLIGĀTA IESTATĪŠANA</div><h1>Iestati<br><em>divfaktoru autentifikāciju.</em></h1><p>Admin kontiem ir obligāta 2FA. Skenē kodu ar autentifikācijas lietotni (piem., Google Authenticator, Authy) vai ievadi atslēgu manuāli.</p><div class="mfa-qr">${qrMarkup}</div><p class="admin-note">Atslēga: <code>${escapeHtml(totp.secret)}</code></p><form class="site-form" id="admin-mfa-enroll-form"><label>APSTIPRINĀŠANAS KODS<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label><button class="button button-dark" type="submit">AKTIVIZĒT ↗</button><p class="form-message" id="admin-mfa-enroll-message"></p></form>`
+  document.querySelector('#admin-mfa-enroll-form').addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const code = new FormData(event.target).get('code')
+    const message = document.querySelector('#admin-mfa-enroll-message')
+    const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
+    if (verifyError) { message.textContent = verifyError.message; return }
+    await loadAdminDashboard()
+  })
+}
+
 async function loadAdminDashboard() {
   const { data: { user } } = await supabase.auth.getUser()
   const { data: profile } = await supabase.from('profiles').select('display_name, username, role').eq('id', user.id).single()
   const allowedRoles = ['owner', 'manager', 'warehouse', 'fulfillment']
   if (!profile || !allowedRoles.includes(profile.role)) { document.querySelector('#admin-auth-message').textContent = profile ? 'Šim kontam nav admin piekļuves.' : 'Profils nav atrasts. Palaid migration_products_and_signup.sql Supabase SQL Editor un mēģini vēlreiz.'; await supabase.auth.signOut(); return }
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (aal?.nextLevel !== 'aal2') { await showMfaEnroll(); return }
+  if (aal.currentLevel !== aal.nextLevel) {
+    const { data: factorsData } = await supabase.auth.mfa.listFactors()
+    const factor = (factorsData?.totp || []).find((f) => f.status === 'verified')
+    if (!factor) { await showMfaEnroll(); return }
+    await showMfaChallenge(factor)
+    return
+  }
   document.querySelector('#admin-login').hidden = true
   const dashboard = document.querySelector('#admin-dashboard')
   dashboard.hidden = false
@@ -1298,12 +1343,16 @@ const placeholderTranslations = {
   'Piem., 2012': 'E.g. 2012',
 }
 // Machine translation for dynamic content (product/listing names and
-// descriptions) that can't be hardcoded ahead of time. Uses the free,
-// keyless MyMemory API and a shared Supabase table so the first visitor
-// who views something in English pays the API call and everyone after
-// gets it instantly from the cache. Results are written into the same
-// `translations` dict translatePage() already reads, so reverting back
-// to Latvian works for free via its existing originalText tracking.
+// descriptions) that can't be hardcoded ahead of time. A shared Supabase
+// table caches results so the first visitor who views something in English
+// pays the translation cost and everyone after gets it instantly from the
+// cache. The browser only ever reads that cache directly; on a cache miss
+// it calls the translate-cache Edge Function, which is the only writer (it
+// calls the translation API itself and validates the result before storing
+// it) — this keeps the client from being able to poison the shared cache
+// with arbitrary source/translated pairs. Results are written into the
+// same `translations` dict translatePage() already reads, so reverting
+// back to Latvian works for free via its existing originalText tracking.
 const translationRequests = new Map()
 async function translateText(text) {
   const key = (text || '').trim()
@@ -1311,22 +1360,11 @@ async function translateText(text) {
   if (translations[key]) return translations[key]
   if (translationRequests.has(key)) return translationRequests.get(key)
   const request = (async () => {
-    if (supabase) {
-      const { data } = await supabase.from('translations_cache').select('translated_text').eq('source_text', key).maybeSingle()
-      if (data?.translated_text) return data.translated_text
-    }
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(key)}&langpair=lv|en&de=hello@trackparts.lv`)
-        const json = await res.json()
-        const translated = json?.responseData?.translatedText
-        if (translated && translated.toLowerCase() !== key.toLowerCase()) {
-          if (supabase) supabase.from('translations_cache').insert({ source_text: key, translated_text: translated }).then(() => {}, () => {})
-          return translated
-        }
-      } catch { /* offline or API hiccup */ }
-      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500)) // the free API is flaky, especially under concurrent load
-    }
+    if (!supabase) return key
+    const { data } = await supabase.from('translations_cache').select('translated_text').eq('source_text', key).maybeSingle()
+    if (data?.translated_text) return data.translated_text
+    const { data: result } = await supabase.functions.invoke('translate-cache', { body: { source_text: key } })
+    if (result?.translated_text) return result.translated_text
     return key
   })()
   translationRequests.set(key, request)
