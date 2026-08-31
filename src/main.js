@@ -646,9 +646,13 @@ async function showMfaEnroll() {
   // one from an earlier abandoned attempt (e.g. a failed QR render) can't be
   // re-shown — the QR/secret are only ever returned once, at enroll time. So
   // clear any stale unverified factor before enrolling a fresh one.
+  // listFactors()'s per-type arrays (e.g. `.totp`) only ever contain VERIFIED
+  // factors — unverified ones only show up in `.all` — so stale factors have
+  // to be found there. Clear all of them, not just the first, in case more
+  // than one abandoned attempt has piled up.
   const { data: existingFactors } = await supabase.auth.mfa.listFactors()
-  const staleFactor = (existingFactors?.totp || []).find((f) => f.status === 'unverified')
-  if (staleFactor) await supabase.auth.mfa.unenroll({ factorId: staleFactor.id })
+  const staleFactors = (existingFactors?.all || []).filter((f) => f.factor_type === 'totp' && f.status === 'unverified')
+  for (const stale of staleFactors) await supabase.auth.mfa.unenroll({ factorId: stale.id })
   const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
   if (error) { loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><p class="form-message">${escapeHtml(error.message)}</p>`; return }
   const { id: factorId, totp } = data
