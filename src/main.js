@@ -642,6 +642,13 @@ async function showMfaChallenge(factor) {
 
 async function showMfaEnroll() {
   const loginPane = document.querySelector('#admin-login')
+  // Supabase only allows one unverified TOTP factor at a time, and a leftover
+  // one from an earlier abandoned attempt (e.g. a failed QR render) can't be
+  // re-shown — the QR/secret are only ever returned once, at enroll time. So
+  // clear any stale unverified factor before enrolling a fresh one.
+  const { data: existingFactors } = await supabase.auth.mfa.listFactors()
+  const staleFactor = (existingFactors?.totp || []).find((f) => f.status === 'unverified')
+  if (staleFactor) await supabase.auth.mfa.unenroll({ factorId: staleFactor.id })
   const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
   if (error) { loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><p class="form-message">${escapeHtml(error.message)}</p>`; return }
   const { id: factorId, totp } = data
