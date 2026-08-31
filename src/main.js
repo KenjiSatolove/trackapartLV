@@ -645,7 +645,13 @@ async function showMfaEnroll() {
   const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
   if (error) { loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><p class="form-message">${escapeHtml(error.message)}</p>`; return }
   const { id: factorId, totp } = data
-  const qrMarkup = totp.qr_code.startsWith('<svg') ? totp.qr_code : `<img src="${totp.qr_code}" alt="QR kods" width="200" height="200">`
+  // Supabase's qr_code is either a data:/http(s): URI (safe to use as an <img> src) or raw
+  // SVG/XML markup — sometimes with a leading <?xml ...?> declaration, so checking for a
+  // leading "<svg" isn't reliable. Raw markup can't be dropped into a src="..." attribute:
+  // it contains its own unescaped double quotes, which breaks the tag mid-attribute.
+  const qrMarkup = /^(data:|https?:)/.test(totp.qr_code)
+    ? `<img src="${totp.qr_code}" alt="QR kods" width="200" height="200">`
+    : totp.qr_code
   loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><div class="section-kicker">OBLIGĀTA IESTATĪŠANA</div><h1>Iestati<br><em>divfaktoru autentifikāciju.</em></h1><p>Admin kontiem ir obligāta 2FA. Skenē kodu ar autentifikācijas lietotni (piem., Google Authenticator, Authy) vai ievadi atslēgu manuāli.</p><div class="mfa-qr">${qrMarkup}</div><p class="admin-note">Atslēga: <code>${escapeHtml(totp.secret)}</code></p><form class="site-form" id="admin-mfa-enroll-form"><label>APSTIPRINĀŠANAS KODS<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label><button class="button button-dark" type="submit">AKTIVIZĒT ↗</button><p class="form-message" id="admin-mfa-enroll-message"></p></form>`
   document.querySelector('#admin-mfa-enroll-form').addEventListener('submit', async (event) => {
     event.preventDefault()
