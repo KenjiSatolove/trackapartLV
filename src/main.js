@@ -912,7 +912,7 @@ document.addEventListener('keydown', (event) => {
 })
 
 function categoryPage(categoryValue) {
-  const label = CATEGORIES.find((c) => c[3] === categoryValue)?.[1] || categoryValue
+  const label = CATEGORIES.find((c) => c[3] === categoryValue)?.[1] || escapeHtml(categoryValue)
   const matchingProducts = products.filter((product) => (product.category || '').toLowerCase() === categoryValue).sort((a, b) => a.name.localeCompare(b.name, 'lv'))
   return `<section class="page-hero"><a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a><div class="section-kicker">KATEGORIJA / <span>${label}</span></div><h1>${label}<br><em>detaļas.</em></h1><p>Šeit redzamas tikai <span>${label}</span> detaļas no kataloga un kopienas sludinājumiem.</p></section><section class="product-section category-products reveal"><div class="section-top"><div><div class="section-kicker">TRACKPARTS KATALOGS</div><h2>Kataloga <em>preces.</em></h2></div><a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a></div>${matchingProducts.length ? productGridMarkup(matchingProducts) : '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'}</section><section class="listings-section category-listings reveal"><div class="section-top"><div><div class="section-kicker">KOPIENAS SLUDINĀJUMI / <span>${label}</span></div><h2>Citi pārdod <em><span>${label}</span>.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT ŠEIT ↗</a></div><div class="listing-table" id="category-listing-table"><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
 }
