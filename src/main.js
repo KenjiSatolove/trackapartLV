@@ -216,6 +216,8 @@ document.querySelector('#app').innerHTML = `
 
   <div class="modal-overlay" id="auth-modal-overlay" hidden><div class="auth-modal"><button class="modal-close" id="auth-modal-close" type="button" aria-label="Aizvērt">×</button><div class="auth-modal-tabs"><button class="auth-tab active" data-auth-tab="login" type="button">IELOGOTIES</button><button class="auth-tab" data-auth-tab="signup" type="button">REĢISTRĒTIES</button></div><h2 class="auth-modal-title">Sveicināts <em>TrackParts.</em></h2><form class="site-form" id="auth-modal-form" data-mode="login">${honeypotFieldMarkup()}<label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label><label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label><label class="consent-label" id="auth-modal-consent-row" hidden><input type="checkbox" name="consent"><span>Piekrītu <a href="#terms">Lietošanas noteikumiem</a> un <a href="#privacy">Privātuma politikai</a>.</span></label><div class="form-actions"><button class="button button-dark" type="submit" id="auth-modal-submit">IELOGOTIES ↗</button><button class="text-button" id="auth-modal-forgot" type="button">AIZMIRSI PAROLI?</button></div><p class="form-message" id="auth-modal-message"></p></form></div></div>
 
+  <div class="modal-overlay" id="mfa-modal-overlay" hidden><div class="auth-modal"><h2 class="auth-modal-title">Ievadi <em>2FA kodu.</em></h2><p>Šim kontam ir ieslēgta divfaktoru autentifikācija. Ievadi kodu no savas autentifikācijas lietotnes.</p><div id="mfa-modal-holder"></div><button class="text-button" id="mfa-modal-cancel" type="button">ATCELT UN IZIET</button></div></div>
+
   <div class="cookie-notice" id="cookie-notice" hidden><p>Šī vietne izmanto tikai tehniski nepieciešamu lokālo glabātuvi, lai uzturētu tavu pieslēgšanās sesiju. Uzzini vairāk mūsu <a href="#privacy">Privātuma politikā</a>.</p><button class="button button-light" type="button" id="cookie-notice-accept">SAPRATU</button></div>
 
   <div class="lightbox-overlay" id="lightbox-overlay" hidden><button class="lightbox-close" id="lightbox-close" type="button" aria-label="Aizvērt">×</button><img id="lightbox-image" src="" alt=""><button class="gallery-arrow gallery-prev" id="lightbox-prev" type="button" aria-label="Iepriekšējā bilde">‹</button><button class="gallery-arrow gallery-next" id="lightbox-next" type="button" aria-label="Nākamā bilde">›</button></div>
@@ -384,6 +386,33 @@ function closeAuthModal() {
   document.querySelector('#auth-modal-form')?.reset()
 }
 
+// Regular accounts opt into MFA from the account page (unlike admin roles,
+// where it's mandatory). A successful password sign-in only reaches aal1;
+// if the account has since enrolled a verified TOTP factor, nextLevel is
+// 'aal2' and a code is still required before the login can be considered
+// complete.
+async function accountHasPendingMfaChallenge() {
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  return aal?.nextLevel === 'aal2' && aal.currentLevel !== aal.nextLevel
+}
+
+async function challengeMfaIfNeeded(onDone) {
+  if (!(await accountHasPendingMfaChallenge())) { onDone(); return }
+  const { data: factorsData } = await supabase.auth.mfa.listFactors()
+  const factor = (factorsData?.totp || [])[0]
+  if (!factor) { onDone(); return }
+  const overlay = document.querySelector('#mfa-modal-overlay')
+  overlay.hidden = false
+  renderMfaChallenge(document.querySelector('#mfa-modal-holder'), 'mfa-modal', factor.id, () => {
+    overlay.hidden = true
+    onDone()
+  })
+  document.querySelector('#mfa-modal-cancel').onclick = async () => {
+    overlay.hidden = true
+    await supabase.auth.signOut()
+  }
+}
+
 function setAuthModalTab(mode) {
   document.querySelectorAll('.auth-tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.authTab === mode))
   document.querySelector('#auth-modal-submit').textContent = mode === 'signup' ? 'IZVEIDOT KONTU ↗' : 'IELOGOTIES ↗'
@@ -420,9 +449,11 @@ if (supabase) {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email: data.get('email'), password: data.get('password') })
       if (error) { message.textContent = error.message; return }
-      closeAuthModal()
-      window.location.hash = 'account'
-      renderPage()
+      await challengeMfaIfNeeded(() => {
+        closeAuthModal()
+        window.location.hash = 'account'
+        renderPage()
+      })
     }
   })
 }
@@ -627,21 +658,29 @@ function bindAdminPage() {
 // enrollment first, one with a factor but a not-yet-verified session is
 // prompted for a code. This is app-side enforcement; TOTP also needs to be
 // enabled as an auth provider in the Supabase dashboard for enrollment to work.
-async function showMfaChallenge(factor) {
-  const loginPane = document.querySelector('#admin-login')
-  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><div class="section-kicker">DIVFAKTORU AUTENTIFIKĀCIJA</div><h1>Ievadi<br><em>kodu.</em></h1><p>Ievadi 6 ciparu kodu no savas autentifikācijas lietotnes.</p><form class="site-form" id="admin-mfa-form"><label>KODS<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label><button class="button button-dark" type="submit">APSTIPRINĀT ↗</button><p class="form-message" id="admin-mfa-message"></p></form>`
-  document.querySelector('#admin-mfa-form').addEventListener('submit', async (event) => {
+function mfaCodeFormMarkup(idPrefix, submitLabel) {
+  return `<form class="site-form" id="${idPrefix}-form"><label>KODS<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label><button class="button button-dark" type="submit">${submitLabel} ↗</button><p class="form-message" id="${idPrefix}-message"></p></form>`
+}
+
+// Renders a 6-digit code form into `container` and calls onVerified() once
+// challengeAndVerify succeeds. Shared by every place that needs an existing
+// TOTP factor re-confirmed: admin login, the opt-in login challenge, etc.
+function renderMfaChallenge(container, idPrefix, factorId, onVerified) {
+  container.innerHTML = mfaCodeFormMarkup(idPrefix, 'APSTIPRINĀT')
+  document.querySelector(`#${idPrefix}-form`).addEventListener('submit', async (event) => {
     event.preventDefault()
     const code = new FormData(event.target).get('code')
-    const message = document.querySelector('#admin-mfa-message')
-    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code })
+    const message = document.querySelector(`#${idPrefix}-message`)
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
     if (error) { message.textContent = error.message; return }
-    await loadAdminDashboard()
+    onVerified()
   })
 }
 
-async function showMfaEnroll() {
-  const loginPane = document.querySelector('#admin-login')
+// Enrolls a fresh TOTP factor and renders its QR/secret plus a verify form
+// into `container`, calling onEnrolled() once challengeAndVerify succeeds.
+// Shared by admin's mandatory enrollment and the account page's opt-in one.
+async function renderMfaEnroll(container, idPrefix, onEnrolled) {
   // Supabase only allows one unverified TOTP factor at a time, and a leftover
   // one from an earlier abandoned attempt (e.g. a failed QR render) can't be
   // re-shown — the QR/secret are only ever returned once, at enroll time. So
@@ -655,7 +694,7 @@ async function showMfaEnroll() {
   for (const stale of staleFactors) await supabase.auth.mfa.unenroll({ factorId: stale.id })
   const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
   if (error || !data?.totp?.qr_code || !data.totp.secret) {
-    loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><p class="form-message">${escapeHtml(error?.message || 'Neizdevās sagatavot 2FA iestatīšanu. Mēģini vēlreiz.')}</p>`
+    container.innerHTML = `<p class="form-message">${escapeHtml(error?.message || 'Neizdevās sagatavot 2FA iestatīšanu. Mēģini vēlreiz.')}</p>`
     return
   }
   const { id: factorId, totp } = data
@@ -666,15 +705,27 @@ async function showMfaEnroll() {
   const qrMarkup = /^(data:|https?:)/.test(totp.qr_code)
     ? `<img src="${totp.qr_code}" alt="QR kods" width="200" height="200">`
     : totp.qr_code
-  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><div class="section-kicker">OBLIGĀTA IESTATĪŠANA</div><h1>Iestati<br><em>divfaktoru autentifikāciju.</em></h1><p>Admin kontiem ir obligāta 2FA. Skenē kodu ar autentifikācijas lietotni (piem., Google Authenticator, Authy) vai ievadi atslēgu manuāli.</p><div class="mfa-qr">${qrMarkup}</div><p class="admin-note">Atslēga: <code>${escapeHtml(totp.secret)}</code></p><form class="site-form" id="admin-mfa-enroll-form"><label>APSTIPRINĀŠANAS KODS<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label><button class="button button-dark" type="submit">AKTIVIZĒT ↗</button><p class="form-message" id="admin-mfa-enroll-message"></p></form>`
-  document.querySelector('#admin-mfa-enroll-form').addEventListener('submit', async (event) => {
+  container.innerHTML = `<div class="mfa-qr">${qrMarkup}</div><p class="admin-note">Atslēga: <code>${escapeHtml(totp.secret)}</code></p>${mfaCodeFormMarkup(idPrefix, 'AKTIVIZĒT')}`
+  document.querySelector(`#${idPrefix}-form`).addEventListener('submit', async (event) => {
     event.preventDefault()
     const code = new FormData(event.target).get('code')
-    const message = document.querySelector('#admin-mfa-enroll-message')
+    const message = document.querySelector(`#${idPrefix}-message`)
     const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
     if (verifyError) { message.textContent = verifyError.message; return }
-    await loadAdminDashboard()
+    onEnrolled()
   })
+}
+
+async function showMfaChallenge(factor) {
+  const loginPane = document.querySelector('#admin-login')
+  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><div class="section-kicker">DIVFAKTORU AUTENTIFIKĀCIJA</div><h1>Ievadi<br><em>kodu.</em></h1><p>Ievadi 6 ciparu kodu no savas autentifikācijas lietotnes.</p><div id="admin-mfa-holder"></div>`
+  renderMfaChallenge(document.querySelector('#admin-mfa-holder'), 'admin-mfa', factor.id, () => loadAdminDashboard())
+}
+
+async function showMfaEnroll() {
+  const loginPane = document.querySelector('#admin-login')
+  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div><div class="section-kicker">OBLIGĀTA IESTATĪŠANA</div><h1>Iestati<br><em>divfaktoru autentifikāciju.</em></h1><p>Admin kontiem ir obligāta 2FA. Skenē kodu ar autentifikācijas lietotni (piem., Google Authenticator, Authy) vai ievadi atslēgu manuāli.</p><div id="admin-mfa-holder"></div>`
+  await renderMfaEnroll(document.querySelector('#admin-mfa-holder'), 'admin-mfa-enroll', () => loadAdminDashboard())
 }
 
 async function loadAdminDashboard() {
@@ -1140,7 +1191,7 @@ async function initAccountPage() {
   const { data: profile } = await supabase.from('profiles').select('display_name, phone, city, username').eq('id', user.id).single()
   const confirmedBanner = pendingAuthEvent === 'confirmed' ? '<p class="form-message">E-pasts apstiprināts — tu esi ielogojies!</p>' : ''
   pendingAuthEvent = null
-  holder.innerHTML = `<div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Sveiks, <em>${escapeHtml(profile?.display_name || user.email)}!</em></h2>${confirmedBanner}<p><span>Tu esi ielogojies kā</span> <b>${escapeHtml(user.email)}</b>.</p><form class="site-form" id="profile-form"><label>VĀRDS<input name="display_name" value="${escapeHtml(profile?.display_name || '')}"></label><div class="form-two"><label>TĀLRUNIS<input name="phone" value="${escapeHtml(profile?.phone || '')}"></label><label>PILSĒTA<input name="city" value="${escapeHtml(profile?.city || '')}"></label></div><label>LIETOTĀJVĀRDS<input name="username" value="${escapeHtml(profile?.username || '')}"></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT IZMAIŅAS ↗</button></div><p class="form-message" id="profile-message"></p></form><div class="form-actions"><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a><a class="text-button" href="#seller-${user.id}">SKATĪT MANU PROFILU ↗</a><button class="text-button" id="logout-button" type="button">IZIET</button></div><div class="section-kicker">MANI SLUDINĀJUMI</div><h2>Tavi <em>sludinājumi.</em></h2><div id="my-listings"><p class="listing-loading">Ielādējam sludinājumus...</p></div><div class="section-kicker">MANI PASŪTĪJUMI</div><h2>Pasūtījumu <em>vēsture.</em></h2><div id="my-orders"><p class="listing-loading">Ielādējam pasūtījumus...</p></div><div class="section-kicker">SAGLABĀTIE SLUDINĀJUMI</div><h2>Tavi <em>favorīti.</em></h2><div id="my-favorites"><p class="listing-loading">Ielādējam...</p></div><div class="section-kicker">BĪSTAMĀ ZONA</div><h2>Dzēst <em>kontu.</em></h2><div class="danger-zone"><p class="detail-description">Konta dzēšana ir neatgriezeniska. Tiks dzēsti tavi sludinājumi, favorīti un profils.</p><button class="danger-button" id="delete-account-button" type="button">DZĒST KONTU</button><p class="form-message" id="delete-account-message"></p></div>`
+  holder.innerHTML = `<div class="section-kicker">LIETOTĀJA PIEKĻUVE</div><h2>Sveiks, <em>${escapeHtml(profile?.display_name || user.email)}!</em></h2>${confirmedBanner}<p><span>Tu esi ielogojies kā</span> <b>${escapeHtml(user.email)}</b>.</p><form class="site-form" id="profile-form"><label>VĀRDS<input name="display_name" value="${escapeHtml(profile?.display_name || '')}"></label><div class="form-two"><label>TĀLRUNIS<input name="phone" value="${escapeHtml(profile?.phone || '')}"></label><label>PILSĒTA<input name="city" value="${escapeHtml(profile?.city || '')}"></label></div><label>LIETOTĀJVĀRDS<input name="username" value="${escapeHtml(profile?.username || '')}"></label><div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT IZMAIŅAS ↗</button></div><p class="form-message" id="profile-message"></p></form><div class="form-actions"><a class="button button-dark" href="#sell">PĀRDOT DETAĻU ↗</a><a class="text-button" href="#seller-${user.id}">SKATĪT MANU PROFILU ↗</a><button class="text-button" id="logout-button" type="button">IZIET</button></div><div class="section-kicker">DROŠĪBA</div><h2>Divfaktoru <em>autentifikācija.</em></h2><div id="account-security"><p class="listing-loading">Ielādējam...</p></div><div class="section-kicker">MANI SLUDINĀJUMI</div><h2>Tavi <em>sludinājumi.</em></h2><div id="my-listings"><p class="listing-loading">Ielādējam sludinājumus...</p></div><div class="section-kicker">MANI PASŪTĪJUMI</div><h2>Pasūtījumu <em>vēsture.</em></h2><div id="my-orders"><p class="listing-loading">Ielādējam pasūtījumus...</p></div><div class="section-kicker">SAGLABĀTIE SLUDINĀJUMI</div><h2>Tavi <em>favorīti.</em></h2><div id="my-favorites"><p class="listing-loading">Ielādējam...</p></div><div class="section-kicker">BĪSTAMĀ ZONA</div><h2>Dzēst <em>kontu.</em></h2><div class="danger-zone"><p class="detail-description">Konta dzēšana ir neatgriezeniska. Tiks dzēsti tavi sludinājumi, favorīti un profils.</p><button class="danger-button" id="delete-account-button" type="button">DZĒST KONTU</button><p class="form-message" id="delete-account-message"></p></div>`
   document.querySelector('#logout-button').addEventListener('click', async () => { await supabase.auth.signOut(); window.location.hash = 'home'; renderPage() })
   document.querySelector('#profile-form').addEventListener('submit', async (event) => {
     event.preventDefault()
@@ -1158,9 +1209,33 @@ async function initAccountPage() {
     window.location.hash = 'home'
     renderPage()
   })
+  await renderAccountSecurity(user.id)
   await loadMyListings(user.id)
   await loadMyOrders(user.id)
   await loadMyFavorites(user.id)
+}
+
+// Regular accounts opt into MFA (unlike admin roles, where it's mandatory)
+// — this renders the current status plus an enable/disable control.
+async function renderAccountSecurity(userId) {
+  const holder = document.querySelector('#account-security')
+  if (!holder) return
+  const { data: factorsData } = await supabase.auth.mfa.listFactors()
+  const factor = (factorsData?.totp || [])[0]
+  if (factor) {
+    holder.innerHTML = `<p class="detail-description">2FA ir ieslēgta šim kontam.</p><button class="text-button" id="mfa-disable-button" type="button">IZSLĒGT 2FA</button><p class="form-message" id="account-security-message"></p>`
+    document.querySelector('#mfa-disable-button').addEventListener('click', async () => {
+      const message = document.querySelector('#account-security-message')
+      const { error } = await supabase.auth.mfa.unenroll({ factorId: factor.id })
+      if (error) { message.textContent = error.message; return }
+      renderAccountSecurity(userId)
+    })
+  } else {
+    holder.innerHTML = `<p class="detail-description">2FA nav ieslēgta šim kontam. Ieteicams pārdevējiem, lai pasargātu kontu no pārņemšanas.</p><button class="button button-dark" id="mfa-enable-button" type="button">IESLĒGT 2FA</button>`
+    document.querySelector('#mfa-enable-button').addEventListener('click', async () => {
+      await renderMfaEnroll(holder, 'account-security-enroll', () => renderAccountSecurity(userId))
+    })
+  }
 }
 
 async function loadMyOrders(userId) {
@@ -1201,8 +1276,9 @@ function bindRouteForms(route) {
       if (isSpamSubmit(data)) return
       if (!data.get('email') || !data.get('password')) { authMessage.textContent = 'Ievadi e-pastu un paroli.'; return }
       const { error } = await supabase.auth.signInWithPassword({ email: data.get('email'), password: data.get('password') })
-      authMessage.textContent = error ? error.message : 'Veiksmīgi ielogojies.'
-      if (!error) { window.location.hash = 'sell' }
+      if (error) { authMessage.textContent = error.message; return }
+      authMessage.textContent = 'Veiksmīgi ielogojies.'
+      await challengeMfaIfNeeded(() => { window.location.hash = 'sell' })
     })
     document.querySelector('#signup-button').addEventListener('click', async () => {
       const data = new FormData(authForm)
