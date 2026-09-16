@@ -279,30 +279,7 @@ function bindCatalogSidebarFilters() {
     button.querySelector('.facet-chevron').textContent = open ? '▴' : '▾'
   }))
 
-  if (pendingCatalogFilter) {
-    if (pendingCatalogFilter.category) {
-      // pendingCatalogFilter.category is CATEGORIES' lowercase url-slug value
-      // (e.g. "riteņi un diski"), which doesn't always match the raw-case
-      // text actually stored on products (e.g. "Riteņi un diski", or the
-      // display label "Riteņi & diski" used in the mega-menu, which matches
-      // neither) - resolve to whatever exact string real products use.
-      const matchingProduct = products.find((p) => p.category && p.category.toLowerCase() === pendingCatalogFilter.category.toLowerCase())
-      if (matchingProduct) state.categories.add(matchingProduct.category)
-      const categoryBody = document.querySelector('#facet-body-category')
-      categoryBody?.removeAttribute('hidden')
-      const categoryToggle = document.querySelector('[data-facet-toggle="category"] .facet-chevron')
-      if (categoryToggle) categoryToggle.textContent = '▴'
-    }
-    if (pendingCatalogFilter.query) {
-      state.query = pendingCatalogFilter.query.toLowerCase()
-      const searchInput = document.querySelector('#sidebar-search-input')
-      if (searchInput) searchInput.value = pendingCatalogFilter.query
-    }
-    pendingCatalogFilter = null
-    run()
-  } else {
-    renderAllFacets()
-  }
+  renderAllFacets()
 }
 
 function homeMarkup() {
@@ -337,7 +314,7 @@ document.querySelector('#app').innerHTML = `
     <div class="header-actions"><button class="lang" type="button">LV <small>/ EN</small></button><button class="icon-button search-trigger" type="button" aria-label="Meklēt">⌕</button><button class="icon-button user-button" type="button" aria-label="Mans konts">◎</button><button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button></div>
   </header>
   <div class="mega-menu-backdrop" id="mega-menu-backdrop"></div>
-  <div class="mega-menu" id="mega-menu"><div class="mega-menu-top"><span class="section-kicker">IZVĒLIES KATEGORIJU</span><a class="text-link" href="#catalog" id="mega-menu-viewall">SKATĪT VISU <span>↗</span></a><button class="mega-menu-close" id="mega-menu-close" type="button" aria-label="Aizvērt">×</button></div><div class="mega-menu-grid">${CATEGORIES.map(([n, name, icon, value]) => `<div class="mega-menu-category"><a class="mega-menu-category-link" href="#category-${value.replaceAll(' ', '-')}"><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a><form class="mega-menu-category-search" data-category-value="${escapeHtml(value)}"><input type="text" placeholder="Meklēt ${name.toLowerCase()}..."><button type="submit" aria-label="Meklēt">⌕</button></form></div>`).join('')}</div></div>
+  <div class="mega-menu" id="mega-menu"><div class="mega-menu-top"><span class="section-kicker">IZVĒLIES KATEGORIJU</span><a class="text-link" href="#catalog" id="mega-menu-viewall">SKATĪT VISU <span>↗</span></a><button class="mega-menu-close" id="mega-menu-close" type="button" aria-label="Aizvērt">×</button></div><div class="mega-menu-grid">${CATEGORIES.map(([n, name, icon, value]) => `<a class="mega-menu-category" href="#category-${value.replaceAll(' ', '-')}"><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a>`).join('')}</div></div>
   <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
   <aside class="mobile-nav" id="mobile-nav"><button class="mobile-nav-close" id="mobile-nav-close" type="button" aria-label="Aizvērt izvēlni">×</button><nav class="mobile-nav-links"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#listings">Sludinājumi</a><a href="#sell">Pārdot detaļu</a><a href="#account">Mans konts</a><a href="#contact">Kontakti</a></nav><nav class="mobile-nav-legal"><a href="#terms">Lietošanas noteikumi</a><a href="#privacy">Privātuma politika</a><a href="#marketplace">Tirdzniecības noteikumi</a><a href="#safety">Drošība</a></nav><button class="mobile-nav-lang lang" type="button">LV <small>/ EN</small></button></aside>
   <aside class="cart-panel" id="cart-panel"><button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button><div class="section-kicker">TAVS GROZS</div><h2>Atlasītās <em>detaļas.</em></h2><div id="cart-view"><div class="cart-items" id="cart-items"><p id="cart-empty">Grozs ir tukšs.</p></div><div class="cart-summary"><span>KOPĀ</span><strong id="cart-total">0,00 €</strong></div><button class="button button-dark" type="button" id="checkout-button">UZ NORĒĶINU ↗</button><button class="text-button" type="button" id="clear-cart">NOTĪRĪT GROZU</button></div><div id="checkout-view" hidden></div></aside>
@@ -504,20 +481,8 @@ document.querySelector('#catalog-nav-trigger').addEventListener('click', (event)
 })
 document.querySelector('#mega-menu-close').addEventListener('click', closeMegaMenu)
 document.querySelector('#mega-menu-backdrop').addEventListener('click', closeMegaMenu)
-document.querySelectorAll('.mega-menu-category-link, #mega-menu-viewall').forEach((link) => link.addEventListener('click', closeMegaMenu))
+document.querySelectorAll('.mega-menu-category, #mega-menu-viewall').forEach((link) => link.addEventListener('click', closeMegaMenu))
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMegaMenu() })
-
-// Searching from inside a mega-menu category card jumps to the catalog page
-// with that category pre-selected and the query pre-filled, reusing the
-// sidebar filter's own state rather than building a second search path.
-let pendingCatalogFilter = null
-document.querySelectorAll('.mega-menu-category-search').forEach((form) => form.addEventListener('submit', (event) => {
-  event.preventDefault()
-  const input = form.querySelector('input')
-  pendingCatalogFilter = { category: form.dataset.categoryValue, query: input.value.trim() }
-  closeMegaMenu()
-  if (window.location.hash !== '#catalog') window.location.hash = 'catalog'; else renderPage()
-}))
 
 try {
   if (!localStorage.getItem('cookieNoticeDismissed')) document.querySelector('#cookie-notice').hidden = false
