@@ -207,9 +207,11 @@ document.querySelector('#app').innerHTML = `
   <header class="site-header">
     <button class="icon-button menu-toggle" id="menu-toggle" type="button" aria-label="Izvēlne" aria-expanded="false">☰</button>
     <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
-    <nav class="main-nav"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#listings">Sludinājumi</a><a href="#sell">Pārdot detaļu</a><a href="#account">Mans konts</a><a href="#contact">Kontakti</a></nav>
+    <nav class="main-nav"><a class="active" href="#home">Sākums</a><a href="#catalog" id="catalog-nav-trigger" aria-haspopup="true" aria-expanded="false">Katalogs <span class="nav-caret">▾</span></a><a href="#listings">Sludinājumi</a><a href="#sell">Pārdot detaļu</a><a href="#account">Mans konts</a><a href="#contact">Kontakti</a></nav>
     <div class="header-actions"><button class="lang" type="button">LV <small>/ EN</small></button><button class="icon-button search-trigger" type="button" aria-label="Meklēt">⌕</button><button class="icon-button user-button" type="button" aria-label="Mans konts">◎</button><button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button></div>
   </header>
+  <div class="mega-menu-backdrop" id="mega-menu-backdrop"></div>
+  <div class="mega-menu" id="mega-menu"><div class="mega-menu-top"><span class="section-kicker">IZVĒLIES KATEGORIJU</span><a class="text-link" href="#catalog" id="mega-menu-viewall">SKATĪT VISU <span>↗</span></a><button class="mega-menu-close" id="mega-menu-close" type="button" aria-label="Aizvērt">×</button></div><div class="mega-menu-grid">${CATEGORIES.map(([n, name, icon, value]) => `<a class="mega-menu-category" href="#category-${value.replaceAll(' ', '-')}"><span class="category-icon">${icon}</span><strong>${name}</strong><span class="arrow">↗</span></a>`).join('')}</div></div>
   <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
   <aside class="mobile-nav" id="mobile-nav"><button class="mobile-nav-close" id="mobile-nav-close" type="button" aria-label="Aizvērt izvēlni">×</button><nav class="mobile-nav-links"><a class="active" href="#home">Sākums</a><a href="#catalog">Katalogs</a><a href="#listings">Sludinājumi</a><a href="#sell">Pārdot detaļu</a><a href="#account">Mans konts</a><a href="#contact">Kontakti</a></nav><nav class="mobile-nav-legal"><a href="#terms">Lietošanas noteikumi</a><a href="#privacy">Privātuma politika</a><a href="#marketplace">Tirdzniecības noteikumi</a><a href="#safety">Drošība</a></nav><button class="mobile-nav-lang lang" type="button">LV <small>/ EN</small></button></aside>
   <aside class="cart-panel" id="cart-panel"><button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button><div class="section-kicker">TAVS GROZS</div><h2>Atlasītās <em>detaļas.</em></h2><div id="cart-view"><div class="cart-items" id="cart-items"><p id="cart-empty">Grozs ir tukšs.</p></div><div class="cart-summary"><span>KOPĀ</span><strong id="cart-total">0,00 €</strong></div><button class="button button-dark" type="button" id="checkout-button">UZ NORĒĶINU ↗</button><button class="text-button" type="button" id="clear-cart">NOTĪRĪT GROZU</button></div><div id="checkout-view" hidden></div></aside>
@@ -346,7 +348,7 @@ document.querySelector('.user-button').addEventListener('click', async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (user) { window.location.hash = 'account' } else { openAuthModal('login') }
 })
-document.querySelector('.cart-button').addEventListener('click', () => document.querySelector('#cart-panel').classList.toggle('is-open'))
+document.querySelector('.cart-button').addEventListener('click', () => { closeMegaMenu(); document.querySelector('#cart-panel').classList.toggle('is-open') })
 document.querySelector('.cart-close').addEventListener('click', () => document.querySelector('#cart-panel').classList.remove('is-open'))
 function closeMobileNav() {
   document.querySelector('#mobile-nav').classList.remove('is-open')
@@ -354,6 +356,7 @@ function closeMobileNav() {
   document.querySelector('#menu-toggle').setAttribute('aria-expanded', 'false')
 }
 document.querySelector('#menu-toggle').addEventListener('click', () => {
+  closeMegaMenu()
   const open = document.querySelector('#mobile-nav').classList.toggle('is-open')
   document.querySelector('#mobile-nav-backdrop').classList.toggle('is-open', open)
   document.querySelector('#menu-toggle').setAttribute('aria-expanded', String(open))
@@ -361,6 +364,22 @@ document.querySelector('#menu-toggle').addEventListener('click', () => {
 document.querySelector('#mobile-nav-close').addEventListener('click', closeMobileNav)
 document.querySelector('#mobile-nav-backdrop').addEventListener('click', closeMobileNav)
 document.querySelectorAll('.mobile-nav-links a, .mobile-nav-legal a').forEach((link) => link.addEventListener('click', closeMobileNav))
+
+function closeMegaMenu() {
+  document.querySelector('#mega-menu').classList.remove('is-open')
+  document.querySelector('#mega-menu-backdrop').classList.remove('is-open')
+  document.querySelector('#catalog-nav-trigger').setAttribute('aria-expanded', 'false')
+}
+document.querySelector('#catalog-nav-trigger').addEventListener('click', (event) => {
+  event.preventDefault()
+  const open = document.querySelector('#mega-menu').classList.toggle('is-open')
+  document.querySelector('#mega-menu-backdrop').classList.toggle('is-open', open)
+  document.querySelector('#catalog-nav-trigger').setAttribute('aria-expanded', String(open))
+})
+document.querySelector('#mega-menu-close').addEventListener('click', closeMegaMenu)
+document.querySelector('#mega-menu-backdrop').addEventListener('click', closeMegaMenu)
+document.querySelectorAll('.mega-menu-category, #mega-menu-viewall').forEach((link) => link.addEventListener('click', closeMegaMenu))
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMegaMenu() })
 
 try {
   if (!localStorage.getItem('cookieNoticeDismissed')) document.querySelector('#cookie-notice').hidden = false
@@ -1362,7 +1381,7 @@ const translations = {
   '+ VAIRĀK FILTRU': '+ MORE FILTERS', '- MAZĀK FILTRU': '- FEWER FILTERS', 'STĀVOKLIS': 'CONDITION', 'Jebkurš': 'Any', 'Ļoti labs': 'Very good', 'Labs': 'Good', 'Pārbaudīts': 'Tested', 'Pārbaudīta': 'Tested', 'Ar defektu': 'Has a defect',
   'CENA NO (€)': 'PRICE FROM (€)', 'CENA LĪDZ (€)': 'PRICE TO (€)', 'GADS': 'YEAR',
   'MARKAS, KO PAZĪSTAM': 'BRANDS WE KNOW',
-  '02 / IZPĒTI KATEGORIJAS': '02 / EXPLORE CATEGORIES', 'Viss, kas vajadzīgs': 'Everything you need', 'tavam auto.': 'for your car.', 'SKATĪT VISU': 'SEE ALL',
+  '02 / IZPĒTI KATEGORIJAS': '02 / EXPLORE CATEGORIES', 'Viss, kas vajadzīgs': 'Everything you need', 'tavam auto.': 'for your car.', 'SKATĪT VISU': 'SEE ALL', 'IZVĒLIES KATEGORIJU': 'CHOOSE A CATEGORY',
   'Dzinējs': 'Engine', 'Virsbūve': 'Body', 'Salons': 'Interior', 'Balstiekārta': 'Suspension', 'Elektrība': 'Electrical', 'Riteņi & diski': 'Wheels & tires', 'Riteņi un diski': 'Wheels & tires',
   '03 / JAUNUMI NOLIKTAVĀ': '03 / NEW IN STOCK', 'Pēdējie': 'Latest', 'atradumi.': 'finds.', 'SKATĪT VISUS': 'SEE ALL', 'PIEVIENOT': 'ADD', 'PRECES': 'PARTS',
   '04 / KOPIENAS SLUDINĀJUMI': '04 / COMMUNITY LISTINGS', 'Ko pārdod': 'What others', 'citi.': 'sell.', 'PĀRDOT SAVU DETAĻU': 'SELL YOUR PART',
