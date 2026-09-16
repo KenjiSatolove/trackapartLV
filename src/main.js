@@ -178,6 +178,110 @@ function bindCatalogFilters() {
   document.querySelectorAll('[data-brand]').forEach((button) => button.addEventListener('click', () => { document.querySelector('#search-input').value = button.dataset.brand; run(); document.querySelector('#product-grid')?.scrollIntoView({ behavior: 'smooth' }) }))
 }
 
+// Faceted sidebar filter for the catalog page (separate from searchBoxMarkup/
+// bindCatalogFilters above, which still serve the homepage's search preview).
+// Every facet's counts reflect all OTHER active filters, not itself, so
+// picking a brand narrows the model list's counts rather than freezing them.
+function sidebarFilterMarkup() {
+  return `<div class="sidebar-search"><span>⌕</span><input id="sidebar-search-input" placeholder="Meklē..."></div><div class="sidebar-facet"><div class="sidebar-facet-label">MARKA</div><div class="facet-options" id="facet-options-brand"></div></div><div class="sidebar-facet"><div class="sidebar-facet-label">MODELIS</div><div class="facet-search"><span>⌕</span><input type="text" placeholder="Meklēt..." id="facet-search-model"></div><div class="facet-options" id="facet-options-model"></div></div><button class="sidebar-facet-toggle" type="button" data-facet-toggle="category">KATEGORIJA<span class="facet-chevron">▾</span></button><div class="sidebar-facet-body" id="facet-body-category" hidden><div class="facet-options" id="facet-options-category"></div></div><button class="sidebar-facet-toggle" type="button" data-facet-toggle="more">VAIRĀK FILTRU<span class="facet-chevron">▾</span></button><div class="sidebar-facet-body" id="facet-body-more" hidden><div class="sidebar-facet-label">STĀVOKLIS</div><div class="facet-options" id="facet-options-condition"></div><label class="sidebar-year-label">GADS<input type="text" id="filter-year-input" placeholder="Piem., 2012"></label></div><div class="sidebar-price"><div class="sidebar-facet-label">CENA (€)</div><div class="sidebar-price-inputs"><input type="number" min="0" id="sidebar-price-min" placeholder="Min"><span>–</span><input type="number" min="0" id="sidebar-price-max" placeholder="Max"></div><button class="button button-dark sidebar-apply-price" type="button" id="sidebar-apply-price">PIEMĒROT CENU</button></div>`
+}
+
+function bindCatalogSidebarFilters() {
+  const sidebar = document.querySelector('#catalog-sidebar')
+  if (!sidebar) return
+  const cardsById = new Map()
+  document.querySelectorAll('#product-grid .product-card').forEach((card) => cardsById.set(card.dataset.productId, card))
+  const state = { brands: new Set(), models: new Set(), categories: new Set(), conditions: new Set(), year: '', priceMin: 0, priceMax: Infinity, query: '', modelSearch: '' }
+
+  function matches(p, exclude) {
+    if (exclude !== 'query' && state.query) {
+      const blob = [p.name, p.code, p.oem, p.brand, p.model].filter(Boolean).join(' ').toLowerCase()
+      if (!blob.includes(state.query)) return false
+    }
+    if (exclude !== 'brand' && state.brands.size && !state.brands.has(p.brand)) return false
+    if (exclude !== 'model' && state.models.size && !state.models.has(p.model)) return false
+    if (exclude !== 'category' && state.categories.size && !state.categories.has(p.category)) return false
+    if (exclude !== 'condition' && state.conditions.size && !state.conditions.has(p.condition)) return false
+    if (exclude !== 'price' && (Number(p.price) < state.priceMin || Number(p.price) > state.priceMax)) return false
+    if (exclude !== 'year' && state.year && !String(p.production_year || '').toLowerCase().includes(state.year)) return false
+    return true
+  }
+
+  function countsFor(key, exclude) {
+    const counts = {}
+    products.forEach((p) => { if (p[key] && matches(p, exclude)) counts[p[key]] = (counts[p[key]] || 0) + 1 })
+    return counts
+  }
+
+  function renderFacet(id, key, selectedSet, searchText) {
+    const holder = document.querySelector(`#facet-options-${id}`)
+    if (!holder) return
+    const counts = countsFor(key, id)
+    const q = (searchText || '').toLowerCase()
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).filter(([value]) => !q || value.toLowerCase().includes(q))
+    holder.innerHTML = entries.length ? entries.map(([value, count]) => `<label class="facet-option"><input type="checkbox" data-facet-input="${id}" value="${escapeHtml(value)}" ${selectedSet.has(value) ? 'checked' : ''}><span>${escapeHtml(value)}</span><b>${count}</b></label>`).join('') : '<p class="facet-empty">Nav rezultātu.</p>'
+    holder.querySelectorAll(`input[data-facet-input="${id}"]`).forEach((box) => box.addEventListener('change', () => {
+      if (box.checked) selectedSet.add(box.value); else selectedSet.delete(box.value)
+      run()
+    }))
+  }
+
+  function renderAllFacets() {
+    renderFacet('brand', 'brand', state.brands)
+    renderFacet('model', 'model', state.models, state.modelSearch)
+    renderFacet('category', 'category', state.categories)
+    renderFacet('condition', 'condition', state.conditions)
+  }
+
+  function run() {
+    let visible = 0
+    products.forEach((p) => {
+      const card = cardsById.get(String(p.id))
+      if (!card) return
+      const ok = matches(p, null)
+      card.hidden = !ok
+      if (ok) visible += 1
+    })
+    document.querySelectorAll('.product-card.card-capped').forEach((card) => card.classList.remove('card-capped'))
+    document.querySelector('#catalog-show-more')?.remove()
+    const noResults = document.querySelector('#no-results')
+    if (noResults) noResults.hidden = visible !== 0
+    const countEl = document.querySelector('#sidebar-catalog-count')
+    if (countEl) countEl.innerHTML = `${visible} <span>PRECES</span>`
+    renderAllFacets()
+  }
+
+  document.querySelector('#sidebar-search-input')?.addEventListener('input', (event) => { state.query = event.target.value.trim().toLowerCase(); run() })
+  document.querySelector('#facet-search-model')?.addEventListener('input', (event) => { state.modelSearch = event.target.value; renderFacet('model', 'model', state.models, state.modelSearch) })
+  document.querySelector('#sidebar-apply-price')?.addEventListener('click', () => {
+    state.priceMin = Number(document.querySelector('#sidebar-price-min')?.value) || 0
+    state.priceMax = Number(document.querySelector('#sidebar-price-max')?.value) || Infinity
+    run()
+  })
+  document.querySelector('#filter-year-input')?.addEventListener('input', (event) => { state.year = event.target.value.trim().toLowerCase(); run() })
+  document.querySelector('#sidebar-sort-select')?.addEventListener('change', () => {
+    const grid = document.querySelector('#product-grid')
+    if (!grid) return
+    const sortValue = document.querySelector('#sidebar-sort-select').value
+    const cards = [...grid.querySelectorAll('.product-card')]
+    cards.sort((a, b) => {
+      if (sortValue === 'price-asc') return Number(a.dataset.price) - Number(b.dataset.price)
+      if (sortValue === 'price-desc') return Number(b.dataset.price) - Number(a.dataset.price)
+      return Number(a.dataset.order) - Number(b.dataset.order)
+    })
+    cards.forEach((card) => grid.appendChild(card))
+  })
+  sidebar.querySelectorAll('[data-facet-toggle]').forEach((button) => button.addEventListener('click', () => {
+    const id = button.dataset.facetToggle
+    const body = document.querySelector(`#facet-body-${id}`)
+    const open = body.hasAttribute('hidden')
+    if (open) body.removeAttribute('hidden'); else body.setAttribute('hidden', '')
+    button.querySelector('.facet-chevron').textContent = open ? '▴' : '▾'
+  }))
+
+  renderAllFacets()
+}
+
 function homeMarkup() {
   return `
     <section class="hero">
@@ -482,7 +586,7 @@ function renderPage() {
   let route = rawRoute
   try { route = decodeURIComponent(rawRoute) } catch { /* malformed sequence, keep raw */ }
   const pages = {
-    catalog: `<section class="page-hero"><div class="section-kicker">02 / PREČU KATALOGS</div><h1>Atrodi detaļu.<br><em>Uztaisi ātrāku.</em></h1><p>Oriģinālas un pārbaudītas detaļas ielas auto, trases projektam un servisam.</p></section><section class="search-section reveal"><div class="section-kicker">FILTRĒ KATALOGU</div>${searchBoxMarkup()}</section><section class="product-section catalog-page reveal"><div class="section-top"><div><div class="section-kicker">VISAS DETAĻAS</div><h2>Noliktavā <em>tagad.</em></h2></div><span class="catalog-count">${products.length} <span>PRECES</span></span></div>${productGridMarkup(products, true)}</section>`,
+    catalog: `<section class="page-hero"><div class="section-kicker">02 / PREČU KATALOGS</div><h1>Atrodi detaļu.<br><em>Uztaisi ātrāku.</em></h1><p>Oriģinālas un pārbaudītas detaļas ielas auto, trases projektam un servisam.</p></section><section class="catalog-layout catalog-page reveal"><aside class="catalog-sidebar" id="catalog-sidebar">${sidebarFilterMarkup()}</aside><div class="catalog-main"><div class="catalog-main-top"><span class="catalog-count" id="sidebar-catalog-count">${products.length} <span>PRECES</span></span><select id="sidebar-sort-select"><option value="">Jaunākie</option><option value="price-asc">Cena: no zemākās</option><option value="price-desc">Cena: no augstākās</option></select></div>${productGridMarkup(products, true)}</div></section>`,
     about: `<section class="page-hero about-hero"><div class="section-kicker">03 / PAR TRACKPARTS</div><h1>Built for the<br><em>road ahead.</em></h1><p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p></section><section class="story-section reveal"><div class="section-kicker">MŪSU PIEEJA</div><h2>Nevis detaļu kaudze.<br><em>Īstais atradums.</em></h2><div class="story-grid"><p>TrackParts sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p><p>Mūsu noliktavā katram kodam ir sava vieta, statuss un vēsture. Mazāk minēšanas, vairāk laika uz ceļa.</p></div></section><section class="trust-section reveal"><div><span class="trust-icon">✦</span><strong>Pārbaudīta kvalitāte</strong><p>Katrs produkts tiek apskatīts pirms pārdošanas.</p></div><div><span class="trust-icon">↝</span><strong>Piegāde Eiropā</strong><p>No Rīgas līdz tavām durvīm.</p></div><div><span class="trust-icon">◷</span><strong>Cilvēcīgs atbalsts</strong><p>Palīdzēsim atrast pareizo detaļu.</p></div></section>`,
     contact: `<section class="page-hero contact-hero"><div class="section-kicker">04 / SAZINĀSIMIES</div><h1>Ir jautājums?<br><em>Dod ziņu.</em></h1><p>Neatrodi detaļu katalogā? Atsūti VIN, OEM kodu vai bildi, un mēs paskatīsimies.</p></section><section class="contact-section reveal"><div><div class="section-kicker">RAKSTI MUMS</div><h2>Atbildēsim<br><em>ātri.</em></h2></div><div class="contact-list"><a href="mailto:hello@trackparts.lv"><small>E-PASTS</small>hello@trackparts.lv ↗</a><a href="tel:+37120000000"><small>TELEFONS</small>+371 2000 0000 ↗</a><div><small>ATRODI MŪS</small>Rīga, Latvija</div></div></section>`,
     terms: `<section class="page-hero"><div class="section-kicker">LIETOŠANAS NOTEIKUMI</div><h1>Noteikumi.<br><em>Skaidri un godīgi.</em></h1><p>Šie noteikumi regulē TrackParts interneta veikala un sludinājumu platformas lietošanu.</p></section><section class="legal-page">
@@ -599,6 +703,7 @@ function renderPage() {
   bindProductButtons()
   bindRouteForms(route)
   bindCatalogFilters()
+  bindCatalogSidebarFilters()
   loadListings()
   if (route.startsWith('category-')) loadCategoryListings(route.replace('category-', '').replaceAll('-', ' '))
   if (route.startsWith('listing-')) loadListingDetail(route.replace('listing-', ''))
