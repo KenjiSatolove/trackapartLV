@@ -203,7 +203,6 @@ function homeMarkup() {
 
 document.querySelector('#app').innerHTML = `
   <div class="page-wipe" id="page-wipe"></div>
-  <div class="announcement">KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ <span>BEZMAKSA PIEGĀDE NO 150 €</span></div>
   <header class="site-header">
     <button class="icon-button menu-toggle" id="menu-toggle" type="button" aria-label="Izvēlne" aria-expanded="false">☰</button>
     <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
