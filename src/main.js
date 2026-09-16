@@ -704,6 +704,7 @@ function renderPage() {
   bindRouteForms(route)
   bindCatalogFilters()
   bindCatalogSidebarFilters()
+  bindCategorySearch()
   loadListings()
   if (route.startsWith('category-')) loadCategoryListings(route.replace('category-', '').replaceAll('-', ' '))
   if (route.startsWith('listing-')) loadListingDetail(route.replace('listing-', ''))
@@ -1037,7 +1038,23 @@ document.addEventListener('keydown', (event) => {
 function categoryPage(categoryValue) {
   const label = CATEGORIES.find((c) => c[3] === categoryValue)?.[1] || escapeHtml(categoryValue)
   const matchingProducts = products.filter((product) => (product.category || '').toLowerCase() === categoryValue).sort((a, b) => a.name.localeCompare(b.name, 'lv'))
-  return `<section class="page-hero"><a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a><div class="section-kicker">KATEGORIJA / <span>${label}</span></div><h1>${label}<br><em>detaļas.</em></h1><p>Šeit redzamas tikai <span>${label}</span> detaļas no kataloga un kopienas sludinājumiem.</p></section><section class="product-section category-products reveal"><div class="section-top"><div><div class="section-kicker">TRACKPARTS KATALOGS</div><h2>Kataloga <em>preces.</em></h2></div><a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a></div>${matchingProducts.length ? productGridMarkup(matchingProducts) : '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'}</section><section class="listings-section category-listings reveal"><div class="section-top"><div><div class="section-kicker">KOPIENAS SLUDINĀJUMI / <span>${label}</span></div><h2>Citi pārdod <em><span>${label}</span>.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT ŠEIT ↗</a></div><div class="listing-table" id="category-listing-table"><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
+  return `<section class="page-hero"><a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a><div class="section-kicker">KATEGORIJA / <span>${label}</span></div><h1>${label}<br><em>detaļas.</em></h1><p>Šeit redzamas tikai <span>${label}</span> detaļas no kataloga un kopienas sludinājumiem.</p></section><section class="product-section category-products reveal"><div class="section-top"><div><div class="section-kicker">TRACKPARTS KATALOGS</div><h2>Kataloga <em>preces.</em></h2></div><a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a></div>${matchingProducts.length ? `<div class="sidebar-search category-search"><span>⌕</span><input id="category-search-input" placeholder="Meklēt ${label.toLowerCase()} kategorijā..."></div>` : ''}${matchingProducts.length ? productGridMarkup(matchingProducts) : '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'}${matchingProducts.length ? '<p class="no-results" id="category-search-empty" hidden>Neviena prece neatbilst meklējumam.</p>' : ''}</section><section class="listings-section category-listings reveal"><div class="section-top"><div><div class="section-kicker">KOPIENAS SLUDINĀJUMI / <span>${label}</span></div><h2>Citi pārdod <em><span>${label}</span>.</em></h2></div><a class="button button-dark" href="#sell">PĀRDOT ŠEIT ↗</a></div><div class="listing-table" id="category-listing-table"><p class="listing-loading">Ielādējam sludinājumus...</p></div></section>`
+}
+
+function bindCategorySearch() {
+  const input = document.querySelector('#category-search-input')
+  if (!input) return
+  input.addEventListener('input', () => {
+    const query = input.value.trim().toLowerCase()
+    let visible = 0
+    document.querySelectorAll('.category-products .product-card').forEach((card) => {
+      const match = !query || card.dataset.name.includes(query)
+      card.hidden = !match
+      if (match) visible += 1
+    })
+    const empty = document.querySelector('#category-search-empty')
+    if (empty) empty.hidden = visible !== 0
+  })
 }
 
 function loadProductDetail(id) {
