@@ -6,7 +6,7 @@ const LANG_STORAGE_KEY = 'trackparts-lang'
 export const translations = {
   'Sākums': 'Home', 'Katalogs': 'Catalog', 'Sludinājumi': 'Listings', 'Pārdot detaļu': 'Sell a part', 'Mans konts': 'My account', 'Par mums': 'About us', 'Kontakti': 'Contact',
   'KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ': 'QUALITY USED PARTS · SHIPPING ACROSS EUROPE', 'BEZMAKSA PIEGĀDE NO 150 €': 'FREE SHIPPING FROM €150',
-  'GROZS': 'CART', 'TAVS GROZS': 'YOUR CART', 'Atlasītās': 'Selected', 'detaļas.': 'parts.', 'KOPĀ': 'TOTAL', 'UZ NORĒĶINU ↗': 'CHECKOUT ↗', 'NOTĪRĪT GROZU': 'CLEAR CART', 'Grozs ir tukšs.': 'Cart is empty.',
+  'GROZS': 'CART', 'TAVS GROZS': 'YOUR CART', 'SKATĪT GROZU ↗': 'VIEW CART ↗', 'Atlasītās': 'Selected', 'detaļas.': 'parts.', 'KOPĀ': 'TOTAL', 'UZ NORĒĶINU ↗': 'CHECKOUT ↗', 'NOTĪRĪT GROZU': 'CLEAR CART', 'Grozs ir tukšs.': 'Cart is empty.',
   'PASŪTĪJUMA PIEPRASĪJUMS': 'ORDER REQUEST', 'Pabeidz': 'Complete', 'pasūtījumu.': 'your order.',
   'Apmaksa tiešsaistē vēl nav pieejama — pēc pieprasījuma nosūtīšanas mēs sazināsimies pa e-pastu, lai vienotos par apmaksu un piegādi.': "Online payment isn't available yet — after you send the request we'll contact you by email to arrange payment and delivery.",
   'VĀRDS, UZVĀRDS': 'FULL NAME', 'E-PASTS': 'EMAIL', 'TĀLRUNIS': 'PHONE', 'PIEGĀDES ADRESE': 'DELIVERY ADDRESS', 'PIEZĪMES': 'NOTES', 'NOSŪTĪT': 'SEND', '← ATPAKAĻ': '← BACK',

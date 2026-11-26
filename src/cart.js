@@ -2,6 +2,7 @@ import { supabase } from './lib/supabase.js'
 import { getProducts } from './data.js'
 import { escapeHtml, formatPrice, honeypotFieldMarkup, isSpamSubmit, notifyEmail } from './utils.js'
 import { primeAndTranslate, translatePage, isEnglish } from './i18n.js'
+import { pulseCartBadge, showToast } from './fx.js'
 
 const cartItems = []
 let cartOwner = 'guest'
@@ -132,11 +133,24 @@ export async function switchCartOwner(userId) {
 
 export function addToCart(product) {
   const check = canAddProductToCart(cartItems, product)
-  if (!check.ok) return check
+  if (!check.ok) {
+    showToast(
+      check.reason === 'out_of_stock'
+        ? 'Šī detaļa pašlaik nav noliktavā.'
+        : 'Sasniegts pieejamais atlikums noliktavā.',
+      { isWarning: true },
+    )
+    return check
+  }
   cartItems.push(product)
   updateCartBadge()
+  pulseCartBadge()
   renderCart()
   persistCart()
+  showToast(`Pievienots grozam: ${product.name}`, {
+    actionLabel: 'SKATĪT GROZU ↗',
+    onAction: () => document.querySelector('#cart-panel')?.classList.add('is-open'),
+  })
   return check
 }
 

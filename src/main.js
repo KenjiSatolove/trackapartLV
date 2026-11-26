@@ -43,6 +43,7 @@ import {
 } from './auth.js'
 import { adminPage, bindAdminPage } from './admin.js'
 import { STATIC_PAGES, catalogPageMarkup, homeMarkup } from './pages.js'
+import { bindHeroFx, initGlobalFx } from './fx.js'
 
 if (window.location.hash.includes('error=') || window.location.hash.includes('error_description=')) {
   window.location.hash = 'account'
@@ -68,6 +69,8 @@ const currentYear = new Date().getFullYear()
 
 document.querySelector('#app').innerHTML = `
   <div class="page-wipe" id="page-wipe"></div>
+  <div class="scroll-progress-wrap" aria-hidden="true"><div class="scroll-progress" id="scroll-progress"></div></div>
+  <div class="toast-host" id="toast-host"></div>
   <header class="site-header">
     <button class="icon-button menu-toggle" id="menu-toggle" type="button" aria-label="Izvēlne" aria-expanded="false">☰</button>
     <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
@@ -427,6 +430,7 @@ function renderPage({ scrollToTop = false } = {}) {
     translatePage()
     primeAndTranslate()
   }
+  bindHeroFx()
   initScrollReveal()
 }
 
@@ -470,6 +474,7 @@ function playPageWipe(callback) {
 }
 
 initLanguage()
+initGlobalFx()
 window.addEventListener('hashchange', () => playPageWipe(() => renderPage({ scrollToTop: true })))
 renderPage()
 

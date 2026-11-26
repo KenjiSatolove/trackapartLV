@@ -14,8 +14,8 @@ export function homeMarkup() {
       </div>
       <div class="hero-visual">
         <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=90" alt="Autosporta auto trasē">
-        <div class="hero-label">EST. 2024 <i></i> RĪGA, LV</div>
-        <div class="hero-spec">01 <span>TRACKPARTS</span></div>
+        <div class="hero-label"><span class="live-dot" aria-hidden="true"></span>EST. 2024 <i></i> RĪGA, LV</div>
+        <div class="hero-spec">01 <span>TRACKPARTS // OEM TELEMETRY</span></div>
       </div>
       <div class="hero-stats">
         <div><strong>10k+</strong><span>DETAĻAS<br>NOLIKTAVĀ</span></div>
@@ -24,6 +24,22 @@ export function homeMarkup() {
       </div>
     </section>
     <div class="racing-stripe"></div>
+    <div class="telemetry-marquee" aria-hidden="true">
+      <div class="telemetry-track">
+        <span><b>●</b> OEM VERIFIED PARTS</span>
+        <span><b>//</b> RĪGA WAREHOUSE LIVE</span>
+        <span><b>●</b> 24H DISPATCH ACROSS EU</span>
+        <span><b>//</b> BMW · AUDI · MERCEDES-BENZ · VW · VOLVO</span>
+        <span><b>●</b> INSPECTED BEFORE SHIPMENT</span>
+        <span><b>//</b> TRACKPARTS LV</span>
+        <span><b>●</b> OEM VERIFIED PARTS</span>
+        <span><b>//</b> RĪGA WAREHOUSE LIVE</span>
+        <span><b>●</b> 24H DISPATCH ACROSS EU</span>
+        <span><b>//</b> BMW · AUDI · MERCEDES-BENZ · VW · VOLVO</span>
+        <span><b>●</b> INSPECTED BEFORE SHIPMENT</span>
+        <span><b>//</b> TRACKPARTS LV</span>
+      </div>
+    </div>
 
     <section class="search-section reveal" id="catalog-preview">
       <div class="section-kicker">01 / ATRODI SAVU DETAĻU</div>
