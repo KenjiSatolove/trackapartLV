@@ -108,7 +108,33 @@ async function showMfaEnroll() {
   })
 }
 
+function ensureAdminDrawerMounted() {
+  if (document.querySelector('#admin-drawer')) return
+  const backdrop = document.createElement('div')
+  backdrop.className = 'admin-drawer-backdrop'
+  backdrop.id = 'admin-drawer-backdrop'
+  const drawer = document.createElement('aside')
+  drawer.className = 'admin-drawer'
+  drawer.id = 'admin-drawer'
+  drawer.setAttribute('role', 'dialog')
+  drawer.setAttribute('aria-modal', 'true')
+  drawer.setAttribute('aria-labelledby', 'admin-drawer-title')
+  drawer.setAttribute('aria-hidden', 'true')
+  drawer.innerHTML = `<div class="admin-drawer-header">
+      <div>
+        <span class="admin-overline" id="admin-drawer-subtitle"></span>
+        <h3 id="admin-drawer-title"></h3>
+      </div>
+      <button class="admin-drawer-close" id="admin-drawer-close" type="button" aria-label="Close drawer">×</button>
+    </div>
+    <div class="admin-drawer-body" id="admin-drawer-body"></div>`
+  document.body.append(backdrop, drawer)
+  drawer.querySelector('#admin-drawer-close')?.addEventListener('click', closeAdminDrawer)
+  backdrop.addEventListener('click', closeAdminDrawer)
+}
+
 function openAdminDrawer(title, subtitle, bodyHtml) {
+  ensureAdminDrawerMounted()
   const backdrop = document.querySelector('#admin-drawer-backdrop')
   const drawer = document.querySelector('#admin-drawer')
   const titleEl = document.querySelector('#admin-drawer-title')
@@ -118,12 +144,16 @@ function openAdminDrawer(title, subtitle, bodyHtml) {
   if (titleEl) titleEl.textContent = title
   if (subEl) subEl.textContent = subtitle || ''
   bodyEl.innerHTML = bodyHtml
+  bodyEl.scrollTop = 0
+  drawer.setAttribute('aria-hidden', 'false')
   drawer.classList.add('is-open')
   backdrop?.classList.add('is-open')
 }
 
-function closeAdminDrawer() {
-  document.querySelector('#admin-drawer')?.classList.remove('is-open')
+export function closeAdminDrawer() {
+  const drawer = document.querySelector('#admin-drawer')
+  drawer?.classList.remove('is-open')
+  drawer?.setAttribute('aria-hidden', 'true')
   document.querySelector('#admin-drawer-backdrop')?.classList.remove('is-open')
 }
 
@@ -225,25 +255,13 @@ async function loadAdminDashboard() {
       </div>
       <section class="admin-content" id="admin-content"></section>
     </div>
-  </div>
+  </div>`
 
-  <div class="admin-drawer-backdrop" id="admin-drawer-backdrop"></div>
-  <aside class="admin-drawer" id="admin-drawer" role="dialog" aria-modal="true" aria-labelledby="admin-drawer-title">
-    <div class="admin-drawer-header">
-      <div>
-        <span class="admin-overline" id="admin-drawer-subtitle"></span>
-        <h3 id="admin-drawer-title"></h3>
-      </div>
-      <button class="admin-drawer-close" id="admin-drawer-close" type="button" aria-label="Close drawer">×</button>
-    </div>
-    <div class="admin-drawer-body" id="admin-drawer-body"></div>
-  </aside>`
+  ensureAdminDrawerMounted()
 
   document.querySelectorAll('.admin-tab').forEach((tab) =>
     tab.addEventListener('click', () => switchAdminTab(tab.dataset.tab)),
   )
-  document.querySelector('#admin-drawer-close')?.addEventListener('click', closeAdminDrawer)
-  document.querySelector('#admin-drawer-backdrop')?.addEventListener('click', closeAdminDrawer)
   document.querySelector('#admin-refresh-btn')?.addEventListener('click', async () => {
     await loadProducts()
     await renderAdminTab(activeTab)

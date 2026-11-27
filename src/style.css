@@ -2378,13 +2378,15 @@ h2 {
 }
 
 .site-form input[type='file'],
-.admin-product-form input[type='file'] {
+.admin-product-form input[type='file'],
+.admin-drawer-form input[type='file'] {
   padding: 10px 12px;
   cursor: pointer;
 }
 
 .site-form input[type='file']::file-selector-button,
-.admin-product-form input[type='file']::file-selector-button {
+.admin-product-form input[type='file']::file-selector-button,
+.admin-drawer-form input[type='file']::file-selector-button {
   margin-right: 12px;
   padding: 7px 12px;
   border: 0;
@@ -2398,7 +2400,8 @@ h2 {
 }
 
 .site-form input[type='file']::file-selector-button:hover,
-.admin-product-form input[type='file']::file-selector-button:hover {
+.admin-product-form input[type='file']::file-selector-button:hover,
+.admin-drawer-form input[type='file']::file-selector-button:hover {
   background: var(--orange);
 }
 
@@ -2770,6 +2773,7 @@ h2 {
 .admin-shell {
   min-height: calc(100vh - 78px);
   background: #f5f5f4;
+  overflow-x: clip;
 }
 
 .admin-login {
@@ -3298,7 +3302,7 @@ h2 {
 
 .admin-products-table .admin-table-head,
 .admin-products-table .admin-table-row {
-  grid-template-columns: 2.3fr 1.2fr 122px 0.75fr auto;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.15fr) 108px minmax(88px, auto) auto;
 }
 
 .admin-table-row[hidden] {
@@ -3330,6 +3334,11 @@ h2 {
 
 .admin-table-row span {
   color: var(--muted);
+}
+
+.admin-table-row b {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .admin-table-row code {
@@ -3603,10 +3612,17 @@ h2 {
 }
 
 .admin-product-form select,
-.admin-drawer-form select {
-  display: inline-block;
+.admin-drawer-form select,
+.admin-select {
+  display: block;
   height: 40px;
-  padding: 0 9px;
+  padding: 0 32px 0 10px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.25 6 7.75l3.5-3.5' stroke='%230a0a0a' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 12px;
 }
 
 .admin-product-form .form-two,
@@ -3632,12 +3648,14 @@ h2 {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.22s ease;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
 }
 
 .admin-drawer-backdrop.is-open {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
 }
 
@@ -3645,20 +3663,26 @@ h2 {
   position: fixed;
   top: 0;
   right: 0;
+  bottom: 0;
   z-index: 55;
   width: min(620px, 100vw);
   height: 100vh;
+  height: 100dvh;
   background: #fff;
   border-left: 3px solid var(--orange);
   box-shadow: -20px 0 60px rgba(0, 0, 0, 0.22);
   transform: translateX(104%);
-  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.26s ease;
   display: flex;
   flex-direction: column;
 }
 
 .admin-drawer.is-open {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .admin-drawer-header {
@@ -4431,11 +4455,40 @@ footer {
     flex-direction: column;
   }
   .admin-table {
+    max-width: 100%;
     overflow-x: auto;
   }
   .admin-table-head,
   .admin-table-row {
     min-width: 720px;
+  }
+  .admin-products-table {
+    overflow-x: visible;
+  }
+  .admin-products-table .admin-table-head {
+    display: none;
+  }
+  .admin-products-table .admin-table-row {
+    min-width: 0;
+    grid-template-columns: 1fr auto;
+    gap: 10px 12px;
+    padding: 14px;
+  }
+  .admin-products-table .admin-product-cell,
+  .admin-products-table .admin-meta-cell,
+  .admin-products-table .row-actions {
+    grid-column: 1 / -1;
+  }
+  .admin-products-table .row-actions {
+    flex-wrap: wrap;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .admin-drawer-body {
+    padding: 16px 18px 24px;
+  }
+  .admin-drawer-form .form-two {
+    grid-template-columns: 1fr;
   }
   .moderation-row {
     align-items: start;

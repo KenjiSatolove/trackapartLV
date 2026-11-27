@@ -41,7 +41,7 @@ import {
   openAuthModal,
   setPendingAuthEvent,
 } from './auth.js'
-import { adminPage, bindAdminPage } from './admin.js'
+import { adminPage, bindAdminPage, closeAdminDrawer } from './admin.js'
 import { STATIC_PAGES, catalogPageMarkup, homeMarkup, notFoundMarkup } from './pages.js'
 import { bindHeroFx, initGlobalFx } from './fx.js'
 
@@ -369,8 +369,7 @@ document.addEventListener('keydown', (event) => {
     return
   }
   if (document.querySelector('#admin-drawer')?.classList.contains('is-open')) {
-    document.querySelector('#admin-drawer')?.classList.remove('is-open')
-    document.querySelector('#admin-drawer-backdrop')?.classList.remove('is-open')
+    closeAdminDrawer()
     return
   }
   if (document.querySelector('#cart-panel')?.classList.contains('is-open')) {
@@ -597,6 +596,7 @@ initLanguage()
 initGlobalFx()
 window.addEventListener('hashchange', () => {
   closeMegaMenu()
+  closeAdminDrawer()
   playPageWipe(() => renderPage({ scrollToTop: true }))
 })
 renderPage()
