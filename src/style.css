@@ -3302,7 +3302,7 @@ h2 {
 
 .admin-products-table .admin-table-head,
 .admin-products-table .admin-table-row {
-  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.15fr) 108px minmax(88px, auto) auto;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.15fr) 108px 98px 208px;
 }
 
 .admin-table-row[hidden] {
@@ -3611,6 +3611,10 @@ h2 {
   color: var(--ink);
 }
 
+.admin-drawer-form input:not([type='file']):not([type='checkbox']) {
+  height: 40px;
+}
+
 .admin-product-form select,
 .admin-drawer-form select,
 .admin-select {
@@ -3623,6 +3627,12 @@ h2 {
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 12px 12px;
+}
+
+.admin-product-form select::picker-icon,
+.admin-drawer-form select::picker-icon,
+.admin-select::picker-icon {
+  display: none;
 }
 
 .admin-product-form .form-two,
@@ -3665,7 +3675,7 @@ h2 {
   right: 0;
   bottom: 0;
   z-index: 55;
-  width: min(620px, 100vw);
+  width: min(620px, 100%);
   height: 100vh;
   height: 100dvh;
   background: #fff;
@@ -3722,7 +3732,7 @@ h2 {
 .admin-drawer-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px 28px;
+  padding: 20px 24px 0;
 }
 
 .admin-form-section {
@@ -3749,7 +3759,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 0 4px;
+  padding: 14px 0 20px;
   margin-top: 16px;
   background: #fff;
   border-top: 1px solid var(--line);
@@ -4485,7 +4495,7 @@ footer {
     border-top: 1px solid #f0f0f0;
   }
   .admin-drawer-body {
-    padding: 16px 18px 24px;
+    padding: 16px 18px 0;
   }
   .admin-drawer-form .form-two {
     grid-template-columns: 1fr;
