@@ -44,6 +44,7 @@ import {
 import { adminPage, bindAdminPage, closeAdminDrawer } from './admin.js'
 import { STATIC_PAGES, catalogPageMarkup, homeMarkup, notFoundMarkup } from './pages.js'
 import { bindHeroFx, initGlobalFx } from './fx.js'
+import { closeOpenSelect, enhanceSelects } from './selects.js'
 
 if (window.location.hash.includes('error=') || window.location.hash.includes('error_description=')) {
   window.location.hash = 'account'
@@ -356,6 +357,7 @@ document.addEventListener('keydown', (event) => {
     return
   }
   if (event.key !== 'Escape') return
+  if (closeOpenSelect({ restoreFocus: true })) return
   if (!document.querySelector('#lightbox-overlay')?.hidden) {
     closeLightbox()
     return
@@ -544,6 +546,7 @@ function renderPage({ scrollToTop = false } = {}) {
     translatePage()
     primeAndTranslate()
   }
+  enhanceSelects()
   bindHeroFx()
   initScrollReveal()
 
@@ -595,6 +598,7 @@ function playPageWipe(callback) {
 initLanguage()
 initGlobalFx()
 window.addEventListener('hashchange', () => {
+  closeOpenSelect()
   closeMegaMenu()
   closeAdminDrawer()
   playPageWipe(() => renderPage({ scrollToTop: true }))

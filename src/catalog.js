@@ -10,6 +10,7 @@ import {
   stockLabel,
 } from './utils.js'
 import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
+import { syncSelect } from './selects.js'
 
 export const CATALOG_PAGE_SIZE = 8
 
@@ -198,6 +199,8 @@ export function bindCatalogFilters() {
       }
       refreshModelOptions()
       if (modelSelect) modelSelect.value = ''
+      syncSelect(brandSelect)
+      syncSelect(modelSelect)
       run()
       document.querySelector('#product-grid')?.scrollIntoView({ behavior: 'smooth' })
     }),

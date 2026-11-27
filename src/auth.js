@@ -18,6 +18,7 @@ import {
 } from './utils.js'
 import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
 import { fetchListingThumbnails, listingThumbMarkup } from './listings.js'
+import { enhanceSelects } from './selects.js'
 
 let pendingAuthEvent = null
 
@@ -403,6 +404,7 @@ async function bindMyListingForm(listing, userId) {
     }))
   }
   holder.innerHTML = myListingFormMarkup(listing, existingImages)
+  enhanceSelects(holder)
   document.querySelector('#my-listing-cancel')?.addEventListener('click', () => {
     holder.innerHTML = ''
   })

@@ -12,6 +12,7 @@ import {
 } from './utils.js'
 import { renderMfaChallenge, renderMfaEnroll } from './auth.js'
 import { showToast } from './fx.js'
+import { closeOpenSelect, enhanceSelects, syncSelect } from './selects.js'
 
 const STAFF_ROLES = ['owner', 'manager', 'warehouse', 'fulfillment']
 const ROLE_LABELS = {
@@ -145,12 +146,14 @@ function openAdminDrawer(title, subtitle, bodyHtml) {
   if (subEl) subEl.textContent = subtitle || ''
   bodyEl.innerHTML = bodyHtml
   bodyEl.scrollTop = 0
+  enhanceSelects(bodyEl)
   drawer.setAttribute('aria-hidden', 'false')
   drawer.classList.add('is-open')
   backdrop?.classList.add('is-open')
 }
 
 export function closeAdminDrawer() {
+  closeOpenSelect()
   const drawer = document.querySelector('#admin-drawer')
   drawer?.classList.remove('is-open')
   drawer?.setAttribute('aria-hidden', 'true')
@@ -831,6 +834,7 @@ async function renderAdminTab(tab) {
         paintProducts()
       }),
     )
+    enhanceSelects(content)
     paintProducts()
     return
   }
@@ -976,6 +980,7 @@ async function renderAdminTab(tab) {
             .eq('id', select.dataset.orderStatus)
           if (error) {
             select.value = select.dataset.prevStatus
+            syncSelect(select)
             showToast(error.message, { isWarning: true })
             return
           }
@@ -983,6 +988,7 @@ async function renderAdminTab(tab) {
           renderAdminTab('orders')
         })
       })
+      enhanceSelects(tableEl)
     }
 
     document.querySelector('#admin-order-search')?.addEventListener('input', (e) => {

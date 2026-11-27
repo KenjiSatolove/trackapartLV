@@ -1,5 +1,6 @@
 import { supabase } from './lib/supabase.js'
 import { ROUTE_TITLES, ROUTE_TITLES_EN } from './data.js'
+import { syncAllSelects } from './selects.js'
 
 const LANG_STORAGE_KEY = 'trackparts-lang'
 
@@ -233,6 +234,7 @@ export function translatePage() {
   textNodes.forEach((textNode) => {
     const original = originalText.get(textNode) || textNode.nodeValue.trim()
     if (!original || textNode.parentElement?.tagName === 'SCRIPT') return
+    if (textNode.parentElement?.closest('.tp-select-trigger, .tp-select-popover')) return
     if (!originalText.has(textNode)) originalText.set(textNode, original)
     const translated = english ? translations[original] || original : originalText.get(textNode)
     if (textNode.nodeValue.trim() !== translated) {
@@ -247,4 +249,5 @@ export function translatePage() {
   document.querySelectorAll('.lang').forEach((languageButton) => {
     languageButton.innerHTML = english ? 'EN <small>/ LV</small>' : 'LV <small>/ EN</small>'
   })
+  syncAllSelects()
 }
