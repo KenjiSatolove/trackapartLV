@@ -42,7 +42,7 @@ export function bindHeroFx() {
 
   const hero = document.querySelector('.hero')
   if (!hero) return
-  const visualImg = hero.querySelector('.hero-visual img')
+  const visualStage = hero.querySelector('.hero-wheel-stage') || hero.querySelector('.hero-visual img')
   const spec = hero.querySelector('.hero-spec')
 
   hero.addEventListener('pointermove', (event) => {
@@ -54,8 +54,8 @@ export function bindHeroFx() {
     hero.style.setProperty('--mx', `${x.toFixed(1)}px`)
     hero.style.setProperty('--my', `${y.toFixed(1)}px`)
     hero.classList.add('has-pointer')
-    if (visualImg) {
-      visualImg.style.transform = `translate3d(${(nx * -10).toFixed(1)}px, ${(ny * -8).toFixed(1)}px, 0) scale(1.03)`
+    if (visualStage) {
+      visualStage.style.transform = `translate3d(${(nx * -12).toFixed(1)}px, ${(ny * -9).toFixed(1)}px, 0)`
     }
     if (spec) {
       spec.style.transform = `translate3d(${(nx * 6).toFixed(1)}px, ${(ny * 4).toFixed(1)}px, 0)`
@@ -64,7 +64,7 @@ export function bindHeroFx() {
 
   hero.addEventListener('pointerleave', () => {
     hero.classList.remove('has-pointer')
-    if (visualImg) visualImg.style.transform = ''
+    if (visualStage) visualStage.style.transform = ''
     if (spec) spec.style.transform = ''
   })
 }

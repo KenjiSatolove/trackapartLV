@@ -13,7 +13,12 @@ export function homeMarkup() {
         <a class="button button-light" href="#catalog">SKATĪT KATALOGU <span>↗</span></a>
       </div>
       <div class="hero-visual">
-        <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=90" alt="Autosporta auto trasē">
+        <div class="hero-wheel-stage">
+          <div class="hero-wheel-ring" aria-hidden="true"></div>
+          <div class="hero-wheel-frame">
+            <img class="hero-wheel-img" src="${import.meta.env.BASE_URL}style37-wheel.jpg" alt="BMW Style 37 M-Parallel disks">
+          </div>
+        </div>
         <div class="hero-label"><span class="live-dot" aria-hidden="true"></span>EST. 2024 <i></i> RĪGA, LV</div>
         <div class="hero-spec">01 <span>TRACKPARTS // OEM TELEMETRY</span></div>
       </div>
