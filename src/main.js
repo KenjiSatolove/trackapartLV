@@ -340,6 +340,8 @@ function getTopOpenDialog() {
   if (mfa && !mfa.hidden) return mfa
   const auth = document.querySelector('#auth-modal-overlay')
   if (auth && !auth.hidden) return auth
+  const adminDrawer = document.querySelector('#admin-drawer')
+  if (adminDrawer?.classList.contains('is-open')) return adminDrawer
   const cart = document.querySelector('#cart-panel')
   if (cart?.classList.contains('is-open')) return cart
   const mobile = document.querySelector('#mobile-nav')
@@ -364,6 +366,11 @@ document.addEventListener('keydown', (event) => {
   }
   if (!document.querySelector('#mfa-modal-overlay')?.hidden) {
     cancelMfaModal()
+    return
+  }
+  if (document.querySelector('#admin-drawer')?.classList.contains('is-open')) {
+    document.querySelector('#admin-drawer')?.classList.remove('is-open')
+    document.querySelector('#admin-drawer-backdrop')?.classList.remove('is-open')
     return
   }
   if (document.querySelector('#cart-panel')?.classList.contains('is-open')) {
