@@ -508,7 +508,7 @@ export function categoryPage(categoryValue) {
       <a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a>
       <div class="section-kicker">KATEGORIJA / <span>${label}</span></div>
       <h1>${headingLabel}<br><em>detaļas.</em></h1>
-      <p>Šeit redzamas tikai <span>${label}</span> detaļas no kataloga un kopienas sludinājumiem.</p>
+      <p>Šeit redzamas tikai <span>${headingLabel}</span> detaļas no kataloga un kopienas sludinājumiem.</p>
     </section>
     <section class="product-section category-products reveal">
       <div class="section-top">

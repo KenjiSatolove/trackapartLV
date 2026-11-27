@@ -137,9 +137,9 @@ footer {
   flex: 0 0 auto;
   margin-left: 8px;
   padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.42);
   background: none;
-  color: var(--orange);
+  color: #fff;
   font: 10px 'DM Mono';
   letter-spacing: 0.08em;
   white-space: nowrap;
@@ -1135,20 +1135,15 @@ h2 {
 }
 
 .select-row select {
-  display: block;
+  display: inline-block;
   width: 100%;
-  min-height: 44px;
+  height: 44px;
   border: 0;
   border-bottom: 1px solid var(--line);
   border-radius: 0;
-  background: transparent
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%230a0a0a' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E")
-    no-repeat right 6px center;
-  background-size: 9px 5px;
-  appearance: none;
-  -webkit-appearance: none;
-  padding: 10px 26px 10px 0;
-  line-height: 1.4;
+  background: transparent;
+  padding: 0 4px 0 0;
+  line-height: 44px;
 }
 
 .extra-filters {
@@ -1171,25 +1166,15 @@ h2 {
 
 .extra-filters input,
 .extra-filters select {
-  display: block;
+  display: inline-block;
   width: 100%;
-  min-height: 42px;
+  height: 42px;
   border: 0;
   border-bottom: 1px solid var(--line);
   border-radius: 0;
-  background: none;
-  padding: 10px 0;
-  line-height: 1.4;
-}
-
-.extra-filters select {
-  background: transparent
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%230a0a0a' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E")
-    no-repeat right 6px center;
-  background-size: 9px 5px;
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 26px;
+  background: transparent;
+  padding: 0 4px 0 0;
+  line-height: 42px;
 }
 
 .filter-button,
@@ -1522,13 +1507,8 @@ h2 {
 .catalog-main-top select {
   border: 1px solid var(--line);
   border-radius: 0;
-  background: var(--paper)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%230a0a0a' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E")
-    no-repeat right 10px center;
-  background-size: 9px 5px;
-  appearance: none;
-  -webkit-appearance: none;
-  padding: 9px 28px 9px 12px;
+  background: var(--paper);
+  padding: 9px 12px;
   font: 11px 'DM Mono';
 }
 
@@ -2353,13 +2333,9 @@ h2 {
 }
 
 .site-form select {
-  background: #fff
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%230a0a0a' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E")
-    no-repeat right 12px center;
-  background-size: 10px 6px;
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 34px;
+  display: inline-block;
+  height: 46px;
+  padding: 0 12px;
 }
 
 .site-form input[type='file'],
@@ -2441,8 +2417,11 @@ h2 {
 }
 
 .consent-label input {
-  width: auto !important;
-  margin: 3px 0 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 2px 0 0 !important;
   flex: 0 0 auto;
   accent-color: var(--orange);
 }
