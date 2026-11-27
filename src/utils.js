@@ -56,6 +56,27 @@ export function formatPrice(price) {
   return `${Number(price || 0).toFixed(2).replace('.', ',')} €`
 }
 
+export function parseOptionalPrice(value, fallback) {
+  if (value === null || value === undefined) return fallback
+  const trimmed = String(value).trim()
+  if (!trimmed) return fallback
+  const num = Number(trimmed)
+  return Number.isFinite(num) && num >= 0 ? num : fallback
+}
+
+export function formatTelHref(phone) {
+  const raw = String(phone ?? '').trim()
+  if (!raw) return ''
+  const hasPlus = raw.startsWith('+')
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length < 7) return ''
+  return `tel:${hasPlus ? '+' : ''}${digits}`
+}
+
+export function escapeIlikePattern(value) {
+  return String(value ?? '').replace(/[\\%_]/g, (char) => `\\${char}`)
+}
+
 export function stockLabel(stock) {
   return `${stock ?? 0} gab.`
 }

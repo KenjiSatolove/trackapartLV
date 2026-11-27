@@ -315,6 +315,10 @@ export const ROUTE_TITLES_EN = {
 
 let products = FALLBACK_PRODUCTS.map((product) => ({ ...product }))
 let productsLoaded = false
+let resolveProductsReady = null
+const productsReadyPromise = new Promise((resolve) => {
+  resolveProductsReady = resolve
+})
 
 export function getProducts() {
   return products
@@ -324,13 +328,22 @@ export function isProductsLoaded() {
   return productsLoaded
 }
 
+export function whenProductsReady() {
+  return productsLoaded ? Promise.resolve(products) : productsReadyPromise
+}
+
 export async function loadProducts() {
-  if (!supabase) {
+  try {
+    if (!supabase) {
+      productsLoaded = true
+      return products
+    }
+    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false })
+    if (data?.length) products = data
     productsLoaded = true
     return products
+  } finally {
+    productsLoaded = true
+    resolveProductsReady?.(products)
   }
-  const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false })
-  if (data?.length) products = data
-  productsLoaded = true
-  return products
 }

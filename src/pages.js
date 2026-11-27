@@ -7,7 +7,7 @@ export function homeMarkup() {
   return `
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">DETĀĻAS, KURĀM VAR UZTICĒTIES</p>
+        <p class="eyebrow">DETAĻAS, KURĀM VAR UZTICĒTIES</p>
         <h1>Tava automašīna.<br><em>Mūsu detaļas.</em></h1>
         <p class="hero-text">Pārbaudītas lietotas auto detaļas. Atrastas ātri, nosūtītas droši.</p>
         <a class="button button-light" href="#catalog">SKATĪT KATALOGU <span>↗</span></a>
@@ -83,7 +83,7 @@ export function homeMarkup() {
         </div>
         <a class="text-link" href="#catalog">SKATĪT VISUS <span>↗</span></a>
       </div>
-      ${productGridMarkup(products.slice(0, 8))}
+      ${productGridMarkup(products, true, { showMoreButton: false })}
     </section>
 
     <section class="listings-section reveal" id="listings-preview">
@@ -257,7 +257,7 @@ export const STATIC_PAGES = {
     <h3>5. TrackParts loma darījumā</h3>
     <p>Kopienas sludinājumos TrackParts darbojas tikai kā starpnieks — savienojam pircēju ar pārdevēju, bet nepiedalāmies maksājumā, piegādē vai preces apskatē pirms publicēšanas. Vienošanās par cenu, apmaksu un nodošanu notiek tieši starp pircēju un pārdevēju, un abas puses par to ir pilnībā atbildīgas. Sk. arī mūsu <a href="#safety">Drošības ieteikumus</a> drošam darījumam.</p>
     <h3>6. Moderācija un sludinājumu noņemšana</h3>
-    <p>Mēs paturam tiesības pārskatīt, rediģēt pieprasīt vai bez brīdinājuma noņemt sludinājumus, kas pārkāpj šos noteikumus, kā arī apturēt vai dzēst lietotāja kontu smagu vai atkārtotu pārkāpumu gadījumā (piemēram, aizdomas par zagtu preci vai krāpšanu).</p>
+    <p>Mēs paturam tiesības pārskatīt, pieprasīt rediģēšanu vai bez brīdinājuma noņemt sludinājumus, kas pārkāpj šos noteikumus, kā arī apturēt vai dzēst lietotāja kontu smagu vai atkārtotu pārkāpumu gadījumā (piemēram, aizdomas par zagtu preci vai krāpšanu).</p>
     <h3>7. Ziņošana par pārkāpumiem</h3>
     <p>Ja pamani sludinājumu vai lietotāju, kas pārkāpj šos noteikumus, izmanto pogu "Ziņot par sludinājumu" attiecīgā sludinājuma lapā vai raksti mums uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>.</p>
     <h3>8. Kontakti</h3>
@@ -279,9 +279,9 @@ export const STATIC_PAGES = {
     <h3>3. Tiekoties klātienē</h3>
     <p>Izvēlies drošu, publisku un labi apgaismotu vietu, ideālā gadījumā dienas laikā. Ja iespējams, ņem līdzi kādu citu. Izvairies doties vienatnē uz nomaļu vietu, īpaši, ja darījuma summa ir liela.</p>
     <h3>4. Pārbaudi preci pirms apmaksas</h3>
-    <p>Salīdzini detaļas numuru un stāvokli ar sludinājumā redzamo. Ja iespējams, pārbaudi detaļu vai pielaikojot to. Nemaksā, pirms neesi preci redzējis un apstiprinājis, ka tā atbilst aprakstam.</p>
+    <p>Salīdzini detaļas numuru un stāvokli ar sludinājumā redzamo. Ja iespējams, pārbaudi detaļu vai pielaiko to. Nemaksā, pirms neesi preci redzējis un apstiprinājis, ka tā atbilst aprakstam.</p>
     <h3>5. Maksājumi</h3>
-    <p>Priekšroku dod skaidrai naudai pēc preces apskates vai citam drošam maksājuma veidam. Nekad nesūti avansu vai pilnu summu nepazīstamam pārdevējam, īpaši ar bankas pārskaitījumu, kriptovalūtu vai dāvanu kartēm, ja precīti neesi redzējis. Uzmanies no steidzināšanas ("jāmaksā tagad, citādi detaļu nopirks cits") — tas ir bieži sastopams krāpšanas paņēmiens. Nekad nedalies ar bankas kartes datiem, PIN kodiem vai vienreizējiem apstiprinājuma kodiem.</p>
+    <p>Priekšroku dod skaidrai naudai pēc preces apskates vai citam drošam maksājuma veidam. Nekad nesūti avansu vai pilnu summu nepazīstamam pārdevējam, īpaši ar bankas pārskaitījumu, kriptovalūtu vai dāvanu kartēm, ja preci neesi redzējis. Uzmanies no steidzināšanas ("jāmaksā tagad, citādi detaļu nopirks cits") — tas ir bieži sastopams krāpšanas paņēmiens. Nekad nedalies ar bankas kartes datiem, PIN kodiem vai vienreizējiem apstiprinājuma kodiem.</p>
     <h3>6. Sūtīšana un attālināti darījumi</h3>
     <p>Ja prece tiek sūtīta, izmanto izsekojamu kurjerpakalpojumu un vienojies par apmaksu tikai pēc sūtījuma apstiprināšanas. Esi piesardzīgs, ja cena šķiet neparasti zema salīdzinājumā ar tirgu — tas var liecināt par krāpšanu.</p>
     <h3>7. Brīdinājuma pazīmes</h3>

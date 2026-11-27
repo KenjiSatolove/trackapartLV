@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 :root {
   --ink: #0a0a0a;
   --paper: #ffffff;
@@ -116,6 +114,15 @@ footer {
   border-radius: 50%;
   background: var(--orange);
   box-shadow: 0 0 8px rgba(225, 6, 0, 0.8);
+}
+
+.toast.is-warning {
+  border-left-color: #f59e0b;
+}
+
+.toast.is-warning .toast-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
 }
 
 .toast-text {

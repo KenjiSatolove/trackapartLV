@@ -5,13 +5,13 @@ const LANG_STORAGE_KEY = 'trackparts-lang'
 
 export const translations = {
   'Sākums': 'Home', 'Katalogs': 'Catalog', 'Sludinājumi': 'Listings', 'Pārdot detaļu': 'Sell a part', 'Mans konts': 'My account', 'Par mums': 'About us', 'Kontakti': 'Contact',
-  'KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ': 'QUALITY USED PARTS · SHIPPING ACROSS EUROPE', 'BEZMAKSA PIEGĀDE NO 150 €': 'FREE SHIPPING FROM €150',
+  'KVALITĀTES LIETOTAS DETAĻAS · PIEGĀDE VISĀ EIROPĀ': 'QUALITY USED PARTS · SHIPPING ACROSS EUROPE', 'BEZMAKSAS PIEGĀDE NO 150 €': 'FREE SHIPPING FROM €150',
   'GROZS': 'CART', 'TAVS GROZS': 'YOUR CART', 'SKATĪT GROZU ↗': 'VIEW CART ↗', 'Atlasītās': 'Selected', 'detaļas.': 'parts.', 'KOPĀ': 'TOTAL', 'UZ NORĒĶINU ↗': 'CHECKOUT ↗', 'NOTĪRĪT GROZU': 'CLEAR CART', 'Grozs ir tukšs.': 'Cart is empty.',
   'PASŪTĪJUMA PIEPRASĪJUMS': 'ORDER REQUEST', 'Pabeidz': 'Complete', 'pasūtījumu.': 'your order.',
   'Apmaksa tiešsaistē vēl nav pieejama — pēc pieprasījuma nosūtīšanas mēs sazināsimies pa e-pastu, lai vienotos par apmaksu un piegādi.': "Online payment isn't available yet — after you send the request we'll contact you by email to arrange payment and delivery.",
   'VĀRDS, UZVĀRDS': 'FULL NAME', 'E-PASTS': 'EMAIL', 'TĀLRUNIS': 'PHONE', 'PIEGĀDES ADRESE': 'DELIVERY ADDRESS', 'PIEZĪMES': 'NOTES', 'NOSŪTĪT': 'SEND', '← ATPAKAĻ': '← BACK',
   'PALDIES!': 'THANKS!', 'Pasūtījums': 'Order', 'saņemts.': 'received.', 'AIZVĒRT': 'CLOSE',
-  'DETĀĻAS, KURĀM VAR UZTICĒTIES': 'PARTS YOU CAN TRUST', 'Tava automašīna.': 'Your car.', 'Mūsu detaļas.': 'Our parts.',
+  'DETAĻAS, KURĀM VAR UZTICĒTIES': 'PARTS YOU CAN TRUST', 'Tava automašīna.': 'Your car.', 'Mūsu detaļas.': 'Our parts.',
   'Pārbaudītas lietotas auto detaļas. Atrastas ātri, nosūtītas droši.': 'Checked used car parts. Found fast, shipped safely.', 'SKATĪT KATALOGU': 'BROWSE CATALOG',
   'DETAĻAS': 'PARTS', 'NOLIKTAVĀ': 'IN STOCK', 'ĀTRA': 'FAST', 'IZSŪTĪŠANA': 'SHIPPING', 'PIEGĀDE': 'SHIPPING', 'VISĀ EIROPĀ': 'ACROSS EUROPE',
   '01 / ATRODI SAVU DETAĻU': '01 / FIND YOUR PART', 'Ko tu meklē?': 'What are you looking for?', 'Meklē pēc nosaukuma, OEM koda vai detaļas numura.': 'Search by name, OEM code or part number.',
@@ -95,6 +95,7 @@ export const translations = {
   'Šī vietne izmanto tikai tehniski nepieciešamu lokālo glabātuvi, lai uzturētu tavu pieslēgšanās sesiju. Uzzini vairāk mūsu': 'This site only uses technically necessary local storage to keep you signed in. Learn more in our', 'SAPRATU': 'GOT IT', 'Privātuma politikā': 'Privacy Policy',
   'Auto detaļas bez liekām': 'Car parts without the', 'rūpēm.': 'hassle.',
   'PĀRDEVĒJA PROFILS': 'SELLER PROFILE', 'Pārdevēja': "Seller's", 'ATSAUKSMES': 'REVIEWS', 'Ko saka': 'What buyers', 'pircēji.': 'say.', 'VĒRTĒJUMS': 'RATING', 'KOMENTĀRS': 'COMMENT', 'PUBLICĒT ATSAUKSMI': 'POST REVIEW', 'ATJAUNOT ATSAUKSMI': 'UPDATE REVIEW',
+  'Ielādē...': 'Loading...', 'Ielādējam...': 'Loading...', 'Ielogojies, lai publicētu sludinājumu.': 'Sign in to publish a listing.', 'Lai ievietotu sludinājumu, vispirms ielogojies.': 'Please sign in first to publish a listing.', 'Pārdevējs nav pievienojis aprakstu.': 'Seller has not added a description.', 'Nav norādīta': 'Not specified', 'Paldies! Ziņojums nosūtīts administrācijai.': 'Thanks! Your report has been sent to moderation.', 'Izvēlies vērtējumu.': 'Please select a rating.', 'Vēl nav nevienas atsauksmes.': 'No reviews yet.', 'Ielogojies, lai atstātu atsauksmi.': 'Sign in to leave a review.', 'Šim pārdevējam pašlaik nav aktīvu sludinājumu.': 'This seller has no active listings right now.', 'BILDES (maks. 10 faili, līdz 5 MB katrs)': 'PHOTOS (max 10 files, up to 5 MB each)', '2FA ir ieslēgta šim kontam.': '2FA is enabled for this account.', '2FA nav ieslēgta šim kontam. Ieteicams pārdevējiem, lai pasargātu kontu no pārņemšanas.': '2FA is not enabled for this account. Recommended for sellers to protect against account takeover.', 'Konta dzēšana ir neatgriezeniska. Tiks dzēsti tavi sludinājumi, favorīti un profils.': 'Deleting your account is permanent. Your listings, favorites, and profile will be removed.', 'Šī prece vairs nav pieejama katalogā.': 'This item is no longer available in the catalog.', 'Veiksmīgi ielogojies.': 'Signed in successfully.', 'Parole atjaunota! Tagad vari izmantot jauno paroli.': 'Password updated! You can now use your new password.', 'Ievadi e-pastu un paroli, lai izveidotu kontu.': 'Enter your email and password to create an account.',
 }
 
 export const placeholderTranslations = {

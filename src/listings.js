@@ -2,7 +2,9 @@ import { supabase } from './lib/supabase.js'
 import { CONDITION_NAMES, FALLBACK_LISTINGS } from './data.js'
 import {
   escapeHtml,
+  escapeIlikePattern,
   formatPrice,
+  formatTelHref,
   isSpamSubmit,
   safeUrl,
   sanitizeUploadFilename,
@@ -29,6 +31,7 @@ export const listingsPage = `<section class="page-hero">
     <div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>
     <p class="listing-loading">Ielādējam sludinājumus...</p>
   </div>
+  <p class="no-results" id="listings-no-results" hidden>Neviena prece neatbilst meklējumam.</p>
 </section>`
 
 export const listingDetailPage = `<section class="detail-page">
@@ -122,7 +125,7 @@ function listingRowsMarkup(rows, thumbs) {
   return `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows
     .map(
       (row, index) =>
-        `<a class="listing-row" data-search="${escapeHtml([row.title, row.brand, row.model].filter(Boolean).join(' ').toLowerCase())}" href="#listing-${escapeHtml(row.id || `demo-${index + 1}`)}">
+        `<a class="listing-row" data-search="${escapeHtml([row.title, row.brand, row.model, row.location, row.oem_number].filter(Boolean).join(' ').toLowerCase())}" href="#listing-${escapeHtml(row.id || `demo-${index + 1}`)}">
           <div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${escapeHtml(row.title)}</strong></div>
           <span>${escapeHtml(row.brand || '-')} ${escapeHtml(row.model || '')}</span>
           <span>${escapeHtml(CONDITION_NAMES[row.condition] || row.condition || 'Nav norādīts')}</span>
@@ -141,7 +144,7 @@ export async function loadListings() {
   if (supabase) {
     const { data } = await supabase
       .from('listings')
-      .select('id, title, brand, model, condition, price, location')
+      .select('id, title, brand, model, condition, price, location, oem_number')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(isFullPage ? 50 : 8)
@@ -162,9 +165,14 @@ function bindListingsFilter() {
   input.dataset.bound = 'true'
   input.addEventListener('input', () => {
     const query = input.value.trim().toLowerCase()
+    let visible = 0
     document.querySelectorAll('.listing-row[data-search]').forEach((row) => {
-      row.hidden = query.length > 0 && !row.dataset.search.includes(query)
+      const match = query.length === 0 || row.dataset.search.includes(query)
+      row.hidden = !match
+      if (match) visible += 1
     })
+    const empty = document.querySelector('#listings-no-results')
+    if (empty) empty.hidden = visible !== 0
   })
 }
 
@@ -175,9 +183,9 @@ export async function loadCategoryListings(categoryValue) {
   if (supabase) {
     const { data } = await supabase
       .from('listings')
-      .select('id, title, brand, model, condition, price, location, category')
+      .select('id, title, brand, model, condition, price, location, category, oem_number')
       .eq('status', 'active')
-      .ilike('category', categoryValue)
+      .ilike('category', escapeIlikePattern(categoryValue))
       .order('created_at', { ascending: false })
       .limit(8)
     if (data?.length) rows = data
@@ -224,11 +232,10 @@ async function bindFavoriteToggle(listing, openAuthModal) {
       openAuthModal('login')
       return
     }
-    if (isFavorite) {
-      await supabase.from('favorites').delete().eq('user_id', current.id).eq('listing_id', listing.id)
-    } else {
-      await supabase.from('favorites').insert({ user_id: current.id, listing_id: listing.id })
-    }
+    const { error } = isFavorite
+      ? await supabase.from('favorites').delete().eq('user_id', current.id).eq('listing_id', listing.id)
+      : await supabase.from('favorites').insert({ user_id: current.id, listing_id: listing.id })
+    if (error) return
     isFavorite = !isFavorite
     paint()
   }
@@ -338,8 +345,14 @@ export async function loadListingDetail(id, openAuthModal) {
     sellerHeading.textContent = listing.seller || 'Privāts pārdevējs'
   }
   const phone = document.querySelector('#detail-phone')
-  phone.textContent = `${listing.phone || 'Sazināties ar pārdevēju'} ↗`
-  if (listing.phone?.startsWith('+')) phone.href = `tel:${listing.phone.replaceAll(' ', '')}`
+  const telHref = formatTelHref(listing.phone)
+  if (telHref) {
+    phone.hidden = false
+    phone.textContent = `${listing.phone.trim()} ↗`
+    phone.href = telHref
+  } else {
+    phone.hidden = true
+  }
   await bindFavoriteToggle(listing, openAuthModal)
   bindReportListing(listing, openAuthModal)
   primeAndTranslate()
@@ -449,7 +462,7 @@ export async function loadSellerProfile(id) {
       )
       .join('')
   } else {
-    reviewsHolder.innerHTML = '<p class="listing-loading">Vēl nav neviena atsauksme.</p>'
+    reviewsHolder.innerHTML = '<p class="listing-loading">Vēl nav nevienas atsauksmes.</p>'
   }
 
   const formHolder = document.querySelector('#seller-review-form-holder')
@@ -516,9 +529,10 @@ export function bindSellForm(route, openAuthModal) {
           const path = `${user.id}/${listing.id}/${safeName}`
           const upload = await supabase.storage.from('listing-images').upload(path, file)
           if (upload.error) return upload.error
-          await supabase
+          const { error: metaError } = await supabase
             .from('listing_images')
             .insert({ listing_id: listing.id, storage_path: path, sort_order: index })
+          if (metaError) return metaError
           return null
         }),
       )

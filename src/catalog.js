@@ -1,9 +1,26 @@
 import { CATEGORIES, getProducts, isProductsLoaded } from './data.js'
 import { addToCart, getAvailableStock } from './cart.js'
-import { buildProductSearchBlob, escapeHtml, formatPrice, matchesProductionYear, safeUrl, stockLabel } from './utils.js'
+import {
+  buildProductSearchBlob,
+  escapeHtml,
+  formatPrice,
+  matchesProductionYear,
+  parseOptionalPrice,
+  safeUrl,
+  stockLabel,
+} from './utils.js'
 import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
 
 export const CATALOG_PAGE_SIZE = 8
+
+export function matchesConditionFilter(productCondition, filterCondition) {
+  const filter = String(filterCondition ?? '').trim().toLowerCase()
+  if (!filter) return true
+  const cond = String(productCondition ?? '').trim().toLowerCase()
+  if (!cond) return false
+  if (filter === 'pārbaudīt') return cond.startsWith('pārbaudīt')
+  return cond === filter
+}
 
 export function productCardMarkup(product, index, capped) {
   const dataName = buildProductSearchBlob(product)
@@ -13,7 +30,7 @@ export function productCardMarkup(product, index, capped) {
   const safeId = escapeHtml(product.id)
   const tagText = outOfStock ? 'NAV NOLIKTAVĀ' : product.tag || product.condition || ''
 
-  return `<article class="product-card${capped ? ' card-capped' : ''}${outOfStock ? ' is-out-of-stock' : ''}" data-product-id="${safeId}" data-name="${escapeHtml(dataName)}" data-year="${escapeHtml(product.production_year || '')}" data-price="${Number(product.price || 0)}" data-category="${escapeHtml((product.category || '').toLowerCase())}" data-brand="${escapeHtml((product.brand || '').toLowerCase())}" data-model="${escapeHtml((product.model || '').toLowerCase())}" data-order="${index ?? 0}">
+  return `<article class="product-card${capped ? ' card-capped' : ''}${outOfStock ? ' is-out-of-stock' : ''}" data-product-id="${safeId}" data-name="${escapeHtml(dataName)}" data-year="${escapeHtml(product.production_year || '')}" data-price="${Number(product.price || 0)}" data-category="${escapeHtml((product.category || '').toLowerCase())}" data-brand="${escapeHtml((product.brand || '').toLowerCase())}" data-model="${escapeHtml((product.model || '').toLowerCase())}" data-condition="${escapeHtml((product.condition || '').toLowerCase())}" data-order="${index ?? 0}">
     <div class="product-image">
       ${imgSrc ? `<img src="${imgSrc}" alt="${escapeHtml(product.name)}" loading="lazy"/>` : '<div class="gallery-empty">Nav bildes</div>'}
       <span class="product-tag${outOfStock ? ' is-soldout' : ''}">${escapeHtml(tagText)}</span>
@@ -31,13 +48,13 @@ export function productCardMarkup(product, index, capped) {
   </article>`
 }
 
-export function productGridMarkup(list, paginate) {
+export function productGridMarkup(list, paginate, { showMoreButton = true } = {}) {
   const limit = paginate ? CATALOG_PAGE_SIZE : list.length
   return `<div class="product-grid" id="product-grid">${list
     .map((product, index) => productCardMarkup(product, index, index >= limit))
     .join('')}</div>
     <p class="no-results" id="no-results" ${list.length ? 'hidden' : ''}>Neviena detaļa neatbilst meklējumam.</p>
-    ${paginate && list.length > limit ? '<button class="filter-button show-more-button" id="catalog-show-more" type="button">RĀDĪT VAIRĀK ↓</button>' : ''}`
+    ${paginate && showMoreButton && list.length > limit ? '<button class="filter-button show-more-button" id="catalog-show-more" type="button">RĀDĪT VAIRĀK ↓</button>' : ''}`
 }
 
 export function searchBoxMarkup() {
@@ -103,8 +120,8 @@ export function bindCatalogFilters() {
     const model = modelSelect?.value || ''
     const category = document.querySelector('#filter-category')?.value || ''
     const condition = document.querySelector('#filter-condition')?.value || ''
-    const priceMin = Number(document.querySelector('#filter-price-min')?.value) || 0
-    const priceMax = Number(document.querySelector('#filter-price-max')?.value) || Infinity
+    const priceMin = parseOptionalPrice(document.querySelector('#filter-price-min')?.value, 0)
+    const priceMax = parseOptionalPrice(document.querySelector('#filter-price-max')?.value, Infinity)
     const year = document.querySelector('#filter-year')?.value.trim().toLowerCase() || ''
     let visible = 0
     document.querySelectorAll('.product-card').forEach((card) => {
@@ -115,7 +132,7 @@ export function bindCatalogFilters() {
         (!brand || card.dataset.brand === brand) &&
         (!model || card.dataset.model === model) &&
         (!category || card.dataset.category === category) &&
-        (!condition || text.includes(condition)) &&
+        matchesConditionFilter(card.dataset.condition, condition) &&
         price >= priceMin &&
         price <= priceMax &&
         matchesProductionYear(card.dataset.year, year)
@@ -160,7 +177,18 @@ export function bindCatalogFilters() {
   // Scoped strictly to .brand-strip buttons so product cards with data-brand aren't matched!
   document.querySelectorAll('.brand-strip [data-brand]').forEach((button) =>
     button.addEventListener('click', () => {
-      document.querySelector('#search-input').value = button.dataset.brand
+      const targetBrand = button.dataset.brand
+      const hasBrandOption =
+        brandSelect && [...brandSelect.options].some((option) => option.value === targetBrand)
+      if (hasBrandOption) {
+        brandSelect.value = targetBrand
+        document.querySelector('#search-input').value = ''
+      } else {
+        if (brandSelect) brandSelect.value = ''
+        document.querySelector('#search-input').value = targetBrand
+      }
+      refreshModelOptions()
+      if (modelSelect) modelSelect.value = ''
       run()
       document.querySelector('#product-grid')?.scrollIntoView({ behavior: 'smooth' })
     }),
@@ -288,8 +316,8 @@ export function bindCatalogSidebarFilters() {
     renderFacet('model', 'model', state.models, state.modelSearch)
   })
   document.querySelector('#sidebar-apply-price')?.addEventListener('click', () => {
-    state.priceMin = Number(document.querySelector('#sidebar-price-min')?.value) || 0
-    state.priceMax = Number(document.querySelector('#sidebar-price-max')?.value) || Infinity
+    state.priceMin = parseOptionalPrice(document.querySelector('#sidebar-price-min')?.value, 0)
+    state.priceMax = parseOptionalPrice(document.querySelector('#sidebar-price-max')?.value, Infinity)
     run()
   })
   document.querySelector('#filter-year-input')?.addEventListener('input', (event) => {
@@ -301,12 +329,16 @@ export function bindCatalogSidebarFilters() {
     if (!grid) return
     const sortValue = document.querySelector('#sidebar-sort-select').value
     const cards = [...grid.querySelectorAll('.product-card')]
+    const isPaginated = Boolean(document.querySelector('#catalog-show-more'))
     cards.sort((a, b) => {
       if (sortValue === 'price-asc') return Number(a.dataset.price) - Number(b.dataset.price)
       if (sortValue === 'price-desc') return Number(b.dataset.price) - Number(a.dataset.price)
       return Number(a.dataset.order) - Number(b.dataset.order)
     })
-    cards.forEach((card) => grid.appendChild(card))
+    cards.forEach((card, index) => {
+      if (isPaginated) card.classList.toggle('card-capped', index >= CATALOG_PAGE_SIZE)
+      grid.appendChild(card)
+    })
   })
   sidebar.querySelectorAll('[data-facet-toggle]').forEach((button) =>
     button.addEventListener('click', () => {
@@ -330,19 +362,26 @@ export function bindProductButtons() {
       if (!product) return
       const res = addToCart(product)
       const isQuick = button.classList.contains('quick-add')
+      if (button.dataset.resetTimer) clearTimeout(Number(button.dataset.resetTimer))
       if (!res.ok) {
         button.textContent = isQuick ? '!' : res.reason === 'out_of_stock' ? 'NAV NOLIKTAVĀ' : 'MAKS. DAUDZUMS'
-        setTimeout(() => {
-          button.innerHTML = isQuick ? '+' : 'PIEVIENOT <span>↗</span>'
-          if (isEnglish()) translatePage()
-        }, 1200)
+        button.dataset.resetTimer = String(
+          setTimeout(() => {
+            delete button.dataset.resetTimer
+            button.innerHTML = isQuick ? '+' : 'PIEVIENOT <span>↗</span>'
+            if (isEnglish()) translatePage()
+          }, 1200),
+        )
         return
       }
       button.textContent = '✓'
-      setTimeout(() => {
-        button.innerHTML = isQuick ? '+' : 'PIEVIENOT <span>↗</span>'
-        if (isEnglish()) translatePage()
-      }, 900)
+      button.dataset.resetTimer = String(
+        setTimeout(() => {
+          delete button.dataset.resetTimer
+          button.innerHTML = isQuick ? '+' : 'PIEVIENOT <span>↗</span>'
+          if (isEnglish()) translatePage()
+        }, 900),
+      )
     }),
   )
   document.querySelectorAll('.product-card').forEach((card) =>
@@ -463,7 +502,6 @@ export function categoryPage(categoryValue) {
           ? productGridMarkup(matchingProducts)
           : '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'
       }
-      ${matchingProducts.length ? '<p class="no-results" id="category-search-empty" hidden>Neviena prece neatbilst meklējumam.</p>' : ''}
     </section>
     <section class="listings-section category-listings reveal">
       <div class="section-top">
@@ -488,7 +526,7 @@ export function bindCategorySearch() {
       card.hidden = !match
       if (match) visible += 1
     })
-    const empty = document.querySelector('#category-search-empty')
+    const empty = document.querySelector('.category-products #no-results')
     if (empty) empty.hidden = visible !== 0
   })
 }
@@ -571,12 +609,16 @@ export function loadProductDetail(id) {
       return
     }
     msgEl.textContent = ''
+    if (addBtn.dataset.resetTimer) clearTimeout(Number(addBtn.dataset.resetTimer))
     addBtn.textContent = '✓ PIEVIENOTS GROZAM'
     if (isEnglish()) translatePage()
-    setTimeout(() => {
-      addBtn.textContent = 'PIEVIENOT GROZAM ↗'
-      if (isEnglish()) translatePage()
-    }, 1200)
+    addBtn.dataset.resetTimer = String(
+      setTimeout(() => {
+        delete addBtn.dataset.resetTimer
+        addBtn.textContent = 'PIEVIENOT GROZAM ↗'
+        if (isEnglish()) translatePage()
+      }, 1200),
+    )
   }
   primeAndTranslate()
 }

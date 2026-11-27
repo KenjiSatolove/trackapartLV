@@ -300,14 +300,28 @@ async function renderAdminTab(tab) {
     document.querySelectorAll('[data-delete-id]').forEach((button) =>
       button.addEventListener('click', async () => {
         if (!window.confirm('Delete this product?')) return
-        await supabase.from('products').delete().eq('id', button.dataset.deleteId)
+        const { error } = await supabase.from('products').delete().eq('id', button.dataset.deleteId)
+        if (error) {
+          const msg = document.querySelector('#admin-products-message')
+          if (msg) msg.textContent = error.message
+          return
+        }
         await loadProducts()
         renderAdminTab('products')
       }),
     )
     document.querySelectorAll('[data-stock-id]').forEach((input) =>
       input.addEventListener('change', async () => {
-        await supabase.from('products').update({ stock: Number(input.value) || 0 }).eq('id', input.dataset.stockId)
+        const msg = document.querySelector('#admin-products-message')
+        const { error } = await supabase
+          .from('products')
+          .update({ stock: Math.max(0, Number(input.value) || 0) })
+          .eq('id', input.dataset.stockId)
+        if (error) {
+          if (msg) msg.textContent = error.message
+          return
+        }
+        if (msg) msg.textContent = ''
         await loadProducts()
       }),
     )
@@ -375,12 +389,25 @@ async function renderAdminTab(tab) {
               )
               .join('')}`
           : '<p class="admin-note">Vēl nav neviena pasūtījuma. Norēķinu / apmaksas sistēma tiks pievienota vēlāk — tagad klienti nosūta pasūtījuma pieprasījumu, un jūs sazināties, lai vienotos par apmaksu.</p>'
-      }</div>`
-    document.querySelectorAll('[data-order-status]').forEach((select) =>
+      }</div>
+      <p class="admin-note" id="admin-orders-message"></p>`
+    document.querySelectorAll('[data-order-status]').forEach((select) => {
+      select.dataset.prevStatus = select.value
       select.addEventListener('change', async () => {
-        await supabase.from('orders').update({ status: select.value }).eq('id', select.dataset.orderStatus)
-      }),
-    )
+        const msg = document.querySelector('#admin-orders-message')
+        const { error } = await supabase
+          .from('orders')
+          .update({ status: select.value })
+          .eq('id', select.dataset.orderStatus)
+        if (error) {
+          select.value = select.dataset.prevStatus
+          if (msg) msg.textContent = error.message
+          return
+        }
+        select.dataset.prevStatus = select.value
+        if (msg) msg.textContent = ''
+      })
+    })
   }
 
   if (tab === 'listings') {
@@ -468,7 +495,7 @@ async function renderAdminTab(tab) {
       </div>`
   }
 
-  bindListingActionButtons()
+  bindListingActionButtons(content)
   document.querySelector('#admin-add-employee')?.addEventListener('click', () => {
     window.alert(
       'Employee accounts can be added from Supabase Authentication. Then set their role (manager / warehouse / fulfillment) on their row in the profiles table to give them admin access.',
@@ -476,13 +503,18 @@ async function renderAdminTab(tab) {
   })
 }
 
-function bindListingActionButtons() {
-  document.querySelectorAll('[data-listing-action]').forEach((button) =>
+function bindListingActionButtons(scope = document) {
+  scope.querySelectorAll('[data-listing-action]').forEach((button) =>
     button.addEventListener('click', async () => {
-      await supabase
+      const { error } = await supabase
         .from('listings')
         .update({ status: button.dataset.listingAction })
         .eq('id', button.dataset.listingId)
+      if (error) {
+        const holder = document.querySelector('#admin-listing-detail')
+        if (holder) holder.innerHTML = `<p class="form-message">${escapeHtml(error.message)}</p>`
+        return
+      }
       notifyEmail('listing_status', {
         listingId: button.dataset.listingId,
         status: button.dataset.listingAction,
@@ -537,5 +569,5 @@ async function showListingDetail(id) {
   document.querySelector('#admin-listing-detail-close').addEventListener('click', () => {
     holder.innerHTML = ''
   })
-  bindListingActionButtons()
+  bindListingActionButtons(holder)
 }

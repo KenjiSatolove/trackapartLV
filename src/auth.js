@@ -43,6 +43,15 @@ export function closeAuthModal() {
 export function closeMfaModal() {
   const overlay = document.querySelector('#mfa-modal-overlay')
   if (overlay) overlay.hidden = true
+  const holder = document.querySelector('#mfa-modal-holder')
+  if (holder) holder.innerHTML = ''
+}
+
+export async function cancelMfaModal() {
+  closeMfaModal()
+  if (supabase && (await accountHasPendingMfaChallenge())) {
+    await supabase.auth.signOut()
+  }
 }
 
 function setAuthModalTab(mode) {
@@ -131,10 +140,7 @@ export async function challengeMfaIfNeeded(onDone) {
     overlay.hidden = true
     onDone()
   })
-  document.querySelector('#mfa-modal-cancel').onclick = async () => {
-    overlay.hidden = true
-    await supabase.auth.signOut()
-  }
+  document.querySelector('#mfa-modal-cancel').onclick = () => cancelMfaModal()
 }
 
 export function bindAuthModal(onSignedIn) {
@@ -197,7 +203,7 @@ export function bindAuthModal(onSignedIn) {
   })
 }
 
-export function bindAccountAuthForm() {
+export function bindAccountAuthForm(onSignedIn) {
   if (!supabase) return
   const authForm = document.querySelector('#auth-form')
   const authMessage = document.querySelector('#auth-message')
@@ -220,7 +226,7 @@ export function bindAccountAuthForm() {
     }
     authMessage.textContent = 'Veiksmīgi ielogojies.'
     await challengeMfaIfNeeded(() => {
-      window.location.hash = 'sell'
+      onSignedIn?.()
     })
   })
   document.querySelector('#signup-button')?.addEventListener('click', async () => {
@@ -370,11 +376,12 @@ async function bindMyListingForm(listing, userId) {
         const path = `${userId}/${listingId}/${safeName}`
         const upload = await supabase.storage.from('listing-images').upload(path, file)
         if (upload.error) return upload.error
-        await supabase.from('listing_images').insert({
+        const { error: metaError } = await supabase.from('listing_images').insert({
           listing_id: listingId,
           storage_path: path,
           sort_order: existingImagePaths.length + index,
         })
+        if (metaError) return metaError
         return null
       }),
     )
@@ -396,7 +403,7 @@ async function loadMyListings(userId) {
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  holder.innerHTML = `<div id="my-listing-form-holder"></div>${
+  holder.innerHTML = `<div id="my-listing-form-holder"></div><p class="form-message" id="my-listings-message"></p>${
     rows?.length
       ? `<div class="admin-table cols-5">
           <div class="admin-table-head"><span>SLUDINĀJUMS</span><span>AUTO</span><span>CENA</span><span>STATUSS</span><span>DARBĪBAS</span></div>
@@ -428,7 +435,12 @@ async function loadMyListings(userId) {
   document.querySelectorAll('[data-my-remove-id]').forEach((button) =>
     button.addEventListener('click', async () => {
       if (!window.confirm('Dzēst šo sludinājumu?')) return
-      await supabase.from('listings').delete().eq('id', button.dataset.myRemoveId).eq('user_id', userId)
+      const { error } = await supabase.from('listings').delete().eq('id', button.dataset.myRemoveId).eq('user_id', userId)
+      if (error) {
+        const msg = document.querySelector('#my-listings-message')
+        if (msg) msg.textContent = error.message
+        return
+      }
       await loadMyListings(userId)
     }),
   )
@@ -569,6 +581,10 @@ export async function initAccountPage(onSignOut) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return
+  if (await accountHasPendingMfaChallenge()) {
+    await challengeMfaIfNeeded(() => initAccountPage(onSignOut))
+    return
+  }
   const { data: profile } = await supabase
     .from('profiles')
     .select('display_name, phone, city, username')

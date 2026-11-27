@@ -1,5 +1,5 @@
 import { supabase } from './lib/supabase.js'
-import { getProducts } from './data.js'
+import { getProducts, whenProductsReady } from './data.js'
 import { escapeHtml, formatPrice, honeypotFieldMarkup, isSpamSubmit, notifyEmail } from './utils.js'
 import { primeAndTranslate, translatePage, isEnglish } from './i18n.js'
 import { pulseCartBadge, showToast } from './fx.js'
@@ -7,6 +7,7 @@ import { pulseCartBadge, showToast } from './fx.js'
 const cartItems = []
 let cartOwner = 'guest'
 let persistQueue = Promise.resolve()
+let syncQueue = Promise.resolve()
 
 function cartStorageKey(owner) {
   return `trackparts-cart:${owner}`
@@ -72,7 +73,8 @@ function persistCart() {
   return persistQueue
 }
 
-export async function loadCartForOwner(owner) {
+async function loadCartForOwnerNow(owner) {
+  await whenProductsReady()
   cartOwner = owner || 'guest'
   cartItems.length = 0
   const products = getProducts()
@@ -99,36 +101,49 @@ export async function loadCartForOwner(owner) {
   renderCart()
 }
 
-export async function switchCartOwner(userId) {
-  const nextOwner = userId || 'guest'
-  if (nextOwner !== 'guest' && cartOwner === 'guest' && cartItems.length && supabase) {
-    const guestIds = cartItems.map((product) => product.id)
-    try {
-      const { data: existingRows } = await supabase
-        .from('cart_items')
-        .select('product_id')
-        .eq('user_id', nextOwner)
-      const products = getProducts()
-      const merged = []
-      const tryAdd = (id) => {
-        const product = products.find((item) => item.id === id)
-        if (product && canAddProductToCart(merged, product).ok) merged.push(product)
-      }
-      ;(existingRows || []).forEach((row) => tryAdd(row.product_id))
-      const existingCount = merged.length
-      guestIds.forEach((id) => tryAdd(id))
-      const toInsert = merged.slice(existingCount)
-      if (toInsert.length) {
-        await supabase
+export function loadCartForOwner(owner) {
+  syncQueue = syncQueue.then(() => loadCartForOwnerNow(owner))
+  return syncQueue
+}
+
+export function switchCartOwner(userId) {
+  syncQueue = syncQueue.then(async () => {
+    await whenProductsReady()
+    const nextOwner = userId || 'guest'
+    if (nextOwner !== 'guest' && cartOwner === 'guest' && cartItems.length && supabase) {
+      const guestIds = cartItems.map((product) => product.id)
+      try {
+        const { data: existingRows, error: fetchError } = await supabase
           .from('cart_items')
-          .insert(toInsert.map((product) => ({ user_id: nextOwner, product_id: product.id })))
+          .select('product_id')
+          .eq('user_id', nextOwner)
+        if (!fetchError) {
+          const products = getProducts()
+          const merged = []
+          const tryAdd = (id) => {
+            const product = products.find((item) => item.id === id)
+            if (product && canAddProductToCart(merged, product).ok) merged.push(product)
+          }
+          ;(existingRows || []).forEach((row) => tryAdd(row.product_id))
+          const existingCount = merged.length
+          guestIds.forEach((id) => tryAdd(id))
+          const toInsert = merged.slice(existingCount)
+          let insertError = null
+          if (toInsert.length) {
+            const res = await supabase
+              .from('cart_items')
+              .insert(toInsert.map((product) => ({ user_id: nextOwner, product_id: product.id })))
+            insertError = res.error
+          }
+          if (!insertError) localStorage.removeItem(cartStorageKey('guest'))
+        }
+      } catch {
+        // merge failed
       }
-      localStorage.removeItem(cartStorageKey('guest'))
-    } catch {
-      // merge failed
     }
-  }
-  await loadCartForOwner(nextOwner)
+    await loadCartForOwnerNow(nextOwner)
+  })
+  return syncQueue
 }
 
 export function addToCart(product) {

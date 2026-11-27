@@ -4,8 +4,11 @@ import { readFileSync } from 'node:fs'
 import {
   buildProductSearchBlob,
   escapeHtml,
+  escapeIlikePattern,
   formatPrice,
+  formatTelHref,
   matchesProductionYear,
+  parseOptionalPrice,
   qrCodeToImgSrc,
   safeUrl,
   sanitizeUploadFilename,
@@ -118,12 +121,21 @@ test('matchesProductionYear supports year ranges like 2010–2017 and substrings
 })
 
 test('all fallback products and rendered markup pass basic safety and link invariants', async () => {
-  const { productCardMarkup, categoryPage } = await import('../src/catalog.js')
+  const { productCardMarkup, categoryPage, matchesConditionFilter } = await import('../src/catalog.js')
   const { homeMarkup, STATIC_PAGES } = await import('../src/pages.js')
 
   const home = homeMarkup()
   assert.ok(home.includes('href="#catalog">SKATĪT VISUS'))
   assert.ok(home.includes('data-year="2010–2017"'))
+  assert.ok(home.includes('DETAĻAS, KURĀM VAR UZTICĒTIES'))
+  assert.ok(!home.includes('id="catalog-show-more"'))
+
+  assert.equal(matchesConditionFilter('Ļoti labs', 'labs'), false)
+  assert.equal(matchesConditionFilter('Labs', 'labs'), true)
+  assert.equal(matchesConditionFilter('Ļoti labs', 'ļoti labs'), true)
+  assert.equal(matchesConditionFilter('Pārbaudīta', 'pārbaudīt'), true)
+  assert.equal(matchesConditionFilter('Pārbaudīts', 'pārbaudīt'), true)
+  assert.equal(matchesConditionFilter('Ar defektu', ''), true)
 
   const xssCard = productCardMarkup(
     {
@@ -133,18 +145,46 @@ test('all fallback products and rendered markup pass basic safety and link invar
       stock: 0,
       image: 'javascript:alert(1)',
       category: 'Dzinējs',
+      condition: 'Labs',
     },
     0,
     false,
   )
   assert.ok(!xssCard.includes('<script>'))
   assert.ok(!xssCard.includes('javascript:alert'))
+  assert.ok(xssCard.includes('data-condition="labs"'))
   assert.ok(xssCard.includes('NAV NOLIKTAVĀ'))
   assert.ok(xssCard.includes('disabled'))
 
   const xssCategory = categoryPage('<script>alert(1)</script>')
   assert.ok(!xssCategory.includes('<script>alert(1)</script>'))
+  const validCategory = categoryPage('dzinējs')
+  assert.ok(!validCategory.includes('category-search-empty'))
   assert.ok(STATIC_PAGES.about.includes('PAR TRACKPARTS'))
+})
+
+test('parseOptionalPrice handles 0 without falling back to Infinity', () => {
+  assert.equal(parseOptionalPrice('0', Infinity), 0)
+  assert.equal(parseOptionalPrice(0, Infinity), 0)
+  assert.equal(parseOptionalPrice('', Infinity), Infinity)
+  assert.equal(parseOptionalPrice('   ', 0), 0)
+  assert.equal(parseOptionalPrice('250.5', Infinity), 250.5)
+  assert.equal(parseOptionalPrice('-10', Infinity), Infinity)
+  assert.equal(parseOptionalPrice('abc', 0), 0)
+})
+
+test('formatTelHref formats international and local numbers and rejects non-phone text', () => {
+  assert.equal(formatTelHref('+371 2000 0000'), 'tel:+37120000000')
+  assert.equal(formatTelHref('2000 1234'), 'tel:20001234')
+  assert.equal(formatTelHref('20-00-12-34'), 'tel:20001234')
+  assert.equal(formatTelHref('Sazinies e-pastā'), '')
+  assert.equal(formatTelHref('123'), '')
+  assert.equal(formatTelHref(''), '')
+})
+
+test('escapeIlikePattern escapes SQL wildcard characters', () => {
+  assert.equal(escapeIlikePattern('%'), '\\%')
+  assert.equal(escapeIlikePattern('dzinējs_1\\test%'), 'dzinējs\\_1\\\\test\\%')
 })
 
 test('index.html CSP disallows inline scripts and allows Supabase + fonts', () => {

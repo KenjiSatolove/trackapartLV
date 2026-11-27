@@ -35,8 +35,8 @@ import {
 import {
   bindAccountAuthForm,
   bindAuthModal,
+  cancelMfaModal,
   closeAuthModal,
-  closeMfaModal,
   initAccountPage,
   openAuthModal,
   setPendingAuthEvent,
@@ -237,9 +237,23 @@ function closeMegaMenu() {
   document.querySelector('#catalog-nav-trigger').setAttribute('aria-expanded', 'false')
 }
 
+let pendingSearchFocus = false
+
+function focusHomeSearch() {
+  const input = document.querySelector('#search-input')
+  if (!input) return
+  input.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  input.focus({ preventScroll: true })
+}
+
 document.querySelector('.search-trigger').addEventListener('click', () => {
+  const current = window.location.hash.slice(1) || 'home'
+  if (current === 'home') {
+    focusHomeSearch()
+    return
+  }
+  pendingSearchFocus = true
   window.location.hash = 'home'
-  setTimeout(() => document.querySelector('#search-input')?.focus(), 80)
 })
 document.querySelector('.user-button').addEventListener('click', async () => {
   if (!supabase) {
@@ -289,7 +303,7 @@ document.addEventListener('keydown', (event) => {
     return
   }
   if (!document.querySelector('#mfa-modal-overlay')?.hidden) {
-    closeMfaModal()
+    cancelMfaModal()
     return
   }
   if (document.querySelector('#cart-panel')?.classList.contains('is-open')) {
@@ -327,7 +341,13 @@ document.querySelectorAll('.lang').forEach((languageButton) =>
   languageButton.addEventListener('click', () => {
     toggleLanguage()
     const rawRoute = window.location.hash.slice(1) || 'home'
-    syncDocumentLanguage(rawRoute)
+    let route = rawRoute
+    try {
+      route = decodeURIComponent(rawRoute)
+    } catch {
+      // malformed sequence, keep raw
+    }
+    syncDocumentLanguage(route)
   }),
 )
 
@@ -412,7 +432,7 @@ function renderPage({ scrollToTop = false } = {}) {
       : titleMap.home)
 
   bindProductButtons()
-  bindAccountAuthForm()
+  bindAccountAuthForm(() => renderPage())
   bindSellForm(route, openAuthModal)
   bindCatalogFilters()
   bindCatalogSidebarFilters()
@@ -432,6 +452,11 @@ function renderPage({ scrollToTop = false } = {}) {
   }
   bindHeroFx()
   initScrollReveal()
+
+  if (route === 'home' && pendingSearchFocus) {
+    pendingSearchFocus = false
+    requestAnimationFrame(focusHomeSearch)
+  }
 }
 
 let activeWipeCleanup = null
@@ -478,8 +503,25 @@ initGlobalFx()
 window.addEventListener('hashchange', () => playPageWipe(() => renderPage({ scrollToTop: true })))
 renderPage()
 
+function isProductDependentRoute(route) {
+  return (
+    route === 'home' ||
+    route === 'catalog' ||
+    route.startsWith('category-') ||
+    route.startsWith('product-')
+  )
+}
+
+function userIsEditingFormInMain() {
+  const active = document.activeElement
+  return Boolean(active && active.closest('main') && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))
+}
+
 loadProducts().then(async () => {
   const owner = supabase ? (await supabase.auth.getUser()).data.user?.id : null
   await loadCartForOwner(owner)
-  if (!window.location.hash.includes('access_token')) renderPage()
+  const route = window.location.hash.slice(1) || 'home'
+  if (!window.location.hash.includes('access_token') && isProductDependentRoute(route) && !userIsEditingFormInMain()) {
+    renderPage()
+  }
 })
