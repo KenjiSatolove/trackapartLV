@@ -2238,8 +2238,10 @@ h2 {
   font: 11px 'DM Mono';
 }
 
-.hp-field {
-  display: none;
+.hp-field,
+.site-form .hp-field,
+#checkout-form .hp-field {
+  display: none !important;
 }
 
 .consent-label {
