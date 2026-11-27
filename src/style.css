@@ -1008,40 +1008,6 @@ h2 em,
   will-change: transform;
   user-select: none;
   -webkit-user-drag: none;
-  z-index: 4;
-}
-
-.hero-brake-rotor,
-.hero-brake-caliper,
-.hero-barrel-vignette {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  user-select: none;
-}
-
-.hero-brake-rotor {
-  z-index: 1;
-  transform-origin: center center;
-  will-change: transform;
-}
-
-.hero-brake-caliper {
-  z-index: 2;
-}
-
-.hero-barrel-vignette {
-  z-index: 3;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(0, 0, 0, 0.08) 38%,
-    rgba(0, 0, 0, 0.34) 68%,
-    rgba(0, 0, 0, 0.72) 84%,
-    transparent 88%
-  );
 }
 
 @keyframes wheel-spin {
@@ -1063,8 +1029,7 @@ h2 em,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero-wheel-img,
-  .hero-brake-rotor {
+  .hero-wheel-img {
     animation: wheel-spin 14s linear infinite;
   }
   .hero-wheel-ring {

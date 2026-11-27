@@ -2,91 +2,6 @@ import { CATEGORIES, getProducts } from './data.js'
 import { escapeHtml, honeypotFieldMarkup } from './utils.js'
 import { productGridMarkup, searchBoxMarkup, sidebarFilterMarkup } from './catalog.js'
 
-function heroBrakeAssemblyMarkup() {
-  const holeAngles = Array.from({ length: 10 }, (_, i) => i * 36)
-  const holes = holeAngles
-    .map((deg) => {
-      const r1 = 104
-      const r2 = 123
-      const r3 = 142
-      const pt = (r, a) => {
-        const rad = ((a - 90) * Math.PI) / 180
-        return [+(200 + r * Math.cos(rad)).toFixed(1), +(200 + r * Math.sin(rad)).toFixed(1)]
-      }
-      const [x1, y1] = pt(r1, deg)
-      const [x2, y2] = pt(r2, deg + 5)
-      const [x3, y3] = pt(r3, deg + 10)
-      return `<circle cx="${x1}" cy="${y1}" r="3.4" fill="#09090b" stroke="#6d717a" stroke-width="0.9"/>
-        <circle cx="${x2}" cy="${y2}" r="3.4" fill="#09090b" stroke="#6d717a" stroke-width="0.9"/>
-        <circle cx="${x3}" cy="${y3}" r="3.4" fill="#09090b" stroke="#6d717a" stroke-width="0.9"/>`
-    })
-    .join('')
-
-  return `<svg class="hero-brake-rotor" viewBox="0 0 400 400" aria-hidden="true">
-      <defs>
-        <radialGradient id="tp-rotor-metal" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#141416"/>
-          <stop offset="44%" stop-color="#1d1e22"/>
-          <stop offset="49%" stop-color="#3f434b"/>
-          <stop offset="62%" stop-color="#7c828d"/>
-          <stop offset="76%" stop-color="#5a5f69"/>
-          <stop offset="90%" stop-color="#8b919c"/>
-          <stop offset="97%" stop-color="#393d45"/>
-          <stop offset="100%" stop-color="#17181b"/>
-        </radialGradient>
-        <linearGradient id="tp-rotor-sheen" x1="15%" y1="10%" x2="85%" y2="90%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
-          <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
-          <stop offset="70%" stop-color="#000000" stop-opacity="0.28"/>
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.16"/>
-        </linearGradient>
-      </defs>
-      <circle cx="200" cy="200" r="158" fill="url(#tp-rotor-metal)"/>
-      <circle cx="200" cy="200" r="158" fill="url(#tp-rotor-sheen)"/>
-      <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-      <circle cx="200" cy="200" r="134" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.2"/>
-      <circle cx="200" cy="200" r="116" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
-      <circle cx="200" cy="200" r="96" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="1.5"/>
-      <circle cx="200" cy="200" r="82" fill="#17181c" stroke="#30333a" stroke-width="2"/>
-      ${holes}
-    </svg>
-    <svg class="hero-brake-caliper" viewBox="0 0 400 400" aria-hidden="true">
-      <defs>
-        <linearGradient id="tp-caliper-red" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ff3026"/>
-          <stop offset="28%" stop-color="#e10600"/>
-          <stop offset="68%" stop-color="#a80400"/>
-          <stop offset="100%" stop-color="#5e0200"/>
-        </linearGradient>
-        <linearGradient id="tp-caliper-spec" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
-          <stop offset="45%" stop-color="#ffffff" stop-opacity="0.06"/>
-          <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
-        </linearGradient>
-        <filter id="tp-caliper-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="-4" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.72"/>
-        </filter>
-      </defs>
-      <g filter="url(#tp-caliper-shadow)" transform="rotate(-12 200 200)">
-        <!-- Inner brake pad backing -->
-        <path d="M294 114 A130 130 0 0 1 322 256 L296 248 A104 104 0 0 0 274 132 Z" fill="#191a1e"/>
-        <!-- Main 6-piston Brembo-style monobloc caliper body -->
-        <path d="M300 96 C322 104 342 126 352 156 C362 186 362 222 350 254 C341 278 324 294 304 298 C294 300 286 294 287 283 L294 252 C304 218 304 182 293 144 L286 112 C284 101 290 93 300 96 Z" fill="url(#tp-caliper-red)" stroke="#3b0200" stroke-width="1.5"/>
-        <!-- Metallic specular ridge -->
-        <path d="M304 104 C324 112 340 132 349 159 C357 186 357 219 346 248 C338 270 323 284 306 289 L302 276 C318 269 331 253 338 232 C345 207 345 180 337 156 C330 134 316 118 300 112 Z" fill="url(#tp-caliper-spec)"/>
-        <!-- Piston bridge ribs & recessed stainless hardware bolts -->
-        <path d="M303 158 L345 150 M308 198 L354 198 M303 238 L345 246" stroke="rgba(40,0,0,0.52)" stroke-width="2.6" stroke-linecap="round"/>
-        <circle cx="318" cy="128" r="4.2" fill="#2b2d33" stroke="#d4d7de" stroke-width="1.2"/>
-        <circle cx="326" cy="176" r="4.2" fill="#2b2d33" stroke="#d4d7de" stroke-width="1.2"/>
-        <circle cx="326" cy="220" r="4.2" fill="#2b2d33" stroke="#d4d7de" stroke-width="1.2"/>
-        <circle cx="318" cy="268" r="4.2" fill="#2b2d33" stroke="#d4d7de" stroke-width="1.2"/>
-        <!-- Motorsport caliper branding mark -->
-        <text x="339" y="198" fill="rgba(255,255,255,0.88)" font-family="'DM Mono', monospace" font-size="9.5" font-weight="700" letter-spacing="2.2" text-anchor="middle" transform="rotate(90 339 198)">TRACKPARTS</text>
-      </g>
-    </svg>
-    <div class="hero-barrel-vignette" aria-hidden="true"></div>`
-}
-
 export function homeMarkup() {
   const products = getProducts()
   const baseUrl = import.meta.env ? import.meta.env.BASE_URL : '/'
@@ -102,7 +17,6 @@ export function homeMarkup() {
         <div class="hero-wheel-stage">
           <div class="hero-wheel-ring" aria-hidden="true"></div>
           <div class="hero-wheel-frame">
-            ${heroBrakeAssemblyMarkup()}
             <img class="hero-wheel-img" src="${baseUrl}style37-wheel.jpg" alt="BMW Style 37 M-Parallel disks">
           </div>
         </div>
