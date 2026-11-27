@@ -275,6 +275,39 @@ footer {
   font-size: 20px;
 }
 
+.header-login-btn {
+  border: 0;
+  background: var(--ink);
+  color: #fff;
+  padding: 9px 14px;
+  font: 10px 'DM Mono';
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.header-login-btn:hover {
+  background: var(--orange);
+  transform: translateY(-1px);
+}
+
+.mobile-nav-login {
+  margin-top: 22px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 0;
+  background: var(--orange);
+  color: #fff;
+  font: 11px 'DM Mono';
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.mobile-nav-login:hover {
+  background: #c50500;
+}
+
 .cart-button {
   padding-left: 18px;
   border-left: 1px solid var(--line);
@@ -2539,7 +2572,9 @@ h2 {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(10, 10, 10, 0.6);
+  background: rgba(10, 10, 10, 0.68);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .modal-overlay[hidden] {
@@ -2548,61 +2583,132 @@ h2 {
 
 .auth-modal {
   position: relative;
-  width: min(420px, 100%);
-  max-height: 90vh;
+  width: min(430px, 100%);
+  max-height: 92vh;
   overflow-y: auto;
-  padding: 40px 35px 35px;
+  padding: 36px 34px 30px;
   background: var(--paper);
   border-top: 4px solid var(--orange);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
 }
 
 .modal-close {
   position: absolute;
-  right: 18px;
+  right: 16px;
   top: 14px;
+  width: 34px;
+  height: 34px;
   border: 0;
   background: none;
   color: var(--muted);
   font-size: 26px;
   line-height: 1;
-}
-
-.auth-modal-tabs {
   display: flex;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 24px;
+  align-items: center;
+  justify-content: center;
 }
 
-.auth-tab {
-  flex: 1;
-  padding: 10px 0;
-  margin-bottom: -1px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--muted);
-  font: 11px 'DM Mono';
-  letter-spacing: 0.08em;
-}
-
-.auth-tab.active {
+.modal-close:hover {
   color: var(--ink);
-  border-bottom-color: var(--orange);
+}
+
+.auth-modal-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.auth-modal-brand img {
+  display: block;
+  width: 132px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .auth-modal-title {
-  margin: 0 0 22px;
-  font-size: 27px;
+  margin: 0 0 8px;
+  font-size: 28px;
+  line-height: 1.05;
   letter-spacing: -0.04em;
+  text-align: center;
+}
+
+.auth-modal-title em {
+  color: var(--orange);
+  font-style: normal;
+}
+
+.auth-modal-subtitle {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .auth-modal .site-form {
   max-width: none;
+  margin: 0;
 }
 
 .auth-modal .site-form label:first-of-type {
   margin-top: 0;
+}
+
+.auth-popup-form input[type='email'],
+.auth-popup-form input[type='password'] {
+  border: 1px solid var(--line);
+  background: #fafafa;
+  padding: 12px 14px;
+}
+
+.auth-popup-form input[type='email']:focus,
+.auth-popup-form input[type='password']:focus {
+  background: #fff;
+  border-color: var(--orange);
+}
+
+.auth-forgot-link {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 0;
+  color: var(--muted);
+  font: 11px 'Space Grotesk', sans-serif;
+}
+
+.auth-forgot-link:hover {
+  color: var(--orange);
+}
+
+.auth-popup-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 14px 18px;
+}
+
+.auth-modal-switch {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.auth-modal-switch .text-button {
+  padding: 0;
+  font: 600 13px 'Space Grotesk', sans-serif;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-modal-switch .text-button:hover {
+  color: var(--orange);
 }
 
 .mfa-qr {
@@ -3370,6 +3476,10 @@ footer {
   .header-actions .user-button,
   .header-actions .lang {
     display: none;
+  }
+  .header-login-btn {
+    padding: 8px 10px;
+    font-size: 9px;
   }
   .cart-button {
     padding: 12px 0 12px 10px;

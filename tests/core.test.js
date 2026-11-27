@@ -177,6 +177,7 @@ test('all fallback products and rendered markup pass basic safety and link invar
   assert.ok(categoryPage('balstiekārta').includes('Balstiekārtas'))
   assert.ok(STATIC_PAGES.about.includes('PAR TRACKPARTS'))
   assert.ok(STATIC_PAGES.about.includes('Būvēts ceļam'))
+  assert.ok(!STATIC_PAGES.account.includes('id="auth-form"'))
 })
 
 test('parseOptionalPrice handles 0 without falling back to Infinity', () => {

@@ -33,10 +33,10 @@ import {
   sellerProfilePage,
 } from './listings.js'
 import {
-  bindAccountAuthForm,
   bindAuthModal,
   cancelMfaModal,
   closeAuthModal,
+  getPendingAuthEvent,
   initAccountPage,
   openAuthModal,
   setPendingAuthEvent,
@@ -49,8 +49,25 @@ if (window.location.hash.includes('error=') || window.location.hash.includes('er
   window.location.hash = 'account'
 }
 
+let isSignedIn = false
+let postLoginRedirect = null
+
+function syncAuthNav(signedIn) {
+  isSignedIn = Boolean(signedIn)
+  document.querySelectorAll('.nav-account-link').forEach((el) => {
+    el.hidden = !isSignedIn
+  })
+  document.querySelectorAll('.auth-login-trigger').forEach((el) => {
+    el.hidden = isSignedIn
+  })
+  document.querySelectorAll('.user-button').forEach((el) => {
+    el.hidden = !isSignedIn
+  })
+}
+
 if (supabase) {
   supabase.auth.onAuthStateChange((event, session) => {
+    syncAuthNav(Boolean(session?.user))
     if (event === 'PASSWORD_RECOVERY') {
       setPendingAuthEvent('recovery')
       if (window.location.hash !== '#account') window.location.hash = 'account'
@@ -61,7 +78,12 @@ if (supabase) {
       else renderPage()
     }
     if (event === 'SIGNED_IN' && session?.user) switchCartOwner(session.user.id)
-    else if (event === 'SIGNED_OUT') switchCartOwner(null)
+    else if (event === 'SIGNED_OUT') {
+      switchCartOwner(null)
+      if ((window.location.hash.slice(1) || 'home') === 'account') {
+        window.location.hash = 'home'
+      }
+    }
   })
 }
 
@@ -80,13 +102,14 @@ document.querySelector('#app').innerHTML = `
       <a href="#listings">Sludinājumi</a>
       <a href="#sell">Pārdot detaļu</a>
       <a href="#about">Par mums</a>
-      <a href="#account">Mans konts</a>
+      <a href="#account" class="nav-account-link" hidden>Mans konts</a>
       <a href="#contact">Kontakti</a>
     </nav>
     <div class="header-actions">
       <button class="lang" type="button">LV <small>/ EN</small></button>
       <button class="icon-button search-trigger" type="button" aria-label="Meklēt">⌕</button>
-      <button class="icon-button user-button" type="button" aria-label="Mans konts">◎</button>
+      <button class="header-login-btn auth-login-trigger" type="button">IELOGOTIES</button>
+      <button class="icon-button user-button" type="button" aria-label="Mans konts" hidden>◎</button>
       <button class="cart-button" type="button" aria-label="Grozs">GROZS <b id="cart-count">0</b></button>
     </div>
   </header>
@@ -115,9 +138,10 @@ document.querySelector('#app').innerHTML = `
       <a href="#listings">Sludinājumi</a>
       <a href="#sell">Pārdot detaļu</a>
       <a href="#about">Par mums</a>
-      <a href="#account">Mans konts</a>
+      <a href="#account" class="nav-account-link" hidden>Mans konts</a>
       <a href="#contact">Kontakti</a>
     </nav>
+    <button class="mobile-nav-login auth-login-trigger" type="button">IELOGOTIES ↗</button>
     <nav class="mobile-nav-legal">
       <a href="#terms">Lietošanas noteikumi</a>
       <a href="#privacy">Privātuma politika</a>
@@ -144,25 +168,27 @@ document.querySelector('#app').innerHTML = `
   <div class="modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" hidden>
     <div class="auth-modal">
       <button class="modal-close" id="auth-modal-close" type="button" aria-label="Aizvērt">×</button>
-      <div class="auth-modal-tabs">
-        <button class="auth-tab active" data-auth-tab="login" type="button">IELOGOTIES</button>
-        <button class="auth-tab" data-auth-tab="signup" type="button">REĢISTRĒTIES</button>
+      <div class="auth-modal-brand">
+        <img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV">
       </div>
-      <h2 class="auth-modal-title" id="auth-modal-title">Sveicināts <em>TrackParts.</em></h2>
-      <form class="site-form" id="auth-modal-form" data-mode="login">
+      <h2 class="auth-modal-title" id="auth-modal-title">Ielogojies <em>TrackParts.</em></h2>
+      <p class="auth-modal-subtitle" id="auth-modal-subtitle">Pieslēdzies, lai piekļūtu savam kontam, sludinājumiem un favorītiem.</p>
+      <form class="site-form auth-popup-form" id="auth-modal-form" data-mode="login">
         ${honeypotFieldMarkup()}
-        <label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label>
-        <label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label>
+        <label>E-PASTS<input type="email" name="email" required autocomplete="email" placeholder="tavs@epasts.lv"></label>
+        <label>PAROLE<input type="password" name="password" required minlength="6" autocomplete="current-password" placeholder="Vismaz 6 simboli"></label>
+        <button class="text-button auth-forgot-link" id="auth-modal-forgot" type="button">Aizmirsi paroli?</button>
         <label class="consent-label" id="auth-modal-consent-row" hidden>
           <input type="checkbox" name="consent">
           <span>Piekrītu <a href="#terms">Lietošanas noteikumiem</a> un <a href="#privacy">Privātuma politikai</a>.</span>
         </label>
-        <div class="form-actions">
-          <button class="button button-dark" type="submit" id="auth-modal-submit">IELOGOTIES ↗</button>
-          <button class="text-button" id="auth-modal-forgot" type="button">AIZMIRSI PAROLI?</button>
-        </div>
+        <button class="button button-accent auth-popup-submit" type="submit" id="auth-modal-submit">IELOGOTIES ↗</button>
         <p class="form-message" id="auth-modal-message"></p>
       </form>
+      <div class="auth-modal-switch" id="auth-modal-switch">
+        <span id="auth-modal-switch-text">Vēl nav konta?</span>
+        <button class="text-button" id="auth-modal-switch-btn" type="button">Reģistrēties</button>
+      </div>
     </div>
   </div>
 
@@ -256,9 +282,17 @@ document.querySelector('.search-trigger').addEventListener('click', () => {
   pendingSearchFocus = true
   window.location.hash = 'home'
 })
+document.querySelectorAll('.auth-login-trigger').forEach((btn) =>
+  btn.addEventListener('click', () => {
+    postLoginRedirect = null
+    closeMobileNav()
+    closeMegaMenu()
+    openAuthModal('login')
+  }),
+)
 document.querySelector('.user-button').addEventListener('click', async () => {
   if (!supabase) {
-    window.location.hash = 'account'
+    openAuthModal('login')
     return
   }
   const {
@@ -361,7 +395,18 @@ document.querySelector('#cookie-notice-accept').addEventListener('click', () => 
 
 bindCartControls({ onOpen: closeMegaMenu })
 bindLightbox()
-bindAuthModal(() => renderPage())
+bindAuthModal(() => {
+  syncAuthNav(true)
+  if (postLoginRedirect) {
+    const target = postLoginRedirect
+    postLoginRedirect = null
+    if (window.location.hash !== `#${target}`) {
+      window.location.hash = target
+      return
+    }
+  }
+  renderPage()
+})
 
 document.querySelectorAll('.lang').forEach((languageButton) =>
   languageButton.addEventListener('click', () => {
@@ -463,7 +508,6 @@ function renderPage({ scrollToTop = false } = {}) {
         : titleMap.notFound)
 
   bindProductButtons()
-  bindAccountAuthForm(() => renderPage())
   bindSellForm(route, openAuthModal)
   bindCatalogFilters()
   bindCatalogSidebarFilters()
@@ -475,7 +519,20 @@ function renderPage({ scrollToTop = false } = {}) {
   if (route.startsWith('product-')) loadProductDetail(route.replace('product-', ''))
   if (route.startsWith('seller-')) loadSellerProfile(route.replace('seller-', ''), openAuthModal)
   if (route === 'admin') bindAdminPage()
-  if (route === 'account') initAccountPage(() => renderPage({ scrollToTop: true }))
+  if (route === 'account') {
+    initAccountPage({
+      onSignOut: () => {
+        syncAuthNav(false)
+        renderPage({ scrollToTop: true })
+      },
+      onUnauthenticated: () => {
+        syncAuthNav(false)
+        postLoginRedirect = 'account'
+        window.location.hash = 'home'
+        setTimeout(() => openAuthModal('login'), 50)
+      },
+    })
+  }
 
   if (isEnglish()) {
     translatePage()
@@ -553,8 +610,15 @@ function userIsEditingFormInMain() {
 
 loadProducts().then(async () => {
   const owner = supabase ? (await supabase.auth.getUser()).data.user?.id : null
+  syncAuthNav(Boolean(owner))
   await loadCartForOwner(owner)
   const route = window.location.hash.slice(1) || 'home'
+  if (route === 'account' && !owner && getPendingAuthEvent() !== 'recovery') {
+    postLoginRedirect = 'account'
+    window.location.hash = 'home'
+    setTimeout(() => openAuthModal('login'), 50)
+    return
+  }
   if (!window.location.hash.includes('access_token') && isProductDependentRoute(route) && !userIsEditingFormInMain()) {
     renderPage()
   }

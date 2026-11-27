@@ -311,25 +311,12 @@ export const STATIC_PAGES = {
 
   account: `<section class="page-hero">
     <div class="section-kicker">05 / TAVS KONTS</div>
-    <h1>Pieslēdzies.<br><em>Pārdod.</em></h1>
-    <p>Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.</p>
+    <h1>Tavs<br><em>konts.</em></h1>
+    <p>Pārvaldi savu profilu, sludinājumus, pasūtījumus un favorītus.</p>
   </section>
   <section class="form-section">
     <div id="account-content">
-      <form class="site-form" id="auth-form">
-        ${honeypotFieldMarkup()}
-        <div class="section-kicker">LIETOTĀJA PIEKĻUVE</div>
-        <h2>Ienākt vai <em>reģistrēties.</em></h2>
-        <label>E-PASTS<input type="email" name="email" required placeholder="tavs@epasts.lv"></label>
-        <label>PAROLE<input type="password" name="password" required minlength="6" placeholder="Vismaz 6 simboli"></label>
-        <label class="consent-label"><input type="checkbox" name="consent"><span>Piekrītu <a href="#terms">Lietošanas noteikumiem</a> un <a href="#privacy">Privātuma politikai</a> (nepieciešams, veidojot jaunu kontu).</span></label>
-        <div class="form-actions">
-          <button class="button button-dark" type="submit">IELOGOTIES ↗</button>
-          <button class="text-button" id="signup-button" type="button">IZVEIDOT KONTU</button>
-          <button class="text-button" id="forgot-password" type="button">AIZMIRSI PAROLI?</button>
-        </div>
-        <p class="form-message" id="auth-message"></p>
-      </form>
+      <p class="listing-loading">Ielādējam kontu...</p>
     </div>
   </section>`,
 

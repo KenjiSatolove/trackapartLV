@@ -21,6 +21,10 @@ import { fetchListingThumbnails, listingThumbMarkup } from './listings.js'
 
 let pendingAuthEvent = null
 
+export function getPendingAuthEvent() {
+  return pendingAuthEvent
+}
+
 export function setPendingAuthEvent(val) {
   pendingAuthEvent = val
 }
@@ -56,16 +60,41 @@ export async function cancelMfaModal() {
 }
 
 function setAuthModalTab(mode) {
-  document.querySelectorAll('.auth-tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.authTab === mode))
-  document.querySelector('#auth-modal-submit').textContent = mode === 'signup' ? 'IZVEIDOT KONTU ↗' : 'IELOGOTIES ↗'
-  document.querySelector('#auth-modal-form').dataset.mode = mode
-  document.querySelector('#auth-modal-message').textContent = ''
+  const isSignup = mode === 'signup'
+  const form = document.querySelector('#auth-modal-form')
+  if (!form) return
+  form.dataset.mode = isSignup ? 'signup' : 'login'
+  const titleEl = document.querySelector('#auth-modal-title')
+  if (titleEl) {
+    titleEl.innerHTML = isSignup ? 'Izveido <em>kontu.</em>' : 'Ielogojies <em>TrackParts.</em>'
+  }
+  const subtitleEl = document.querySelector('#auth-modal-subtitle')
+  if (subtitleEl) {
+    subtitleEl.textContent = isSignup
+      ? 'Izveido kontu, lai ievietotu detaļas un pārvaldītu savus sludinājumus.'
+      : 'Pieslēdzies, lai piekļūtu savam kontam, sludinājumiem un favorītiem.'
+  }
+  const submitEl = document.querySelector('#auth-modal-submit')
+  if (submitEl) submitEl.textContent = isSignup ? 'IZVEIDOT KONTU ↗' : 'IELOGOTIES ↗'
+  const pwdInput = form.querySelector('input[name="password"]')
+  if (pwdInput) pwdInput.autocomplete = isSignup ? 'new-password' : 'current-password'
+  const msgEl = document.querySelector('#auth-modal-message')
+  if (msgEl) msgEl.textContent = ''
   const consentRow = document.querySelector('#auth-modal-consent-row')
-  consentRow.hidden = mode !== 'signup'
-  consentRow.querySelector('input').required = mode === 'signup'
-  if (mode !== 'signup') consentRow.querySelector('input').checked = false
+  if (consentRow) {
+    consentRow.hidden = !isSignup
+    const checkbox = consentRow.querySelector('input')
+    if (checkbox) {
+      checkbox.required = isSignup
+      if (!isSignup) checkbox.checked = false
+    }
+  }
   const forgotBtn = document.querySelector('#auth-modal-forgot')
-  if (forgotBtn) forgotBtn.hidden = mode === 'signup'
+  if (forgotBtn) forgotBtn.hidden = isSignup
+  const switchText = document.querySelector('#auth-modal-switch-text')
+  const switchBtn = document.querySelector('#auth-modal-switch-btn')
+  if (switchText) switchText.textContent = isSignup ? 'Jau ir konts?' : 'Vēl nav konta?'
+  if (switchBtn) switchBtn.textContent = isSignup ? 'Ielogoties' : 'Reģistrēties'
   if (isEnglish()) translatePage()
 }
 
@@ -159,23 +188,30 @@ export async function challengeMfaIfNeeded(onDone) {
 }
 
 export function bindAuthModal(onSignedIn) {
-  if (!supabase) return
   document.querySelector('#auth-modal-close')?.addEventListener('click', closeAuthModal)
   document.querySelector('#auth-modal-overlay')?.addEventListener('click', (event) => {
     if (event.target.id === 'auth-modal-overlay') closeAuthModal()
   })
-  document.querySelectorAll('.auth-tab').forEach((tab) =>
-    tab.addEventListener('click', () => setAuthModalTab(tab.dataset.authTab)),
-  )
+  document.querySelector('#auth-modal-switch-btn')?.addEventListener('click', () => {
+    const currentMode = document.querySelector('#auth-modal-form')?.dataset.mode || 'login'
+    setAuthModalTab(currentMode === 'signup' ? 'login' : 'signup')
+  })
   document.querySelector('#auth-modal-forgot')?.addEventListener('click', async () => {
-    const email = new FormData(document.querySelector('#auth-modal-form')).get('email')
     const message = document.querySelector('#auth-modal-message')
+    if (!supabase) {
+      message.textContent = 'Pieslēgšanās sistēma pašlaik nav pieejama.'
+      if (isEnglish()) translatePage()
+      return
+    }
+    const email = new FormData(document.querySelector('#auth-modal-form')).get('email')
     if (!email) {
       message.textContent = 'Ievadi e-pastu, lai atjaunotu paroli.'
+      if (isEnglish()) translatePage()
       return
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${SITE_URL}#account` })
     message.textContent = error ? error.message : 'Paroles atjaunošanas saite nosūtīta uz e-pastu.'
+    if (isEnglish()) translatePage()
   })
   document.querySelector('#auth-modal-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
@@ -184,13 +220,20 @@ export function bindAuthModal(onSignedIn) {
       const data = new FormData(form)
       const message = document.querySelector('#auth-modal-message')
       if (isSpamSubmit(data)) return
+      if (!supabase) {
+        message.textContent = 'Pieslēgšanās sistēma pašlaik nav pieejama.'
+        if (isEnglish()) translatePage()
+        return
+      }
       if (!data.get('email') || !data.get('password')) {
         message.textContent = 'Ievadi e-pastu un paroli.'
+        if (isEnglish()) translatePage()
         return
       }
       if (form.dataset.mode === 'signup') {
         if (!data.get('consent')) {
           message.textContent = 'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.'
+          if (isEnglish()) translatePage()
           return
         }
         const { error } = await supabase.auth.signUp({
@@ -201,6 +244,7 @@ export function bindAuthModal(onSignedIn) {
         message.textContent = error
           ? error.message
           : 'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.'
+        if (isEnglish()) translatePage()
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: data.get('email'),
@@ -212,7 +256,6 @@ export function bindAuthModal(onSignedIn) {
         }
         await challengeMfaIfNeeded(() => {
           closeAuthModal()
-          window.location.hash = 'account'
           onSignedIn?.()
         })
       }
@@ -615,9 +658,15 @@ async function loadMyFavorites(userId) {
   primeAndTranslate()
 }
 
-export async function initAccountPage(onSignOut) {
+export async function initAccountPage(callbacks = {}) {
+  const onSignOut = typeof callbacks === 'function' ? callbacks : callbacks.onSignOut
+  const onUnauthenticated = typeof callbacks === 'function' ? null : callbacks.onUnauthenticated
   const holder = document.querySelector('#account-content')
-  if (!holder || !supabase) return
+  if (!holder) return
+  if (!supabase) {
+    onUnauthenticated?.()
+    return
+  }
   if (pendingAuthEvent === 'recovery') {
     holder.innerHTML = recoveryFormMarkup()
     const recoveryForm = document.querySelector('#recovery-form')
@@ -631,7 +680,7 @@ export async function initAccountPage(onSignOut) {
           : 'Parole atjaunota! Tagad vari izmantot jauno paroli.'
         if (!error) {
           pendingAuthEvent = null
-          setTimeout(() => initAccountPage(onSignOut), 1500)
+          setTimeout(() => initAccountPage(callbacks), 1500)
         }
       })
     })
@@ -640,9 +689,12 @@ export async function initAccountPage(onSignOut) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return
+  if (!user) {
+    onUnauthenticated?.()
+    return
+  }
   if (await accountHasPendingMfaChallenge()) {
-    await challengeMfaIfNeeded(() => initAccountPage(onSignOut))
+    await challengeMfaIfNeeded(() => initAccountPage(callbacks))
     return
   }
   const { data: profile } = await supabase

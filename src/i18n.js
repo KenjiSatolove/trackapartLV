@@ -51,6 +51,7 @@ export const translations = {
   'LIETOTĀJA PIEKĻUVE': 'USER ACCESS', 'Ienākt vai': 'Sign in or', 'reģistrēties.': 'sign up.', 'PAROLE': 'PASSWORD',
   'IELOGOTIES ↗': 'SIGN IN ↗', 'IZVEIDOT KONTU': 'CREATE ACCOUNT', 'IZVEIDOT KONTU ↗': 'CREATE ACCOUNT ↗', 'AIZMIRSI PAROLI?': 'FORGOT PASSWORD?',
   'IELOGOTIES': 'SIGN IN', 'REĢISTRĒTIES': 'SIGN UP', 'Sveicināts': 'Welcome to', 'TrackParts.': 'TrackParts.',
+  'Ielogojies': 'Sign in to', 'Izveido': 'Create an', 'kontu.': 'account.', 'Pieslēdzies, lai piekļūtu savam kontam, sludinājumiem un favorītiem.': 'Sign in to access your account, listings, and favorites.', 'Vēl nav konta?': "Don't have an account?", 'Reģistrēties': 'Sign up', 'Jau ir konts?': 'Already have an account?', 'Ielogoties': 'Sign in', 'Aizmirsi paroli?': 'Forgot your password?', 'Tavs': 'Your', 'konts.': 'account.', 'Pārvaldi savu profilu, sludinājumus, pasūtījumus un favorītus.': 'Manage your profile, listings, orders, and favorites.', 'Ielādējam kontu...': 'Loading account...', 'Pieslēgšanās sistēma pašlaik nav pieejama.': 'Sign-in is currently unavailable.',
   'Ievadi e-pastu un paroli.': 'Enter your email and password.', 'Ievadi e-pastu, lai atjaunotu paroli.': 'Enter your email to reset your password.',
   'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.': 'Account created. Check your email and click the confirmation link.',
   'Paroles atjaunošanas saite nosūtīta uz e-pastu.': 'Password reset link sent to your email.',
