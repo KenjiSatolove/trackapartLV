@@ -1,5 +1,5 @@
 import { supabase } from './lib/supabase.js'
-import { CONDITION_NAMES, FALLBACK_LISTINGS } from './data.js'
+import { CONDITION_NAMES } from './data.js'
 import {
   escapeHtml,
   escapeIlikePattern,
@@ -100,7 +100,7 @@ export async function fetchListingThumbnails(rows) {
   const realIds = []
   rows.forEach((row) => {
     if (row.images?.length) thumbs[row.id] = row.images[0]
-    else if (row.id && !row.id.toString().startsWith('demo-')) realIds.push(row.id)
+    else if (row.id) realIds.push(row.id)
   })
   if (supabase && realIds.length) {
     const { data } = await supabase
@@ -126,8 +126,8 @@ export function listingThumbMarkup(url) {
 function listingRowsMarkup(rows, thumbs) {
   return `<div class="listing-head"><span>DETAĻA</span><span>AUTO</span><span>STĀVOKLIS</span><span>CENA</span><span></span></div>${rows
     .map(
-      (row, index) =>
-        `<a class="listing-row" data-search="${escapeHtml([row.title, row.brand, row.model, row.location, row.oem_number].filter(Boolean).join(' ').toLowerCase())}" href="#listing-${escapeHtml(row.id || `demo-${index + 1}`)}">
+      (row) =>
+        `<a class="listing-row" data-search="${escapeHtml([row.title, row.brand, row.model, row.location, row.oem_number].filter(Boolean).join(' ').toLowerCase())}" href="#listing-${escapeHtml(row.id)}">
           <div class="listing-title-cell">${listingThumbMarkup(thumbs[row.id])}<strong>${escapeHtml(row.title)}</strong></div>
           <span>${escapeHtml(row.brand || '-')} ${escapeHtml(row.model || '')}</span>
           <span>${escapeHtml(CONDITION_NAMES[row.condition] || row.condition || 'Nav norādīts')}</span>
@@ -142,7 +142,7 @@ export async function loadListings() {
   const targets = document.querySelectorAll('#listing-table')
   if (!targets.length) return
   const isFullPage = Boolean(document.querySelector('.listings-page'))
-  let rows = FALLBACK_LISTINGS
+  let rows = []
   if (supabase) {
     const { data } = await supabase
       .from('listings')
@@ -150,10 +150,12 @@ export async function loadListings() {
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(isFullPage ? 50 : 8)
-    if (data?.length) rows = data
+    if (data) rows = data
   }
-  const thumbs = await fetchListingThumbnails(rows)
-  const html = listingRowsMarkup(rows, thumbs)
+  const thumbs = rows.length ? await fetchListingThumbnails(rows) : {}
+  const html = rows.length
+    ? listingRowsMarkup(rows, thumbs)
+    : '<p class="listing-loading">Pašlaik nav neviena aktīva sludinājuma.</p>'
   targets.forEach((target) => {
     target.innerHTML = html
   })
@@ -181,7 +183,7 @@ function bindListingsFilter() {
 export async function loadCategoryListings(categoryValue) {
   const target = document.querySelector('#category-listing-table')
   if (!target) return
-  let rows = FALLBACK_LISTINGS.filter((row) => row.category?.toLowerCase() === categoryValue)
+  let rows = []
   if (supabase) {
     const { data } = await supabase
       .from('listings')
@@ -190,9 +192,9 @@ export async function loadCategoryListings(categoryValue) {
       .ilike('category', escapeIlikePattern(categoryValue))
       .order('created_at', { ascending: false })
       .limit(8)
-    if (data?.length) rows = data
+    if (data) rows = data
   }
-  const thumbs = await fetchListingThumbnails(rows)
+  const thumbs = rows.length ? await fetchListingThumbnails(rows) : {}
   target.innerHTML = rows.length
     ? listingRowsMarkup(rows, thumbs)
     : '<p class="listing-loading">Šajā kategorijā pašlaik nav aktīvu sludinājumu.</p>'
@@ -202,7 +204,7 @@ export async function loadCategoryListings(categoryValue) {
 async function bindFavoriteToggle(listing, openAuthModal) {
   const button = document.querySelector('#detail-favorite')
   if (!button) return
-  if (!supabase || listing.id.toString().startsWith('demo-')) {
+  if (!supabase || !listing?.id) {
     button.hidden = true
     return
   }
@@ -249,7 +251,7 @@ function bindReportListing(listing, openAuthModal) {
   const form = document.querySelector('#detail-report-form')
   const message = document.querySelector('#detail-report-message')
   if (!block || !toggle || !form) return
-  if (!supabase || listing.id.toString().startsWith('demo-')) {
+  if (!supabase || !listing?.id) {
     block.hidden = true
     return
   }
@@ -293,8 +295,8 @@ function bindReportListing(listing, openAuthModal) {
 }
 
 export async function loadListingDetail(id, openAuthModal) {
-  let listing = FALLBACK_LISTINGS.find((item) => item.id === id)
-  if (supabase && !listing) {
+  let listing = null
+  if (supabase && id) {
     const { data } = await supabase
       .from('listings')
       .select('id, title, description, price, condition, brand, model, production_year, engine, location, user_id')
@@ -333,7 +335,7 @@ export async function loadListingDetail(id, openAuthModal) {
     return
   }
   let images = listing.images || []
-  if (supabase && !listing.id.toString().startsWith('demo-')) {
+  if (supabase && listing.id) {
     const { data: imageRows } = await supabase
       .from('listing_images')
       .select('storage_path')

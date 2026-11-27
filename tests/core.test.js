@@ -18,7 +18,6 @@ import {
   withSubmitLock,
 } from '../src/utils.js'
 import { canAddProductToCart, getAvailableStock, groupCartItems } from '../src/cart.js'
-import { FALLBACK_PRODUCTS } from '../src/data.js'
 
 test('escapeHtml neutralizes HTML special characters', () => {
   assert.equal(
@@ -118,11 +117,12 @@ test('matchesProductionYear supports year ranges like 2010–2017 and substrings
   assert.equal(matchesProductionYear('2010–2017', '2018'), false)
   assert.equal(matchesProductionYear('2014', '2014'), true)
   assert.equal(matchesProductionYear('2010–2017', ''), true)
-  const matching2012 = FALLBACK_PRODUCTS.filter((p) => matchesProductionYear(p.production_year, '2012'))
-  assert.ok(matching2012.length >= 4)
+  const sampleYears = ['2010–2017', '2000–2006', '2008–2015', '2007–2014']
+  const matching2012 = sampleYears.filter((yr) => matchesProductionYear(yr, '2012'))
+  assert.equal(matching2012.length, 3)
 })
 
-test('all fallback products and rendered markup pass basic safety and link invariants', async () => {
+test('rendered markup passes safety, link, and zero-demo-inventory invariants', async () => {
   const { productCardMarkup, categoryPage, matchesConditionFilter, normalizeConditionLabel } = await import(
     '../src/catalog.js'
   )
@@ -134,9 +134,10 @@ test('all fallback products and rendered markup pass basic safety and link invar
 
   const home = homeMarkup()
   assert.ok(home.includes('href="#catalog">SKATĪT VISUS'))
-  assert.ok(home.includes('data-year="2010–2017"'))
   assert.ok(home.includes('DETAĻAS, KURĀM VAR UZTICĒTIES'))
   assert.ok(home.includes('style37-wheel.jpg'))
+  assert.ok(!home.includes('bmw-f10-left-light'))
+  assert.ok(!home.includes('demo-1'))
   assert.ok(!home.includes('id="catalog-show-more"'))
 
   const notFound = notFoundMarkup('<script>xss</script>')

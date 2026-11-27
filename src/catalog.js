@@ -60,10 +60,12 @@ export function productCardMarkup(product, index, capped) {
 
 export function productGridMarkup(list, paginate, { showMoreButton = true } = {}) {
   const limit = paginate ? CATALOG_PAGE_SIZE : list.length
+  const loading = !isProductsLoaded() && !list.length
   return `<div class="product-grid" id="product-grid">${list
     .map((product, index) => productCardMarkup(product, index, index >= limit))
     .join('')}</div>
-    <p class="no-results" id="no-results" ${list.length ? 'hidden' : ''}>Neviena detaļa neatbilst meklējumam.</p>
+    ${loading ? '<p class="listing-loading">Ielādējam katalogu...</p>' : ''}
+    <p class="no-results" id="no-results" ${list.length || loading ? 'hidden' : ''}>Neviena detaļa neatbilst meklējumam.</p>
     ${paginate && showMoreButton && list.length > limit ? '<button class="filter-button show-more-button" id="catalog-show-more" type="button">RĀDĪT VAIRĀK ↓</button>' : ''}`
 }
 
@@ -529,7 +531,9 @@ export function categoryPage(categoryValue) {
       ${
         matchingProducts.length
           ? productGridMarkup(matchingProducts)
-          : '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'
+          : isProductsLoaded()
+            ? '<p class="listing-loading">Šajā kategorijā pašlaik nav kataloga preču.</p>'
+            : '<p class="listing-loading">Ielādējam katalogu...</p>'
       }
     </section>
     <section class="listings-section category-listings reveal">

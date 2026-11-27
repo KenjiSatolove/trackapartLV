@@ -30,7 +30,7 @@ export const translations = {
   '03 / JAUNUMI NOLIKTAVĀ': '03 / NEW IN STOCK', 'Pēdējie': 'Latest', 'atradumi.': 'finds.', 'SKATĪT VISUS': 'SEE ALL', 'PIEVIENOT': 'ADD', 'PRECES': 'PARTS',
   'RĀDĪT VAIRĀK ↓': 'SHOW MORE ↓', 'Nav rezultātu.': 'No results.', 'Neviena prece neatbilst meklējumam.': 'No items match your search.',
   '04 / KOPIENAS SLUDINĀJUMI': '04 / COMMUNITY LISTINGS', 'Ko pārdod': 'What others', 'citi.': 'sell.', 'PĀRDOT SAVU DETAĻU': 'SELL YOUR PART',
-  'Ielādējam sludinājumus...': 'Loading listings...', 'DETAĻA': 'PART', 'AUTO': 'CAR', 'CENA': 'PRICE', 'Nav norādīts': 'Not specified',
+  'Ielādējam sludinājumus...': 'Loading listings...', 'Ielādējam katalogu...': 'Loading catalog...', 'Pašlaik nav neviena aktīva sludinājuma.': 'No active listings right now.', 'DETAĻA': 'PART', 'AUTO': 'CAR', 'CENA': 'PRICE', 'Nav norādīts': 'Not specified',
   'Pārbaudīta kvalitāte': 'Checked quality', 'Katra detaļa tiek apskatīta pirms nosūtīšanas.': 'Every part is inspected before shipping.',
   'Piegāde Eiropā': 'European shipping', 'No mūsu noliktavas Rīgā līdz tavām durvīm.': 'From our warehouse in Riga to your door.',
   'Atbalsts 7 dienas': 'Support 7 days', 'Zini, ko pērc. Mēs palīdzēsim atrast pareizo.': "Know what you're buying. We'll help you find the right part.",
