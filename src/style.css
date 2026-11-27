@@ -1917,7 +1917,12 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.seller-panel-top .product-tag {
+  white-space: nowrap;
 }
 
 .seller-panel > strong {
@@ -2010,6 +2015,7 @@ h2 {
   font: 10px 'DM Mono';
   letter-spacing: 0.06em;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .favorite-toggle.is-active {
@@ -2891,7 +2897,7 @@ h2 {
 
 .admin-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   margin-bottom: 28px;
 }
@@ -3062,6 +3068,14 @@ h2 {
   margin-top: 6px;
   padding: 9px;
   border: 1px solid var(--line);
+  border-radius: 0;
+  background: #fff;
+}
+
+.admin-product-form select {
+  display: inline-block;
+  height: 40px;
+  padding: 0 9px;
 }
 
 .admin-product-form .form-two {

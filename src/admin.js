@@ -144,6 +144,7 @@ async function loadAdminDashboard() {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.admin-tab').forEach((item) => item.classList.remove('active'))
       tab.classList.add('active')
+      window.scrollTo({ top: 0, behavior: 'instant' })
       renderAdminTab(tab.dataset.tab)
     }),
   )
@@ -193,7 +194,7 @@ function adminProductFormMarkup(product) {
       <label>DIMENSIONS<input name="dimensions" maxlength="60" placeholder="e.g. 78 × 32 × 28 cm" value="${escapeHtml(p.dimensions || '')}"></label>
     </div>
     <div class="form-two">
-      <label>WARRANTY<input name="warranty" maxlength="40" placeholder="e.g. 3 mēneši" value="${escapeHtml(p.warranty || '')}"></label>
+      <label>WARRANTY<input name="warranty" maxlength="40" placeholder="e.g. 3 months" value="${escapeHtml(p.warranty || '')}"></label>
       <label>LOCATION<input name="location" maxlength="80" value="${escapeHtml(p.location || '')}"></label>
     </div>
     ${
@@ -352,7 +353,7 @@ async function renderAdminTab(tab) {
             (product) => `<div class="admin-table-row">
               <strong>${escapeHtml(product.name)}</strong>
               <span>${escapeHtml(product.category)}</span>
-              <span>${stockLabel(product.stock)}</span>
+              <span>${product.stock ?? 0} pcs</span>
               <b>${Number(product.price).toFixed(0)} €</b>
             </div>`,
           )
@@ -717,7 +718,9 @@ async function showListingDetail(id) {
     supabase.from('listing_images').select('storage_path').eq('listing_id', id).order('sort_order'),
   ])
   const imageUrls = (images || [])
-    .map((image) => safeUrl(supabase.storage.from('listing-images').getPublicUrl(image.storage_path).data.publicUrl))
+    .map((image) => String(image.storage_path || '').trim())
+    .filter(Boolean)
+    .map((path) => safeUrl(supabase.storage.from('listing-images').getPublicUrl(path).data.publicUrl))
     .filter(Boolean)
   holder.innerHTML = `<div class="admin-product-form">
     <h3>${escapeHtml(listing.title)}</h3>
