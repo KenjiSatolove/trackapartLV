@@ -331,25 +331,25 @@ export const STATIC_PAGES = {
       ${honeypotFieldMarkup()}
       <div class="section-kicker">DETAĻAS INFORMĀCIJA</div>
       <h2>Ko tu <em>pārdod?</em></h2>
-      <label>NOSAUKUMS<input name="title" required placeholder="Piem., BMW E46 priekšējais lukturis"></label>
+      <label>NOSAUKUMS<input name="title" required maxlength="120" placeholder="Piem., BMW E46 priekšējais lukturis"></label>
       <div class="form-two">
         <label>CENA (€)<input name="price" type="number" min="0" step="0.01" required placeholder="250"></label>
-        <label>OEM NUMURS<input name="oem_number" placeholder="63117203298"></label>
+        <label>OEM NUMURS<input name="oem_number" maxlength="60" placeholder="63117203298"></label>
       </div>
       <div class="form-two">
-        <label>MARKA<input name="brand" placeholder="BMW"></label>
-        <label>MODELIS<input name="model" placeholder="E46"></label>
+        <label>MARKA<input name="brand" maxlength="50" placeholder="BMW"></label>
+        <label>MODELIS<input name="model" maxlength="60" placeholder="E46"></label>
       </div>
       <div class="form-two">
         <label>GADS<input name="production_year" type="number" min="1950" max="2030" placeholder="2014"></label>
-        <label>DZINĒJS<input name="engine" placeholder="530d / 3.0 TDI"></label>
+        <label>DZINĒJS<input name="engine" maxlength="60" placeholder="530d / 3.0 TDI"></label>
       </div>
       <div class="form-two">
         <label>KATEGORIJA<select name="category">${CATEGORIES.map((c) => `<option>${c[4]}</option>`).join('')}</select></label>
-        <label>ATRAŠANĀS VIETA<input name="location" placeholder="Rīga, noliktava B3"></label>
+        <label>ATRAŠANĀS VIETA<input name="location" maxlength="80" placeholder="Rīga, noliktava B3"></label>
       </div>
       <label>STĀVOKLIS<select name="condition"><option value="very_good">Ļoti labs</option><option value="good">Labs</option><option value="defect">Ar defektu</option></select></label>
-      <label>APRAKSTS<textarea name="description" rows="5" placeholder="Apraksti detaļas stāvokli un zināmos defektus"></textarea></label>
+      <label>APRAKSTS<textarea name="description" rows="5" maxlength="2000" placeholder="Apraksti detaļas stāvokli un zināmos defektus"></textarea></label>
       <label>BILDES (maks. 10 faili, līdz 5 MB katrs)<input name="images" type="file" accept="image/*" multiple required></label>
       <div class="form-actions"><button class="button button-dark" type="submit">PUBLICĒT SLUDINĀJUMU ↗</button></div>
       <p class="form-message" id="listing-message"></p>

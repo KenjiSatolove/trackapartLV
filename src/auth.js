@@ -14,6 +14,7 @@ import {
   safeUrl,
   sanitizeUploadFilename,
   validateImageFiles,
+  withSubmitLock,
 } from './utils.js'
 import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
 import { fetchListingThumbnails, listingThumbMarkup } from './listings.js'
@@ -165,41 +166,43 @@ export function bindAuthModal(onSignedIn) {
   document.querySelector('#auth-modal-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
     const form = event.target
-    const data = new FormData(form)
-    const message = document.querySelector('#auth-modal-message')
-    if (isSpamSubmit(data)) return
-    if (!data.get('email') || !data.get('password')) {
-      message.textContent = 'Ievadi e-pastu un paroli.'
-      return
-    }
-    if (form.dataset.mode === 'signup') {
-      if (!data.get('consent')) {
-        message.textContent = 'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.'
+    await withSubmitLock(form, async () => {
+      const data = new FormData(form)
+      const message = document.querySelector('#auth-modal-message')
+      if (isSpamSubmit(data)) return
+      if (!data.get('email') || !data.get('password')) {
+        message.textContent = 'Ievadi e-pastu un paroli.'
         return
       }
-      const { error } = await supabase.auth.signUp({
-        email: data.get('email'),
-        password: data.get('password'),
-        options: { emailRedirectTo: `${SITE_URL}#account` },
-      })
-      message.textContent = error
-        ? error.message
-        : 'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.'
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.get('email'),
-        password: data.get('password'),
-      })
-      if (error) {
-        message.textContent = error.message
-        return
+      if (form.dataset.mode === 'signup') {
+        if (!data.get('consent')) {
+          message.textContent = 'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.'
+          return
+        }
+        const { error } = await supabase.auth.signUp({
+          email: data.get('email'),
+          password: data.get('password'),
+          options: { emailRedirectTo: `${SITE_URL}#account` },
+        })
+        message.textContent = error
+          ? error.message
+          : 'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.'
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: data.get('email'),
+          password: data.get('password'),
+        })
+        if (error) {
+          message.textContent = error.message
+          return
+        }
+        await challengeMfaIfNeeded(() => {
+          closeAuthModal()
+          window.location.hash = 'account'
+          onSignedIn?.()
+        })
       }
-      await challengeMfaIfNeeded(() => {
-        closeAuthModal()
-        window.location.hash = 'account'
-        onSignedIn?.()
-      })
-    }
+    })
   })
 }
 
@@ -210,23 +213,25 @@ export function bindAccountAuthForm(onSignedIn) {
   if (!authForm) return
   authForm.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const data = new FormData(authForm)
-    if (isSpamSubmit(data)) return
-    if (!data.get('email') || !data.get('password')) {
-      authMessage.textContent = 'Ievadi e-pastu un paroli.'
-      return
-    }
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.get('email'),
-      password: data.get('password'),
-    })
-    if (error) {
-      authMessage.textContent = error.message
-      return
-    }
-    authMessage.textContent = 'Veiksmīgi ielogojies.'
-    await challengeMfaIfNeeded(() => {
-      onSignedIn?.()
+    await withSubmitLock(authForm, async () => {
+      const data = new FormData(authForm)
+      if (isSpamSubmit(data)) return
+      if (!data.get('email') || !data.get('password')) {
+        authMessage.textContent = 'Ievadi e-pastu un paroli.'
+        return
+      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.get('email'),
+        password: data.get('password'),
+      })
+      if (error) {
+        authMessage.textContent = error.message
+        return
+      }
+      authMessage.textContent = 'Veiksmīgi ielogojies.'
+      await challengeMfaIfNeeded(() => {
+        onSignedIn?.()
+      })
     })
   })
   document.querySelector('#signup-button')?.addEventListener('click', async () => {
@@ -272,39 +277,46 @@ function recoveryFormMarkup() {
 
 function myListingFormMarkup(listing, existingImages) {
   const l = listing || {}
-  const images = (existingImages || []).map((url) => safeUrl(url)).filter(Boolean)
+  const images = (existingImages || [])
+    .map((img) => ({ ...img, url: safeUrl(img.url) }))
+    .filter((img) => img.url)
   return `<form class="admin-product-form" id="my-listing-form">
     <h3>Rediģēt sludinājumu</h3>
     <input type="hidden" name="id" value="${escapeHtml(l.id)}">
-    <label>NOSAUKUMS<input name="title" required value="${escapeHtml(l.title || '')}"></label>
+    <label>NOSAUKUMS<input name="title" required maxlength="120" value="${escapeHtml(l.title || '')}"></label>
     <div class="form-two">
       <label>CENA (€)<input name="price" type="number" min="0" step="0.01" required value="${escapeHtml(l.price ?? '')}"></label>
-      <label>OEM NUMURS<input name="oem_number" value="${escapeHtml(l.oem_number || '')}"></label>
+      <label>OEM NUMURS<input name="oem_number" maxlength="60" value="${escapeHtml(l.oem_number || '')}"></label>
     </div>
     <div class="form-two">
-      <label>MARKA<input name="brand" value="${escapeHtml(l.brand || '')}"></label>
-      <label>MODELIS<input name="model" value="${escapeHtml(l.model || '')}"></label>
+      <label>MARKA<input name="brand" maxlength="50" value="${escapeHtml(l.brand || '')}"></label>
+      <label>MODELIS<input name="model" maxlength="60" value="${escapeHtml(l.model || '')}"></label>
     </div>
     <div class="form-two">
       <label>GADS<input name="production_year" type="number" min="1950" max="2030" value="${escapeHtml(l.production_year || '')}"></label>
-      <label>DZINĒJS<input name="engine" value="${escapeHtml(l.engine || '')}"></label>
+      <label>DZINĒJS<input name="engine" maxlength="60" value="${escapeHtml(l.engine || '')}"></label>
     </div>
     <div class="form-two">
       <label>KATEGORIJA<select name="category">${CATEGORIES.map(
         (c) => `<option ${l.category === c[4] ? 'selected' : ''}>${escapeHtml(c[4])}</option>`,
       ).join('')}</select></label>
-      <label>ATRAŠANĀS VIETA<input name="location" value="${escapeHtml(l.location || '')}"></label>
+      <label>ATRAŠANĀS VIETA<input name="location" maxlength="80" value="${escapeHtml(l.location || '')}"></label>
     </div>
     <label>STĀVOKLIS<select name="condition">
       <option value="very_good" ${l.condition === 'very_good' ? 'selected' : ''}>Ļoti labs</option>
       <option value="good" ${l.condition === 'good' ? 'selected' : ''}>Labs</option>
       <option value="defect" ${l.condition === 'defect' ? 'selected' : ''}>Ar defektu</option>
     </select></label>
-    <label>APRAKSTS<textarea name="description" rows="4">${escapeHtml(l.description || '')}</textarea></label>
+    <label>APRAKSTS<textarea name="description" rows="4" maxlength="2000">${escapeHtml(l.description || '')}</textarea></label>
     ${
       images.length
         ? `<label>ESOŠĀS BILDES<div class="admin-listing-images">${images
-            .map((url) => `<img src="${escapeHtml(url)}" alt="">`)
+            .map(
+              (img) => `<div class="editable-image-tile" data-image-tile="${escapeHtml(img.id)}">
+                <img src="${escapeHtml(img.url)}" alt="">
+                <button class="editable-image-remove" type="button" data-remove-image-id="${escapeHtml(img.id)}" data-remove-image-path="${escapeHtml(img.storage_path)}" aria-label="Dzēst bildi">×</button>
+              </div>`,
+            )
             .join('')}</div></label>`
         : ''
     }
@@ -320,78 +332,100 @@ function myListingFormMarkup(listing, existingImages) {
 async function bindMyListingForm(listing, userId) {
   const holder = document.querySelector('#my-listing-form-holder')
   if (!holder) return
-  let existingImagePaths = []
-  let existingImageUrls = []
+  let existingImages = []
   if (listing) {
     const { data: images } = await supabase
       .from('listing_images')
-      .select('storage_path')
+      .select('id, storage_path')
       .eq('listing_id', listing.id)
       .order('sort_order')
-    existingImagePaths = images || []
-    existingImageUrls = existingImagePaths.map(
-      (image) => supabase.storage.from('listing-images').getPublicUrl(image.storage_path).data.publicUrl,
-    )
+    existingImages = (images || []).map((image) => ({
+      id: image.id,
+      storage_path: image.storage_path,
+      url: supabase.storage.from('listing-images').getPublicUrl(image.storage_path).data.publicUrl,
+    }))
   }
-  holder.innerHTML = myListingFormMarkup(listing, existingImageUrls)
+  holder.innerHTML = myListingFormMarkup(listing, existingImages)
   document.querySelector('#my-listing-cancel')?.addEventListener('click', () => {
     holder.innerHTML = ''
   })
-  document.querySelector('#my-listing-form')?.addEventListener('submit', async (event) => {
+  holder.querySelectorAll('[data-remove-image-id]').forEach((btn) =>
+    btn.addEventListener('click', async () => {
+      const message = document.querySelector('#my-listing-message')
+      const imageId = btn.dataset.removeImageId
+      const storagePath = btn.dataset.removeImagePath
+      btn.disabled = true
+      const { error } = await supabase.from('listing_images').delete().eq('id', imageId)
+      if (error) {
+        btn.disabled = false
+        if (message) message.textContent = error.message
+        return
+      }
+      if (storagePath) {
+        await supabase.storage.from('listing-images').remove([storagePath])
+      }
+      existingImages = existingImages.filter((img) => String(img.id) !== String(imageId))
+      btn.closest('.editable-image-tile')?.remove()
+    }),
+  )
+  const form = document.querySelector('#my-listing-form')
+  form?.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const message = document.querySelector('#my-listing-message')
-    const data = new FormData(event.target)
-    const { valid: files, error: fileError } = validateImageFiles(data.getAll('images'), {
-      existingCount: existingImagePaths.length,
+    await withSubmitLock(form, async () => {
+      const message = document.querySelector('#my-listing-message')
+      const data = new FormData(form)
+      const { valid: files, error: fileError } = validateImageFiles(data.getAll('images'), {
+        existingCount: existingImages.length,
+      })
+      if (fileError) {
+        message.textContent = fileError
+        return
+      }
+      const listingId = data.get('id')
+      const row = {
+        title: data.get('title'),
+        price: Number(data.get('price')),
+        oem_number: data.get('oem_number'),
+        brand: data.get('brand'),
+        model: data.get('model'),
+        production_year: Number(data.get('production_year')) || null,
+        engine: data.get('engine'),
+        category: data.get('category'),
+        location: data.get('location'),
+        condition: data.get('condition'),
+        description: data.get('description'),
+      }
+      const { error } = await supabase.from('listings').update(row).eq('id', listingId).eq('user_id', userId)
+      if (error) {
+        message.textContent = error.message
+        return
+      }
+      if (files.length) {
+        message.textContent = `Augšupielādē ${files.length} ${files.length === 1 ? 'bildi' : 'bildes'}...`
+      }
+      const uploadResults = await Promise.all(
+        files.map(async (file, index) => {
+          const safeName = sanitizeUploadFilename(file.name, index)
+          const path = `${userId}/${listingId}/${safeName}`
+          const upload = await supabase.storage.from('listing-images').upload(path, file)
+          if (upload.error) return upload.error
+          const { error: metaError } = await supabase.from('listing_images').insert({
+            listing_id: listingId,
+            storage_path: path,
+            sort_order: existingImages.length + index,
+          })
+          if (metaError) return metaError
+          return null
+        }),
+      )
+      const uploadError = uploadResults.find(Boolean)
+      if (uploadError) {
+        message.textContent = `Izmaiņas saglabātas, bet bildes neizdevās augšupielādēt: ${uploadError.message}`
+        return
+      }
+      holder.innerHTML = ''
+      await loadMyListings(userId)
     })
-    if (fileError) {
-      message.textContent = fileError
-      return
-    }
-    const listingId = data.get('id')
-    const row = {
-      title: data.get('title'),
-      price: Number(data.get('price')),
-      oem_number: data.get('oem_number'),
-      brand: data.get('brand'),
-      model: data.get('model'),
-      production_year: Number(data.get('production_year')) || null,
-      engine: data.get('engine'),
-      category: data.get('category'),
-      location: data.get('location'),
-      condition: data.get('condition'),
-      description: data.get('description'),
-    }
-    const { error } = await supabase.from('listings').update(row).eq('id', listingId).eq('user_id', userId)
-    if (error) {
-      message.textContent = error.message
-      return
-    }
-    if (files.length) {
-      message.textContent = `Augšupielādē ${files.length} ${files.length === 1 ? 'bildi' : 'bildes'}...`
-    }
-    const uploadResults = await Promise.all(
-      files.map(async (file, index) => {
-        const safeName = sanitizeUploadFilename(file.name, index)
-        const path = `${userId}/${listingId}/${safeName}`
-        const upload = await supabase.storage.from('listing-images').upload(path, file)
-        if (upload.error) return upload.error
-        const { error: metaError } = await supabase.from('listing_images').insert({
-          listing_id: listingId,
-          storage_path: path,
-          sort_order: existingImagePaths.length + index,
-        })
-        if (metaError) return metaError
-        return null
-      }),
-    )
-    const uploadError = uploadResults.find(Boolean)
-    if (uploadError) {
-      message.textContent = `Izmaiņas saglabātas, bet bildes neizdevās augšupielādēt: ${uploadError.message}`
-      return
-    }
-    holder.innerHTML = ''
-    await loadMyListings(userId)
   })
 }
 
@@ -435,11 +469,20 @@ async function loadMyListings(userId) {
   document.querySelectorAll('[data-my-remove-id]').forEach((button) =>
     button.addEventListener('click', async () => {
       if (!window.confirm('Dzēst šo sludinājumu?')) return
-      const { error } = await supabase.from('listings').delete().eq('id', button.dataset.myRemoveId).eq('user_id', userId)
+      const listingId = button.dataset.myRemoveId
+      const { data: imgs } = await supabase
+        .from('listing_images')
+        .select('storage_path')
+        .eq('listing_id', listingId)
+      const { error } = await supabase.from('listings').delete().eq('id', listingId).eq('user_id', userId)
       if (error) {
         const msg = document.querySelector('#my-listings-message')
         if (msg) msg.textContent = error.message
         return
+      }
+      const paths = (imgs || []).map((img) => img.storage_path).filter(Boolean)
+      if (paths.length) {
+        await supabase.storage.from('listing-images').remove(paths)
       }
       await loadMyListings(userId)
     }),
@@ -563,17 +606,20 @@ export async function initAccountPage(onSignOut) {
   if (!holder || !supabase) return
   if (pendingAuthEvent === 'recovery') {
     holder.innerHTML = recoveryFormMarkup()
-    document.querySelector('#recovery-form').addEventListener('submit', async (event) => {
+    const recoveryForm = document.querySelector('#recovery-form')
+    recoveryForm.addEventListener('submit', async (event) => {
       event.preventDefault()
-      const password = new FormData(event.target).get('password')
-      const { error } = await supabase.auth.updateUser({ password })
-      document.querySelector('#recovery-message').textContent = error
-        ? error.message
-        : 'Parole atjaunota! Tagad vari izmantot jauno paroli.'
-      if (!error) {
-        pendingAuthEvent = null
-        setTimeout(() => initAccountPage(onSignOut), 1500)
-      }
+      await withSubmitLock(recoveryForm, async () => {
+        const password = new FormData(recoveryForm).get('password')
+        const { error } = await supabase.auth.updateUser({ password })
+        document.querySelector('#recovery-message').textContent = error
+          ? error.message
+          : 'Parole atjaunota! Tagad vari izmantot jauno paroli.'
+        if (!error) {
+          pendingAuthEvent = null
+          setTimeout(() => initAccountPage(onSignOut), 1500)
+        }
+      })
     })
     return
   }
@@ -595,16 +641,16 @@ export async function initAccountPage(onSignOut) {
   pendingAuthEvent = null
   holder.innerHTML = `
     <div class="section-kicker">LIETOTĀJA PIEKĻUVE</div>
-    <h2>Sveiks, <em>${escapeHtml(profile?.display_name || user.email)}!</em></h2>
+    <h2>Sveiks, <em id="account-greeting-name">${escapeHtml(profile?.display_name || user.email)}!</em></h2>
     ${confirmedBanner}
     <p><span>Tu esi ielogojies kā</span> <b>${escapeHtml(user.email)}</b>.</p>
     <form class="site-form" id="profile-form">
-      <label>VĀRDS<input name="display_name" value="${escapeHtml(profile?.display_name || '')}"></label>
+      <label>VĀRDS<input name="display_name" maxlength="80" value="${escapeHtml(profile?.display_name || '')}"></label>
       <div class="form-two">
-        <label>TĀLRUNIS<input name="phone" value="${escapeHtml(profile?.phone || '')}"></label>
-        <label>PILSĒTA<input name="city" value="${escapeHtml(profile?.city || '')}"></label>
+        <label>TĀLRUNIS<input name="phone" maxlength="30" value="${escapeHtml(profile?.phone || '')}"></label>
+        <label>PILSĒTA<input name="city" maxlength="60" value="${escapeHtml(profile?.city || '')}"></label>
       </div>
-      <label>LIETOTĀJVĀRDS<input name="username" value="${escapeHtml(profile?.username || '')}"></label>
+      <label>LIETOTĀJVĀRDS<input name="username" maxlength="40" value="${escapeHtml(profile?.username || '')}"></label>
       <div class="form-actions"><button class="button button-dark" type="submit">SAGLABĀT IZMAIŅAS ↗</button></div>
       <p class="form-message" id="profile-message"></p>
     </form>
@@ -638,20 +684,36 @@ export async function initAccountPage(onSignOut) {
     window.location.hash = 'home'
     onSignOut?.()
   })
-  document.querySelector('#profile-form').addEventListener('submit', async (event) => {
+  const profileForm = document.querySelector('#profile-form')
+  profileForm.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const message = document.querySelector('#profile-message')
-    const data = new FormData(event.target)
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        display_name: data.get('display_name'),
-        phone: data.get('phone'),
-        city: data.get('city'),
-        username: data.get('username') || null,
-      })
-      .eq('id', user.id)
-    message.textContent = error ? error.message : 'Profils saglabāts.'
+    await withSubmitLock(profileForm, async () => {
+      const message = document.querySelector('#profile-message')
+      const data = new FormData(profileForm)
+      const displayName = String(data.get('display_name') || '').trim()
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          display_name: displayName,
+          phone: String(data.get('phone') || '').trim(),
+          city: String(data.get('city') || '').trim(),
+          username: String(data.get('username') || '').trim() || null,
+        })
+        .eq('id', user.id)
+      if (error) {
+        const isDuplicateUsername =
+          error.code === '23505' || String(error.message || '').includes('profiles_username_key')
+        message.textContent = isDuplicateUsername
+          ? 'Šis lietotājvārds jau ir aizņemts. Izvēlies citu.'
+          : error.message
+        if (isEnglish()) translatePage()
+        return
+      }
+      const greetingEl = document.querySelector('#account-greeting-name')
+      if (greetingEl) greetingEl.textContent = `${displayName || user.email}!`
+      message.textContent = 'Profils saglabāts.'
+      if (isEnglish()) translatePage()
+    })
   })
   document.querySelector('#delete-account-button').addEventListener('click', async () => {
     const message = document.querySelector('#delete-account-message')

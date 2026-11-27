@@ -9,6 +9,7 @@ import {
   safeUrl,
   sanitizeUploadFilename,
   validateImageFiles,
+  withSubmitLock,
 } from './utils.js'
 import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
 import { bindGallery, galleryMarkup } from './catalog.js'
@@ -264,24 +265,29 @@ function bindReportListing(listing, openAuthModal) {
   }
   form.onsubmit = async (event) => {
     event.preventDefault()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      openAuthModal('login')
-      return
-    }
-    const reason = String(new FormData(form).get('reason') || '').trim()
-    if (!reason) return
-    const { error } = await supabase
-      .from('reports')
-      .insert({ listing_id: listing.id, reporter_id: user.id, reason })
-    if (error) {
-      message.textContent = error.message
-      return
-    }
-    message.textContent = 'Paldies! Ziņojums nosūtīts administrācijai.'
-    form.reset()
+    await withSubmitLock(form, async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        openAuthModal('login')
+        return
+      }
+      const reason = String(new FormData(form).get('reason') || '').trim()
+      if (!reason) return
+      const { error } = await supabase
+        .from('reports')
+        .insert({ listing_id: listing.id, reporter_id: user.id, reason })
+      if (error) {
+        message.textContent =
+          error.code === '23505' ? 'Tu jau esi ziņojis par šo sludinājumu.' : error.message
+        if (isEnglish()) translatePage()
+        return
+      }
+      message.textContent = 'Paldies! Ziņojums nosūtīts administrācijai.'
+      if (isEnglish()) translatePage()
+      form.reset()
+    })
   }
 }
 
@@ -371,7 +377,7 @@ function reviewFormMarkup(existing) {
         <input type="hidden" name="rating" value="${existing?.rating || 0}">
       </div>
     </label>
-    <label>KOMENTĀRS<textarea name="comment" rows="3" placeholder="Kā pagāja darījums?">${escapeHtml(existing?.comment || '')}</textarea></label>
+    <label>KOMENTĀRS<textarea name="comment" rows="3" maxlength="1000" placeholder="Kā pagāja darījums?">${escapeHtml(existing?.comment || '')}</textarea></label>
     <div class="form-actions"><button class="button button-dark" type="submit">${existing ? 'ATJAUNOT ATSAUKSMI' : 'PUBLICĒT ATSAUKSMI'} ↗</button></div>
     <p class="form-message" id="review-message"></p>
   </form>`
@@ -392,31 +398,42 @@ function bindReviewForm(sellerId, reviewerId) {
   )
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const message = document.querySelector('#review-message')
-    const rating = Number(ratingInput.value)
-    if (!rating) {
-      message.textContent = 'Izvēlies vērtējumu.'
-      return
-    }
-    const data = new FormData(form)
-    const { error } = await supabase
-      .from('reviews')
-      .upsert(
-        { seller_id: sellerId, reviewer_id: reviewerId, rating, comment: data.get('comment') },
-        { onConflict: 'seller_id,reviewer_id' },
-      )
-    if (error) {
-      message.textContent = error.message
-      return
-    }
-    await loadSellerProfile(sellerId)
+    await withSubmitLock(form, async () => {
+      const message = document.querySelector('#review-message')
+      const rating = Number(ratingInput.value)
+      if (!rating) {
+        message.textContent = 'Izvēlies vērtējumu.'
+        if (isEnglish()) translatePage()
+        return
+      }
+      const data = new FormData(form)
+      const { error } = await supabase
+        .from('reviews')
+        .upsert(
+          { seller_id: sellerId, reviewer_id: reviewerId, rating, comment: data.get('comment') },
+          { onConflict: 'seller_id,reviewer_id' },
+        )
+      if (error) {
+        message.textContent = error.message
+        return
+      }
+      await loadSellerProfile(sellerId)
+    })
   })
+}
+
+async function fetchPublicProfilesByIds(ids) {
+  const uniqueIds = [...new Set((ids || []).filter(Boolean))]
+  if (!supabase || !uniqueIds.length) return []
+  const rpcRes = await supabase.rpc('get_public_profiles', { user_ids: uniqueIds })
+  if (!rpcRes.error && Array.isArray(rpcRes.data)) return rpcRes.data
+  const fallback = await supabase.from('profiles').select('id, display_name, city, created_at').in('id', uniqueIds)
+  return fallback.data || []
 }
 
 export async function loadSellerProfile(id) {
   if (!supabase) return
-  const [{ data: profile }, { data: { user } }, { data: reviews }, { data: listings }] = await Promise.all([
-    supabase.from('profiles').select('display_name, city, created_at').eq('id', id).maybeSingle(),
+  const [{ data: { user } }, { data: reviews }, { data: listings }] = await Promise.all([
     supabase.auth.getUser(),
     supabase
       .from('reviews')
@@ -431,10 +448,12 @@ export async function loadSellerProfile(id) {
       .order('created_at', { ascending: false }),
   ])
   const reviewerIds = [...new Set((reviews || []).map((r) => r.reviewer_id))]
-  const { data: reviewers } = reviewerIds.length
-    ? await supabase.from('profiles').select('id, display_name').in('id', reviewerIds)
-    : { data: [] }
-  const thumbs = await fetchListingThumbnails(listings || [])
+  const [publicProfiles, thumbs] = await Promise.all([
+    fetchPublicProfilesByIds([id, ...reviewerIds]),
+    fetchListingThumbnails(listings || []),
+  ])
+  const profile = publicProfiles.find((p) => p.id === id) || null
+  const reviewers = publicProfiles.filter((p) => reviewerIds.includes(p.id))
   if (!document.querySelector('#seller-name')) return
 
   document.querySelector('#seller-name').textContent = profile?.display_name || 'Pārdevējs'
@@ -481,66 +500,69 @@ export function bindSellForm(route, openAuthModal) {
   if (listingForm) {
     listingForm.addEventListener('submit', async (event) => {
       event.preventDefault()
-      const message = document.querySelector('#listing-message')
-      const formData = new FormData(listingForm)
-      if (isSpamSubmit(formData)) return
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) {
-        message.textContent = 'Lai ievietotu sludinājumu, vispirms ielogojies.'
-        openAuthModal('login')
-        return
-      }
-      const { valid: files, error: fileError } = validateImageFiles(formData.getAll('images'))
-      if (fileError) {
-        message.textContent = fileError
-        return
-      }
-      const { data: listing, error } = await supabase
-        .from('listings')
-        .insert({
-          user_id: user.id,
-          title: formData.get('title'),
-          price: Number(formData.get('price')),
-          oem_number: formData.get('oem_number'),
-          brand: formData.get('brand'),
-          model: formData.get('model'),
-          production_year: Number(formData.get('production_year')) || null,
-          engine: formData.get('engine'),
-          category: formData.get('category'),
-          location: formData.get('location'),
-          condition: formData.get('condition'),
-          description: formData.get('description'),
-          status: 'active',
-        })
-        .select()
-        .single()
-      if (error) {
-        message.textContent = error.message
-        return
-      }
-      if (files.length) {
-        message.textContent = `Augšupielādē ${files.length} ${files.length === 1 ? 'bildi' : 'bildes'}...`
-      }
-      const uploadResults = await Promise.all(
-        files.map(async (file, index) => {
-          const safeName = sanitizeUploadFilename(file.name, index)
-          const path = `${user.id}/${listing.id}/${safeName}`
-          const upload = await supabase.storage.from('listing-images').upload(path, file)
-          if (upload.error) return upload.error
-          const { error: metaError } = await supabase
-            .from('listing_images')
-            .insert({ listing_id: listing.id, storage_path: path, sort_order: index })
-          if (metaError) return metaError
-          return null
-        }),
-      )
-      const uploadError = uploadResults.find(Boolean)
-      message.textContent = uploadError
-        ? `Sludinājums publicēts, bet bildes neizdevās augšupielādēt: ${uploadError.message}`
-        : 'Sludinājums publicēts! Pārvaldi to savā kontā (Mans konts).'
-      listingForm.reset()
+      await withSubmitLock(listingForm, async () => {
+        const message = document.querySelector('#listing-message')
+        const formData = new FormData(listingForm)
+        if (isSpamSubmit(formData)) return
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (!user) {
+          message.textContent = 'Lai ievietotu sludinājumu, vispirms ielogojies.'
+          openAuthModal('login')
+          return
+        }
+        const { valid: files, error: fileError } = validateImageFiles(formData.getAll('images'))
+        if (fileError) {
+          message.textContent = fileError
+          return
+        }
+        const { data: listing, error } = await supabase
+          .from('listings')
+          .insert({
+            user_id: user.id,
+            title: formData.get('title'),
+            price: Number(formData.get('price')),
+            oem_number: formData.get('oem_number'),
+            brand: formData.get('brand'),
+            model: formData.get('model'),
+            production_year: Number(formData.get('production_year')) || null,
+            engine: formData.get('engine'),
+            category: formData.get('category'),
+            location: formData.get('location'),
+            condition: formData.get('condition'),
+            description: formData.get('description'),
+            status: 'active',
+          })
+          .select()
+          .single()
+        if (error) {
+          message.textContent = error.message
+          return
+        }
+        if (files.length) {
+          message.textContent = `Augšupielādē ${files.length} ${files.length === 1 ? 'bildi' : 'bildes'}...`
+        }
+        const uploadResults = await Promise.all(
+          files.map(async (file, index) => {
+            const safeName = sanitizeUploadFilename(file.name, index)
+            const path = `${user.id}/${listing.id}/${safeName}`
+            const upload = await supabase.storage.from('listing-images').upload(path, file)
+            if (upload.error) return upload.error
+            const { error: metaError } = await supabase
+              .from('listing_images')
+              .insert({ listing_id: listing.id, storage_path: path, sort_order: index })
+            if (metaError) return metaError
+            return null
+          }),
+        )
+        const uploadError = uploadResults.find(Boolean)
+        message.textContent = uploadError
+          ? `Sludinājums publicēts, bet bildes neizdevās augšupielādēt: ${uploadError.message}`
+          : 'Sludinājums publicēts! Pārvaldi to savā kontā (Mans konts).'
+        if (isEnglish()) translatePage()
+        listingForm.reset()
+      })
     })
   }
   if (route === 'sell') {

@@ -14,6 +14,7 @@ import {
   sanitizeUploadFilename,
   slugify,
   validateImageFiles,
+  withSubmitLock,
 } from '../src/utils.js'
 import { canAddProductToCart, getAvailableStock, groupCartItems } from '../src/cart.js'
 import { FALLBACK_PRODUCTS } from '../src/data.js'
@@ -185,6 +186,47 @@ test('formatTelHref formats international and local numbers and rejects non-phon
 test('escapeIlikePattern escapes SQL wildcard characters', () => {
   assert.equal(escapeIlikePattern('%'), '\\%')
   assert.equal(escapeIlikePattern('dzinējs_1\\test%'), 'dzinējs\\_1\\\\test\\%')
+})
+
+test('withSubmitLock prevents concurrent re-entry and restores submit button state', async () => {
+  const btn = { disabled: false, isConnected: true }
+  const form = {
+    dataset: {},
+    querySelectorAll: () => [btn],
+  }
+  let calls = 0
+  let release
+  const gate = new Promise((resolve) => {
+    release = resolve
+  })
+
+  const first = withSubmitLock(form, async () => {
+    calls += 1
+    assert.equal(btn.disabled, true)
+    await gate
+    return 'ok'
+  })
+  const second = withSubmitLock(form, async () => {
+    calls += 1
+    return 'duplicate'
+  })
+
+  assert.equal(await second, undefined)
+  release()
+  assert.equal(await first, 'ok')
+  assert.equal(calls, 1)
+  assert.equal(btn.disabled, false)
+  assert.equal(form.dataset.submitting, undefined)
+
+  await assert.rejects(
+    withSubmitLock(form, async () => {
+      assert.equal(btn.disabled, true)
+      throw new Error('boom')
+    }),
+    /boom/,
+  )
+  assert.equal(btn.disabled, false)
+  assert.equal(form.dataset.submitting, undefined)
 })
 
 test('index.html CSP disallows inline scripts and allows Supabase + fonts', () => {

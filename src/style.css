@@ -511,6 +511,21 @@ footer {
 }
 
 /* ---- cart drawer ---- */
+.cart-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 47;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.cart-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .cart-panel {
   position: fixed;
   z-index: 48;
@@ -2783,6 +2798,31 @@ h2 {
   object-fit: cover;
   border: 1px solid var(--line);
   background: #f1f1f1;
+}
+
+.editable-image-tile {
+  position: relative;
+  display: inline-block;
+}
+
+.editable-image-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: rgba(10, 10, 10, 0.82);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editable-image-remove:hover {
+  background: var(--orange);
 }
 
 #admin-listing-detail:empty {

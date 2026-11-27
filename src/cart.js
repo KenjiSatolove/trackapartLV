@@ -164,7 +164,7 @@ export function addToCart(product) {
   persistCart()
   showToast(`Pievienots grozam: ${product.name}`, {
     actionLabel: 'SKATĪT GROZU ↗',
-    onAction: () => document.querySelector('#cart-panel')?.classList.add('is-open'),
+    onAction: () => openCartPanel(),
   })
   return check
 }
@@ -262,16 +262,25 @@ function checkoutFormMarkup() {
     </form>`
 }
 
+export function openCartPanel() {
+  document.querySelector('#cart-panel')?.classList.add('is-open')
+  document.querySelector('#cart-backdrop')?.classList.add('is-open')
+}
+
 export function closeCartPanel() {
   document.querySelector('#cart-panel')?.classList.remove('is-open')
+  document.querySelector('#cart-backdrop')?.classList.remove('is-open')
 }
 
 export function bindCartControls({ onOpen } = {}) {
   document.querySelector('.cart-button')?.addEventListener('click', () => {
     onOpen?.()
-    document.querySelector('#cart-panel')?.classList.toggle('is-open')
+    const panel = document.querySelector('#cart-panel')
+    const isOpen = panel?.classList.toggle('is-open')
+    document.querySelector('#cart-backdrop')?.classList.toggle('is-open', Boolean(isOpen))
   })
   document.querySelector('.cart-close')?.addEventListener('click', closeCartPanel)
+  document.querySelector('#cart-backdrop')?.addEventListener('click', closeCartPanel)
   document.querySelector('#clear-cart')?.addEventListener('click', clearCart)
 
   document.querySelector('#checkout-button')?.addEventListener('click', () => {

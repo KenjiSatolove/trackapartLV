@@ -125,6 +125,26 @@ export function isSpamSubmit(formData) {
   return Boolean(formData.get('hp_field'))
 }
 
+// Disables submit buttons on a form while an async submission is running
+// so double-clicks cannot create duplicate records or double-upload files.
+export async function withSubmitLock(form, fn) {
+  if (!form || form.dataset.submitting === '1') return
+  form.dataset.submitting = '1'
+  const buttons = [...form.querySelectorAll('button[type="submit"], input[type="submit"]')]
+  const prevDisabled = buttons.map((btn) => btn.disabled)
+  buttons.forEach((btn) => {
+    btn.disabled = true
+  })
+  try {
+    return await fn()
+  } finally {
+    delete form.dataset.submitting
+    buttons.forEach((btn, i) => {
+      if (btn.isConnected) btn.disabled = prevDisabled[i]
+    })
+  }
+}
+
 // Trigger points for transactional email (order placed, listing status).
 export function notifyEmail(type, payload) {
   if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {

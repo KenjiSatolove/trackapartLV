@@ -1,6 +1,6 @@
 import { supabase } from './lib/supabase.js'
 import { CATEGORIES, CONDITION_NAMES, getProducts, loadProducts } from './data.js'
-import { escapeHtml, notifyEmail, safeUrl, slugify, stockLabel } from './utils.js'
+import { escapeHtml, notifyEmail, safeUrl, slugify, stockLabel, withSubmitLock } from './utils.js'
 import { renderMfaChallenge, renderMfaEnroll } from './auth.js'
 
 const STAFF_ROLES = ['owner', 'manager', 'warehouse', 'fulfillment']
@@ -34,17 +34,19 @@ export function bindAdminPage() {
   const form = document.querySelector('#admin-auth-form')
   form?.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const data = new FormData(form)
-    const message = document.querySelector('#admin-auth-message')
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.get('email'),
-      password: data.get('password'),
+    await withSubmitLock(form, async () => {
+      const data = new FormData(form)
+      const message = document.querySelector('#admin-auth-message')
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.get('email'),
+        password: data.get('password'),
+      })
+      if (error) {
+        message.textContent = error.message
+        return
+      }
+      await loadAdminDashboard()
     })
-    if (error) {
-      message.textContent = error.message
-      return
-    }
-    await loadAdminDashboard()
   })
   supabase.auth.getSession().then(({ data }) => {
     if (data.session) loadAdminDashboard()
@@ -114,6 +116,7 @@ async function loadAdminDashboard() {
       <button class="admin-tab" data-tab="products" type="button">▣ Products</button>
       <button class="admin-tab" data-tab="orders" type="button">≡ Orders</button>
       <button class="admin-tab" data-tab="listings" type="button">♧ Community listings <b id="pending-badge">0</b></button>
+      <button class="admin-tab" data-tab="reports" type="button">⚑ Reports <b id="reports-badge">0</b></button>
       <button class="admin-tab" data-tab="tasks" type="button">✓ Team</button>
       <button class="admin-tab" data-tab="settings" type="button">⚙ Settings</button>
       <button class="admin-logout" id="admin-logout" type="button">Iziet</button>
@@ -140,33 +143,44 @@ function adminProductFormMarkup(product) {
   return `<form class="admin-product-form" id="admin-product-form">
     <h3>${product ? 'Edit product' : 'Add product'}</h3>
     <input type="hidden" name="id" value="${escapeHtml(p.id || '')}">
-    <label>NAME<input name="name" required value="${escapeHtml(p.name || '')}"></label>
+    <label>NAME<input name="name" required maxlength="140" value="${escapeHtml(p.name || '')}"></label>
     <div class="form-two">
       <label>CATEGORY<select name="category">${CATEGORIES.map(
         (c) =>
           `<option value="${escapeHtml(c[4])}" ${p.category === c[1] || p.category === c[4] ? 'selected' : ''}>${escapeHtml(c[1])}</option>`,
       ).join('')}</select></label>
-      <label>CONDITION<input name="condition" value="${escapeHtml(p.condition || 'Labs')}"></label>
+      <label>CONDITION<input name="condition" maxlength="40" value="${escapeHtml(p.condition || 'Labs')}"></label>
     </div>
     <div class="form-two">
       <label>PRICE (€)<input name="price" type="number" min="0" step="0.01" required value="${escapeHtml(p.price ?? '')}"></label>
       <label>STOCK QTY<input name="stock" type="number" min="0" value="${escapeHtml(p.stock ?? 1)}"></label>
     </div>
     <div class="form-two">
-      <label>BRAND<input name="brand" value="${escapeHtml(p.brand || '')}"></label>
-      <label>MODEL<input name="model" value="${escapeHtml(p.model || '')}"></label>
+      <label>BRAND<input name="brand" maxlength="60" value="${escapeHtml(p.brand || '')}"></label>
+      <label>MODEL<input name="model" maxlength="80" value="${escapeHtml(p.model || '')}"></label>
     </div>
     <div class="form-two">
-      <label>OEM NUMBER<input name="oem" value="${escapeHtml(p.oem || '')}"></label>
-      <label>PART CODE<input name="code" value="${escapeHtml(p.code || '')}"></label>
+      <label>OEM NUMBER<input name="oem" maxlength="60" value="${escapeHtml(p.oem || '')}"></label>
+      <label>PART CODE<input name="code" maxlength="60" value="${escapeHtml(p.code || '')}"></label>
     </div>
     <div class="form-two">
-      <label>YEAR RANGE<input name="production_year" value="${escapeHtml(p.production_year || '')}"></label>
-      <label>ENGINE<input name="engine" value="${escapeHtml(p.engine || '')}"></label>
+      <label>MANUFACTURER<input name="manufacturer" maxlength="80" value="${escapeHtml(p.manufacturer || '')}"></label>
+      <label>BADGE TAG (optional)<input name="tag" maxlength="40" placeholder="Defaults to condition" value="${escapeHtml(p.tag || '')}"></label>
     </div>
-    <label>LOCATION<input name="location" value="${escapeHtml(p.location || '')}"></label>
+    <div class="form-two">
+      <label>YEAR RANGE<input name="production_year" maxlength="30" value="${escapeHtml(p.production_year || '')}"></label>
+      <label>ENGINE<input name="engine" maxlength="60" value="${escapeHtml(p.engine || '')}"></label>
+    </div>
+    <div class="form-two">
+      <label>WEIGHT<input name="weight" maxlength="40" placeholder="e.g. 4.2 kg" value="${escapeHtml(p.weight || '')}"></label>
+      <label>DIMENSIONS<input name="dimensions" maxlength="60" placeholder="e.g. 78 × 32 × 28 cm" value="${escapeHtml(p.dimensions || '')}"></label>
+    </div>
+    <div class="form-two">
+      <label>WARRANTY<input name="warranty" maxlength="40" placeholder="e.g. 3 mēneši" value="${escapeHtml(p.warranty || '')}"></label>
+      <label>LOCATION<input name="location" maxlength="80" value="${escapeHtml(p.location || '')}"></label>
+    </div>
     <label>IMAGE URLS (one per line)<textarea name="images" rows="3">${escapeHtml((p.images?.length ? p.images : [p.image].filter(Boolean)).join('\n'))}</textarea></label>
-    <label>DESCRIPTION<textarea name="description" rows="3">${escapeHtml(p.description || '')}</textarea></label>
+    <label>DESCRIPTION<textarea name="description" rows="3" maxlength="2000">${escapeHtml(p.description || '')}</textarea></label>
     <div class="form-actions">
       <button class="button button-dark" type="submit">${product ? 'Save changes' : 'Add product'}</button>
       <button class="text-button" type="button" id="admin-product-cancel">Cancel</button>
@@ -182,42 +196,51 @@ function bindAdminProductForm(existingProduct) {
   document.querySelector('#admin-product-cancel').addEventListener('click', () => {
     holder.innerHTML = ''
   })
-  document.querySelector('#admin-product-form').addEventListener('submit', async (event) => {
+  const form = document.querySelector('#admin-product-form')
+  form.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const message = document.querySelector('#admin-product-form-message')
-    const data = new FormData(event.target)
-    const id = data.get('id') || `${slugify(data.get('name'))}-${Math.random().toString(36).slice(2, 7)}`
-    const images = (data.get('images') || '')
-      .split('\n')
-      .map((line) => safeUrl(line.trim()))
-      .filter(Boolean)
-    const row = {
-      id,
-      name: data.get('name'),
-      category: data.get('category'),
-      condition: data.get('condition'),
-      price: Number(data.get('price')),
-      stock: Number(data.get('stock')) || 0,
-      brand: data.get('brand'),
-      model: data.get('model'),
-      oem: data.get('oem'),
-      code: data.get('code'),
-      production_year: data.get('production_year'),
-      engine: data.get('engine'),
-      location: data.get('location'),
-      image: images[0] || '',
-      images,
-      description: data.get('description'),
-      type: 'Lietota detaļa',
-      tag: data.get('condition'),
-    }
-    const { error } = await supabase.from('products').upsert(row)
-    if (error) {
-      message.textContent = error.message
-      return
-    }
-    await loadProducts()
-    renderAdminTab('products')
+    await withSubmitLock(form, async () => {
+      const message = document.querySelector('#admin-product-form-message')
+      const data = new FormData(form)
+      const id = data.get('id') || `${slugify(data.get('name'))}-${Math.random().toString(36).slice(2, 7)}`
+      const images = (data.get('images') || '')
+        .split('\n')
+        .map((line) => safeUrl(line.trim()))
+        .filter(Boolean)
+      const condition = String(data.get('condition') || '').trim()
+      const customTag = String(data.get('tag') || '').trim()
+      const row = {
+        id,
+        name: data.get('name'),
+        category: data.get('category'),
+        condition,
+        price: Number(data.get('price')),
+        stock: Math.max(0, Number(data.get('stock')) || 0),
+        brand: data.get('brand'),
+        model: data.get('model'),
+        oem: data.get('oem'),
+        code: data.get('code'),
+        manufacturer: data.get('manufacturer'),
+        production_year: data.get('production_year'),
+        engine: data.get('engine'),
+        weight: data.get('weight'),
+        dimensions: data.get('dimensions'),
+        warranty: data.get('warranty'),
+        location: data.get('location'),
+        image: images[0] || '',
+        images,
+        description: data.get('description'),
+        type: 'Lietota detaļa',
+        tag: customTag || condition,
+      }
+      const { error } = await supabase.from('products').upsert(row)
+      if (error) {
+        message.textContent = error.message
+        return
+      }
+      await loadProducts()
+      renderAdminTab('products')
+    })
   })
 }
 
@@ -226,12 +249,15 @@ async function renderAdminTab(tab) {
   if (!content) return
   const products = getProducts()
   const roleLabel = ROLE_LABELS[currentAdminProfile?.role] || currentAdminProfile?.role || 'Staff'
-  const [{ count: listingCount }, { count: pendingCount }] = await Promise.all([
+  const [{ count: listingCount }, { count: pendingCount }, { count: reportCount }] = await Promise.all([
     supabase.from('listings').select('*', { count: 'exact', head: true }).neq('status', 'removed'),
     supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('reports').select('*', { count: 'exact', head: true }),
   ])
   const badge = document.querySelector('#pending-badge')
   if (badge) badge.textContent = listingCount || 0
+  const reportsBadge = document.querySelector('#reports-badge')
+  if (reportsBadge) reportsBadge.textContent = reportCount || 0
 
   if (tab === 'dashboard') {
     content.innerHTML = `<div class="admin-heading">
@@ -445,6 +471,85 @@ async function renderAdminTab(tab) {
       row.addEventListener('click', (event) => {
         if (event.target.closest('button')) return
         showListingDetail(row.dataset.viewId)
+      }),
+    )
+  }
+
+  if (tab === 'reports') {
+    const { data: reports, error } = await supabase
+      .from('reports')
+      .select('id, listing_id, reporter_id, reason, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50)
+    const listingIds = [...new Set((reports || []).map((r) => r.listing_id).filter(Boolean))]
+    const reporterIds = [...new Set((reports || []).map((r) => r.reporter_id).filter(Boolean))]
+    const [{ data: reportedListings }, { data: reporters }] = await Promise.all([
+      listingIds.length
+        ? supabase.from('listings').select('id, title, status').in('id', listingIds)
+        : Promise.resolve({ data: [] }),
+      reporterIds.length
+        ? supabase.from('profiles').select('id, display_name, username').in('id', reporterIds)
+        : Promise.resolve({ data: [] }),
+    ])
+    const listingById = Object.fromEntries((reportedListings || []).map((l) => [l.id, l]))
+    const reporterById = Object.fromEntries((reporters || []).map((p) => [p.id, p.display_name || p.username || 'User']))
+    content.innerHTML = `<div class="admin-heading">
+        <div><span class="admin-overline">MODERATION</span><h2>Reports</h2></div>
+        <span class="admin-count">${reports?.length || 0} open</span>
+      </div>
+      <div id="admin-listing-detail"></div>
+      <p class="form-message" id="admin-reports-message">${error ? escapeHtml(error.message) : ''}</p>
+      <div class="moderation-list">${
+        reports?.length
+          ? reports
+              .map((rep) => {
+                const listing = listingById[rep.listing_id]
+                const reporter = rep.reporter_id ? reporterById[rep.reporter_id] || 'User' : 'Deleted user'
+                return `<div class="moderation-row" data-report-view-id="${escapeHtml(rep.listing_id)}">
+                  <div>
+                    <strong>${escapeHtml(listing?.title || `Listing #${rep.listing_id}`)} ${listing?.status ? `<span class="status-pill">${escapeHtml(listing.status)}</span>` : ''}</strong>
+                    <small>${escapeHtml(rep.reason)}</small>
+                    <small>Reported by ${escapeHtml(reporter)} · ${new Date(rep.created_at).toLocaleString('lv-LV')}</small>
+                  </div>
+                  <div class="row-actions">
+                    ${listing && listing.status !== 'removed' ? `<button class="reject-button" type="button" data-report-remove-listing="${escapeHtml(rep.listing_id)}" data-report-id="${escapeHtml(rep.id)}">Remove listing</button>` : ''}
+                    <button class="row-action" type="button" data-report-dismiss="${escapeHtml(rep.id)}">Dismiss</button>
+                  </div>
+                </div>`
+              })
+              .join('')
+          : '<p class="admin-note">No open reports.</p>'
+      }</div>`
+    content.querySelectorAll('[data-report-view-id]').forEach((row) =>
+      row.addEventListener('click', (event) => {
+        if (event.target.closest('button')) return
+        showListingDetail(row.dataset.reportViewId)
+      }),
+    )
+    content.querySelectorAll('[data-report-dismiss]').forEach((button) =>
+      button.addEventListener('click', async () => {
+        const msg = document.querySelector('#admin-reports-message')
+        const { error: delError } = await supabase.from('reports').delete().eq('id', button.dataset.reportDismiss)
+        if (delError) {
+          if (msg) msg.textContent = delError.message
+          return
+        }
+        renderAdminTab('reports')
+      }),
+    )
+    content.querySelectorAll('[data-report-remove-listing]').forEach((button) =>
+      button.addEventListener('click', async () => {
+        const msg = document.querySelector('#admin-reports-message')
+        const listingId = button.dataset.reportRemoveListing
+        const reportId = button.dataset.reportId
+        const { error: updError } = await supabase.from('listings').update({ status: 'removed' }).eq('id', listingId)
+        if (updError) {
+          if (msg) msg.textContent = updError.message
+          return
+        }
+        await supabase.from('reports').delete().eq('id', reportId)
+        notifyEmail('listing_status', { listingId, status: 'removed' })
+        renderAdminTab('reports')
       }),
     )
   }

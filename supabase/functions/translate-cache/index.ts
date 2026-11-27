@@ -33,6 +33,44 @@ function handleOptions(req: Request): Response | null {
 }
 
 const MAX_LEN = 2000
+const RATE_WINDOW_MS = 10 * 60 * 1000 // 10 minutes
+const MAX_MISSES_PER_WINDOW = 60
+const missHitsByIp = new Map<string, number[]>()
+
+function checkMissRateLimit(req: Request): boolean {
+  const forwarded = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "unknown"
+  const ip = forwarded.split(",")[0].trim() || "unknown"
+  const now = Date.now()
+  const recent = (missHitsByIp.get(ip) || []).filter((ts) => now - ts < RATE_WINDOW_MS)
+  if (recent.length >= MAX_MISSES_PER_WINDOW) {
+    missHitsByIp.set(ip, recent)
+    return false
+  }
+  recent.push(now)
+  missHitsByIp.set(ip, recent)
+  if (missHitsByIp.size > 5000) {
+    for (const [key, times] of missHitsByIp) {
+      if (!times.some((ts) => now - ts < RATE_WINDOW_MS)) missHitsByIp.delete(key)
+    }
+  }
+  return true
+}
+
+// Verify the requested text actually belongs to a catalog product or active
+// community listing so arbitrary external strings cannot fill translations_cache
+// or exhaust the upstream MyMemory API quota.
+async function isKnownCatalogOrListingText(
+  supabase: ReturnType<typeof createClient>,
+  text: string,
+): Promise<boolean> {
+  const [prodName, prodDesc, listTitle, listDesc] = await Promise.all([
+    supabase.from("products").select("id").eq("name", text).limit(1).maybeSingle(),
+    supabase.from("products").select("id").eq("description", text).limit(1).maybeSingle(),
+    supabase.from("listings").select("id").eq("status", "active").eq("title", text).limit(1).maybeSingle(),
+    supabase.from("listings").select("id").eq("status", "active").eq("description", text).limit(1).maybeSingle(),
+  ])
+  return Boolean(prodName.data || prodDesc.data || listTitle.data || listDesc.data)
+}
 
 Deno.serve(async (req) => {
   const preflight = handleOptions(req)
@@ -71,6 +109,14 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ translated_text: cached.translated_text }), { status: 200, headers })
   }
 
+  if (!checkMissRateLimit(req)) {
+    return new Response(JSON.stringify({ error: "Rate limit exceeded" }), { status: 429, headers })
+  }
+
+  if (!(await isKnownCatalogOrListingText(supabase, sourceText))) {
+    return new Response(JSON.stringify({ translated_text: sourceText }), { status: 200, headers })
+  }
+
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
       const res = await fetch(
@@ -84,7 +130,12 @@ Deno.serve(async (req) => {
         translated.length <= MAX_LEN &&
         translated.toLowerCase() !== sourceText.toLowerCase()
       ) {
-        await supabase.from("translations_cache").insert({ source_text: sourceText, translated_text: translated })
+        await supabase
+          .from("translations_cache")
+          .upsert({ source_text: sourceText, translated_text: translated }, {
+            onConflict: "source_text",
+            ignoreDuplicates: true,
+          })
         return new Response(JSON.stringify({ translated_text: translated }), { status: 200, headers })
       }
     } catch {

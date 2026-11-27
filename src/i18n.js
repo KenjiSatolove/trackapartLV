@@ -95,7 +95,7 @@ export const translations = {
   'Šī vietne izmanto tikai tehniski nepieciešamu lokālo glabātuvi, lai uzturētu tavu pieslēgšanās sesiju. Uzzini vairāk mūsu': 'This site only uses technically necessary local storage to keep you signed in. Learn more in our', 'SAPRATU': 'GOT IT', 'Privātuma politikā': 'Privacy Policy',
   'Auto detaļas bez liekām': 'Car parts without the', 'rūpēm.': 'hassle.',
   'PĀRDEVĒJA PROFILS': 'SELLER PROFILE', 'Pārdevēja': "Seller's", 'ATSAUKSMES': 'REVIEWS', 'Ko saka': 'What buyers', 'pircēji.': 'say.', 'VĒRTĒJUMS': 'RATING', 'KOMENTĀRS': 'COMMENT', 'PUBLICĒT ATSAUKSMI': 'POST REVIEW', 'ATJAUNOT ATSAUKSMI': 'UPDATE REVIEW',
-  'Ielādē...': 'Loading...', 'Ielādējam...': 'Loading...', 'Ielogojies, lai publicētu sludinājumu.': 'Sign in to publish a listing.', 'Lai ievietotu sludinājumu, vispirms ielogojies.': 'Please sign in first to publish a listing.', 'Pārdevējs nav pievienojis aprakstu.': 'Seller has not added a description.', 'Nav norādīta': 'Not specified', 'Paldies! Ziņojums nosūtīts administrācijai.': 'Thanks! Your report has been sent to moderation.', 'Izvēlies vērtējumu.': 'Please select a rating.', 'Vēl nav nevienas atsauksmes.': 'No reviews yet.', 'Ielogojies, lai atstātu atsauksmi.': 'Sign in to leave a review.', 'Šim pārdevējam pašlaik nav aktīvu sludinājumu.': 'This seller has no active listings right now.', 'BILDES (maks. 10 faili, līdz 5 MB katrs)': 'PHOTOS (max 10 files, up to 5 MB each)', '2FA ir ieslēgta šim kontam.': '2FA is enabled for this account.', '2FA nav ieslēgta šim kontam. Ieteicams pārdevējiem, lai pasargātu kontu no pārņemšanas.': '2FA is not enabled for this account. Recommended for sellers to protect against account takeover.', 'Konta dzēšana ir neatgriezeniska. Tiks dzēsti tavi sludinājumi, favorīti un profils.': 'Deleting your account is permanent. Your listings, favorites, and profile will be removed.', 'Šī prece vairs nav pieejama katalogā.': 'This item is no longer available in the catalog.', 'Veiksmīgi ielogojies.': 'Signed in successfully.', 'Parole atjaunota! Tagad vari izmantot jauno paroli.': 'Password updated! You can now use your new password.', 'Ievadi e-pastu un paroli, lai izveidotu kontu.': 'Enter your email and password to create an account.',
+  'Ielādē...': 'Loading...', 'Ielādējam...': 'Loading...', 'Ielogojies, lai publicētu sludinājumu.': 'Sign in to publish a listing.', 'Lai ievietotu sludinājumu, vispirms ielogojies.': 'Please sign in first to publish a listing.', 'Pārdevējs nav pievienojis aprakstu.': 'Seller has not added a description.', 'Nav norādīta': 'Not specified', 'Paldies! Ziņojums nosūtīts administrācijai.': 'Thanks! Your report has been sent to moderation.', 'Izvēlies vērtējumu.': 'Please select a rating.', 'Vēl nav nevienas atsauksmes.': 'No reviews yet.', 'Ielogojies, lai atstātu atsauksmi.': 'Sign in to leave a review.', 'Šim pārdevējam pašlaik nav aktīvu sludinājumu.': 'This seller has no active listings right now.', 'BILDES (maks. 10 faili, līdz 5 MB katrs)': 'PHOTOS (max 10 files, up to 5 MB each)', '2FA ir ieslēgta šim kontam.': '2FA is enabled for this account.', '2FA nav ieslēgta šim kontam. Ieteicams pārdevējiem, lai pasargātu kontu no pārņemšanas.': '2FA is not enabled for this account. Recommended for sellers to protect against account takeover.', 'Konta dzēšana ir neatgriezeniska. Tiks dzēsti tavi sludinājumi, favorīti un profils.': 'Deleting your account is permanent. Your listings, favorites, and profile will be removed.', 'Šī prece vairs nav pieejama katalogā.': 'This item is no longer available in the catalog.', 'Veiksmīgi ielogojies.': 'Signed in successfully.', 'Parole atjaunota! Tagad vari izmantot jauno paroli.': 'Password updated! You can now use your new password.', 'Ievadi e-pastu un paroli, lai izveidotu kontu.': 'Enter your email and password to create an account.', 'Šis lietotājvārds jau ir aizņemts. Izvēlies citu.': 'This username is already taken. Please choose another.', 'Tu jau esi ziņojis par šo sludinājumu.': 'You have already reported this listing.',
 }
 
 export const placeholderTranslations = {
@@ -159,18 +159,27 @@ async function translateText(text) {
   if (translationRequests.has(key)) return translationRequests.get(key)
   const request = (async () => {
     if (!supabase) return key
-    const { data } = await supabase
-      .from('translations_cache')
-      .select('translated_text')
-      .eq('source_text', key)
-      .maybeSingle()
-    if (data?.translated_text) return data.translated_text
-    const { data: result, error } = await supabase.functions.invoke('translate-cache', {
-      body: { source_text: key },
-    })
-    if (result?.translated_text) return result.translated_text
-    if (error) console.warn('translate-cache failed:', error.message || error)
-    return key
+    try {
+      const { data } = await supabase
+        .from('translations_cache')
+        .select('translated_text')
+        .eq('source_text', key)
+        .maybeSingle()
+      if (data?.translated_text) return data.translated_text
+      const { data: result, error } = await supabase.functions.invoke('translate-cache', {
+        body: { source_text: key },
+      })
+      if (result?.translated_text && result.translated_text !== key) return result.translated_text
+      if (error) {
+        console.warn('translate-cache failed:', error.message || error)
+        translationRequests.delete(key)
+      }
+      return key
+    } catch (err) {
+      console.warn('translate-cache error:', err)
+      translationRequests.delete(key)
+      return key
+    }
   })()
   translationRequests.set(key, request)
   return request

@@ -127,6 +127,7 @@ document.querySelector('#app').innerHTML = `
     <button class="mobile-nav-lang lang" type="button">LV <small>/ EN</small></button>
   </aside>
 
+  <div class="cart-backdrop" id="cart-backdrop"></div>
   <aside class="cart-panel" id="cart-panel" role="dialog" aria-modal="true" aria-label="Grozs">
     <button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button>
     <div class="section-kicker">TAVS GROZS</div>
@@ -290,6 +291,12 @@ document.querySelector('#mega-menu-backdrop').addEventListener('click', closeMeg
 document.querySelectorAll('.mega-menu-category, #mega-menu-viewall').forEach((link) =>
   link.addEventListener('click', closeMegaMenu),
 )
+document.querySelectorAll('.main-nav a:not(#catalog-nav-trigger), .brand').forEach((link) =>
+  link.addEventListener('click', closeMegaMenu),
+)
+window.addEventListener('resize', () => {
+  if (window.innerWidth <= 960) closeMegaMenu()
+})
 
 // Global Escape closes the topmost open modal/drawer cleanly.
 document.addEventListener('keydown', (event) => {
@@ -500,7 +507,10 @@ function playPageWipe(callback) {
 
 initLanguage()
 initGlobalFx()
-window.addEventListener('hashchange', () => playPageWipe(() => renderPage({ scrollToTop: true })))
+window.addEventListener('hashchange', () => {
+  closeMegaMenu()
+  playPageWipe(() => renderPage({ scrollToTop: true }))
+})
 renderPage()
 
 function isProductDependentRoute(route) {
