@@ -488,16 +488,26 @@ export function bindGallery(container, images) {
   img.addEventListener('click', () => openLightbox(imgs, index))
 }
 
+const CATEGORY_GENITIVE = {
+  dzinējs: 'Dzinēja',
+  virsbūve: 'Virsbūves',
+  salons: 'Salona',
+  balstiekārta: 'Balstiekārtas',
+  elektrība: 'Elektrības',
+  'riteņi un diski': 'Riteņu un disku',
+}
+
 export function categoryPage(categoryValue) {
   const products = getProducts()
   const label = CATEGORIES.find((c) => c[3] === categoryValue)?.[1] || escapeHtml(categoryValue)
+  const headingLabel = CATEGORY_GENITIVE[categoryValue] || label
   const matchingProducts = products
     .filter((product) => (product.category || '').toLowerCase() === categoryValue)
     .sort((a, b) => a.name.localeCompare(b.name, 'lv'))
   return `<section class="page-hero">
       <a class="back-link" href="#home">← ATPAKAĻ UZ SĀKUMU</a>
       <div class="section-kicker">KATEGORIJA / <span>${label}</span></div>
-      <h1>${label}<br><em>detaļas.</em></h1>
+      <h1>${headingLabel}<br><em>detaļas.</em></h1>
       <p>Šeit redzamas tikai <span>${label}</span> detaļas no kataloga un kopienas sludinājumiem.</p>
     </section>
     <section class="product-section category-products reveal">
@@ -555,12 +565,12 @@ export const productDetailPage = `<section class="detail-page product-detail">
       <div class="section-kicker">KATALOGA PRECE</div>
       <h1 id="product-title">Ielādē...</h1>
       <p id="product-description" class="detail-description"></p>
-      <button class="button button-dark" id="product-add" type="button">PIEVIENOT GROZAM ↗</button>
-      <p class="form-message" id="product-add-message"></p>
     </div>
     <aside class="seller-panel">
       <span class="product-tag" id="product-stock-badge">IR NOLIKTAVĀ</span>
       <strong id="product-price"></strong>
+      <button class="button button-dark product-buy-btn" id="product-add" type="button">PIEVIENOT GROZAM ↗</button>
+      <p class="form-message" id="product-add-message"></p>
       <div class="detail-data" id="product-data"></div>
     </aside>
   </div>

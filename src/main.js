@@ -130,13 +130,13 @@ document.querySelector('#app').innerHTML = `
   <div class="cart-backdrop" id="cart-backdrop"></div>
   <aside class="cart-panel" id="cart-panel" role="dialog" aria-modal="true" aria-label="Grozs">
     <button class="cart-close" type="button" aria-label="Aizvērt grozu">×</button>
-    <div class="section-kicker">TAVS GROZS</div>
-    <h2>Atlasītās <em>detaļas.</em></h2>
     <div id="cart-view">
+      <div class="section-kicker">TAVS GROZS</div>
+      <h2>Atlasītās <em>detaļas.</em></h2>
       <div class="cart-items" id="cart-items"><p id="cart-empty">Grozs ir tukšs.</p></div>
       <div class="cart-summary"><span>KOPĀ</span><strong id="cart-total">0,00 €</strong></div>
-      <button class="button button-dark" type="button" id="checkout-button">UZ NORĒĶINU ↗</button>
-      <button class="text-button" type="button" id="clear-cart">NOTĪRĪT GROZU</button>
+      <button class="button button-accent" type="button" id="checkout-button">UZ NORĒĶINU <span>↗</span></button>
+      <button class="text-button cart-clear-btn" type="button" id="clear-cart">NOTĪRĪT GROZU</button>
     </div>
     <div id="checkout-view" hidden></div>
   </aside>
@@ -451,10 +451,13 @@ function renderPage({ scrollToTop = false } = {}) {
     .forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${route}`))
 
   const titleMap = isEnglish() ? ROUTE_TITLES_EN : ROUTE_TITLES
+  const matchedCategory = route.startsWith('category-')
+    ? CATEGORIES.find((c) => c[3] === route.replace('category-', '').replaceAll('-', ' '))
+    : null
   document.title =
     titleMap[route] ||
     (route.startsWith('category-')
-      ? `${route.replace('category-', '').replaceAll('-', ' ')} — TrackParts`
+      ? `${matchedCategory?.[1] || route.replace('category-', '').replaceAll('-', ' ')} — TrackParts`
       : route.startsWith('listing-') || route.startsWith('product-') || route.startsWith('seller-')
         ? titleMap.home
         : titleMap.notFound)
@@ -470,7 +473,7 @@ function renderPage({ scrollToTop = false } = {}) {
   if (route.startsWith('category-')) loadCategoryListings(route.replace('category-', '').replaceAll('-', ' '))
   if (route.startsWith('listing-')) loadListingDetail(route.replace('listing-', ''), openAuthModal)
   if (route.startsWith('product-')) loadProductDetail(route.replace('product-', ''))
-  if (route.startsWith('seller-')) loadSellerProfile(route.replace('seller-', ''))
+  if (route.startsWith('seller-')) loadSellerProfile(route.replace('seller-', ''), openAuthModal)
   if (route === 'admin') bindAdminPage()
   if (route === 'account') initAccountPage(() => renderPage({ scrollToTop: true }))
 

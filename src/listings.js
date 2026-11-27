@@ -109,8 +109,9 @@ export async function fetchListingThumbnails(rows) {
       .in('listing_id', realIds)
       .order('sort_order')
     ;(data || []).forEach((img) => {
-      if (!thumbs[img.listing_id]) {
-        thumbs[img.listing_id] = supabase.storage.from('listing-images').getPublicUrl(img.storage_path).data.publicUrl
+      const storagePath = String(img.storage_path || '').trim()
+      if (storagePath && !thumbs[img.listing_id]) {
+        thumbs[img.listing_id] = supabase.storage.from('listing-images').getPublicUrl(storagePath).data.publicUrl
       }
     })
   }
@@ -338,9 +339,10 @@ export async function loadListingDetail(id, openAuthModal) {
       .select('storage_path')
       .eq('listing_id', id)
       .order('sort_order')
-    images = (imageRows || []).map(
-      (row) => supabase.storage.from('listing-images').getPublicUrl(row.storage_path).data.publicUrl,
-    )
+    images = (imageRows || [])
+      .map((row) => String(row.storage_path || '').trim())
+      .filter(Boolean)
+      .map((storagePath) => supabase.storage.from('listing-images').getPublicUrl(storagePath).data.publicUrl)
   }
   if (!document.querySelector('#detail-gallery')) return
   document.querySelector('#detail-gallery').innerHTML = galleryMarkup(images, listing.title)
@@ -441,7 +443,7 @@ async function fetchPublicProfilesByIds(ids) {
   return fallback.data || []
 }
 
-export async function loadSellerProfile(id) {
+export async function loadSellerProfile(id, openAuthModal) {
   if (!supabase) return
   const [{ data: { user } }, { data: reviews }, { data: listings }] = await Promise.all([
     supabase.auth.getUser(),
@@ -495,8 +497,14 @@ export async function loadSellerProfile(id) {
   }
 
   const formHolder = document.querySelector('#seller-review-form-holder')
-  if (!user) formHolder.innerHTML = '<p class="admin-note">Ielogojies, lai atstātu atsauksmi.</p>'
-  else if (user.id === id) formHolder.innerHTML = ''
+  if (!user) {
+    formHolder.innerHTML =
+      '<div class="review-login-prompt"><button class="button button-dark" id="seller-review-login" type="button">IELOGOTIES, LAI ATSTĀTU ATSAUKSMI ↗</button></div>'
+    document.querySelector('#seller-review-login')?.addEventListener('click', () => {
+      if (openAuthModal) openAuthModal('login')
+      else window.location.hash = 'account'
+    })
+  } else if (user.id === id) formHolder.innerHTML = ''
   else {
     formHolder.innerHTML = reviewFormMarkup(reviews?.find((r) => r.reviewer_id === user.id))
     bindReviewForm(id, user.id)

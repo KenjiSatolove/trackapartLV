@@ -26,17 +26,17 @@ export function homeMarkup() {
     <div class="racing-stripe"></div>
     <div class="telemetry-marquee" aria-hidden="true">
       <div class="telemetry-track">
-        <span><b>●</b> OEM VERIFIED PARTS</span>
-        <span><b>//</b> RĪGA WAREHOUSE LIVE</span>
-        <span><b>●</b> 24H DISPATCH ACROSS EU</span>
+        <span><b>●</b> OEM PĀRBAUDĪTAS DETAĻAS</span>
+        <span><b>//</b> RĪGAS NOLIKTAVA TIEŠSAISTĒ</span>
+        <span><b>●</b> 24H IZSŪTĪŠANA VISĀ EIROPĀ</span>
         <span><b>//</b> BMW · AUDI · MERCEDES-BENZ · VW · VOLVO</span>
-        <span><b>●</b> INSPECTED BEFORE SHIPMENT</span>
+        <span><b>●</b> PĀRBAUDĪTS PIRMS NOSŪTĪŠANAS</span>
         <span><b>//</b> TRACKPARTS LV</span>
-        <span><b>●</b> OEM VERIFIED PARTS</span>
-        <span><b>//</b> RĪGA WAREHOUSE LIVE</span>
-        <span><b>●</b> 24H DISPATCH ACROSS EU</span>
+        <span><b>●</b> OEM PĀRBAUDĪTAS DETAĻAS</span>
+        <span><b>//</b> RĪGAS NOLIKTAVA TIEŠSAISTĒ</span>
+        <span><b>●</b> 24H IZSŪTĪŠANA VISĀ EIROPĀ</span>
         <span><b>//</b> BMW · AUDI · MERCEDES-BENZ · VW · VOLVO</span>
-        <span><b>●</b> INSPECTED BEFORE SHIPMENT</span>
+        <span><b>●</b> PĀRBAUDĪTS PIRMS NOSŪTĪŠANAS</span>
         <span><b>//</b> TRACKPARTS LV</span>
       </div>
     </div>
@@ -146,7 +146,7 @@ export function notFoundMarkup(route) {
 export const STATIC_PAGES = {
   about: `<section class="page-hero about-hero">
     <div class="section-kicker">03 / PAR TRACKPARTS</div>
-    <h1>Built for the<br><em>road ahead.</em></h1>
+    <h1>Būvēts ceļam<br><em>uz priekšu.</em></h1>
     <p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p>
   </section>
   <section class="story-section reveal">

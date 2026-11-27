@@ -174,7 +174,9 @@ test('all fallback products and rendered markup pass basic safety and link invar
   assert.ok(!xssCategory.includes('<script>alert(1)</script>'))
   const validCategory = categoryPage('dzinējs')
   assert.ok(!validCategory.includes('category-search-empty'))
+  assert.ok(categoryPage('balstiekārta').includes('Balstiekārtas'))
   assert.ok(STATIC_PAGES.about.includes('PAR TRACKPARTS'))
+  assert.ok(STATIC_PAGES.about.includes('Būvēts ceļam'))
 })
 
 test('parseOptionalPrice handles 0 without falling back to Infinity', () => {

@@ -64,6 +64,8 @@ function setAuthModalTab(mode) {
   consentRow.hidden = mode !== 'signup'
   consentRow.querySelector('input').required = mode === 'signup'
   if (mode !== 'signup') consentRow.querySelector('input').checked = false
+  const forgotBtn = document.querySelector('#auth-modal-forgot')
+  if (forgotBtn) forgotBtn.hidden = mode === 'signup'
   if (isEnglish()) translatePage()
 }
 

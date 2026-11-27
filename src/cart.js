@@ -254,9 +254,9 @@ function checkoutFormMarkup() {
       <label>TĀLRUNIS<input name="phone"></label>
       <label>PIEGĀDES ADRESE<input name="address" required></label>
       <label>PIEZĪMES<textarea name="notes" rows="3"></textarea></label>
-      <div class="form-actions">
-        <button class="button button-light" type="submit"><span>NOSŪTĪT</span> (${formatPrice(total)}) ↗</button>
-        <button class="text-button" type="button" id="checkout-back">← ATPAKAĻ</button>
+      <div class="checkout-actions">
+        <button class="button button-accent checkout-submit-btn" type="submit"><span>NOSŪTĪT</span> <em>(${formatPrice(total)})</em> <b>↗</b></button>
+        <button class="checkout-back-btn" type="button" id="checkout-back">← ATPAKAĻ</button>
       </div>
       <p class="form-message" id="checkout-message"></p>
     </form>`
