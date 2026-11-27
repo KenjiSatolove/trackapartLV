@@ -96,7 +96,7 @@ document.querySelector('#app').innerHTML = `
   <div class="toast-host" id="toast-host"></div>
   <header class="site-header">
     <button class="icon-button menu-toggle" id="menu-toggle" type="button" aria-label="Izvēlne" aria-expanded="false">☰</button>
-    <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackApart LV logo"></a>
+    <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}trackapart-logo.png" alt="TrackApart LV logo"></a>
     <nav class="main-nav" aria-label="Galvenā navigācija">
       <a class="active" href="#home">Sākums</a>
       <a href="#catalog" id="catalog-nav-trigger" aria-haspopup="true" aria-expanded="false">Katalogs <span class="nav-caret">▾</span></a>
@@ -170,7 +170,7 @@ document.querySelector('#app').innerHTML = `
     <div class="auth-modal">
       <button class="modal-close" id="auth-modal-close" type="button" aria-label="Aizvērt">×</button>
       <div class="auth-modal-brand">
-        <img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackApart LV">
+        <img src="${import.meta.env.BASE_URL}trackapart-logo.png" alt="TrackApart LV">
       </div>
       <h2 class="auth-modal-title" id="auth-modal-title">Ielogojies <em>TrackApart.</em></h2>
       <p class="auth-modal-subtitle" id="auth-modal-subtitle">Pieslēdzies, lai piekļūtu savam kontam, sludinājumiem un favorītiem.</p>
@@ -218,7 +218,7 @@ document.querySelector('#app').innerHTML = `
 
   <footer id="site-footer">
     <div class="footer-brand">
-      <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackApart LV logo"></a>
+      <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}trackapart-logo.png" alt="TrackApart LV logo"></a>
       <p>Auto detaļas bez liekām<br>rūpēm.</p>
     </div>
     <div class="footer-column">

@@ -185,9 +185,11 @@ footer {
 
 .brand img {
   display: block;
-  width: 154px;
-  height: 58px;
-  object-fit: contain;
+  width: 172px;
+  height: 48px;
+  object-fit: cover;
+  object-position: 50% 51.5%;
+  mix-blend-mode: multiply;
 }
 
 .main-nav {
@@ -3103,9 +3105,11 @@ h2 {
 
 .auth-modal-brand img {
   display: block;
-  width: 132px;
-  height: 48px;
-  object-fit: contain;
+  width: 196px;
+  height: 54px;
+  object-fit: cover;
+  object-position: 50% 51.5%;
+  mix-blend-mode: multiply;
 }
 
 .auth-modal-title {
@@ -4630,8 +4634,8 @@ footer {
     gap: 14px;
   }
   .brand img {
-    width: 126px;
-    height: 48px;
+    width: 146px;
+    height: 42px;
   }
   .main-nav {
     gap: 15px;
