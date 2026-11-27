@@ -4,6 +4,7 @@ import { productGridMarkup, searchBoxMarkup, sidebarFilterMarkup } from './catal
 
 export function homeMarkup() {
   const products = getProducts()
+  const baseUrl = import.meta.env ? import.meta.env.BASE_URL : '/'
   return `
     <section class="hero">
       <div class="hero-copy">
@@ -16,7 +17,7 @@ export function homeMarkup() {
         <div class="hero-wheel-stage">
           <div class="hero-wheel-ring" aria-hidden="true"></div>
           <div class="hero-wheel-frame">
-            <img class="hero-wheel-img" src="${import.meta.env.BASE_URL}style37-wheel.jpg" alt="BMW Style 37 M-Parallel disks">
+            <img class="hero-wheel-img" src="${baseUrl}style37-wheel.jpg" alt="BMW Style 37 M-Parallel disks">
           </div>
         </div>
         <div class="hero-label"><span class="live-dot" aria-hidden="true"></span>EST. 2024 <i></i> RĪGA, LV</div>

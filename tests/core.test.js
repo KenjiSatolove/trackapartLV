@@ -136,6 +136,7 @@ test('all fallback products and rendered markup pass basic safety and link invar
   assert.ok(home.includes('href="#catalog">SKATĪT VISUS'))
   assert.ok(home.includes('data-year="2010–2017"'))
   assert.ok(home.includes('DETAĻAS, KURĀM VAR UZTICĒTIES'))
+  assert.ok(home.includes('style37-wheel.jpg'))
   assert.ok(!home.includes('id="catalog-show-more"'))
 
   const notFound = notFoundMarkup('<script>xss</script>')
