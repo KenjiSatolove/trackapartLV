@@ -1,6 +1,15 @@
 import { supabase } from './lib/supabase.js'
 import { CATEGORIES, CONDITION_NAMES, getProducts, loadProducts } from './data.js'
-import { escapeHtml, notifyEmail, safeUrl, slugify, stockLabel, withSubmitLock } from './utils.js'
+import {
+  escapeHtml,
+  notifyEmail,
+  safeUrl,
+  sanitizeUploadFilename,
+  slugify,
+  stockLabel,
+  validateImageFiles,
+  withSubmitLock,
+} from './utils.js'
 import { renderMfaChallenge, renderMfaEnroll } from './auth.js'
 
 const STAFF_ROLES = ['owner', 'manager', 'warehouse', 'fulfillment']
@@ -16,13 +25,13 @@ let currentAdminProfile = null
 export const adminPage = `<section class="admin-shell">
   <div class="admin-login" id="admin-login">
     <div class="admin-mark">TP / ADMIN</div>
-    <div class="section-kicker">PRIVĀTA PIEKĻUVE</div>
-    <h1>Vadības<br><em>panelis.</em></h1>
-    <p>Ielogojies ar administratora kontu, lai pārvaldītu TrackParts.</p>
+    <div class="section-kicker">PRIVATE ACCESS</div>
+    <h1>Admin<br><em>panel.</em></h1>
+    <p>Sign in with a staff account to manage TrackParts.</p>
     <form class="site-form" id="admin-auth-form">
-      <label>E-PASTS<input name="email" type="email" required placeholder="owner@trackparts.lv"></label>
-      <label>PAROLE<input name="password" type="password" required></label>
-      <button class="button button-dark" type="submit">IEIET PANELĪ ↗</button>
+      <label>EMAIL<input name="email" type="email" required placeholder="owner@trackparts.lv"></label>
+      <label>PASSWORD<input name="password" type="password" required></label>
+      <button class="button button-dark" type="submit">SIGN IN ↗</button>
       <p class="form-message" id="admin-auth-message"></p>
     </form>
   </div>
@@ -56,21 +65,29 @@ export function bindAdminPage() {
 async function showMfaChallenge(factor) {
   const loginPane = document.querySelector('#admin-login')
   loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div>
-    <div class="section-kicker">DIVFAKTORU AUTENTIFIKĀCIJA</div>
-    <h1>Ievadi<br><em>kodu.</em></h1>
-    <p>Ievadi 6 ciparu kodu no savas autentifikācijas lietotnes.</p>
+    <div class="section-kicker">TWO-FACTOR AUTHENTICATION</div>
+    <h1>Enter<br><em>code.</em></h1>
+    <p>Enter the 6-digit code from your authenticator app.</p>
     <div id="admin-mfa-holder"></div>`
-  renderMfaChallenge(document.querySelector('#admin-mfa-holder'), 'admin-mfa', factor.id, () => loadAdminDashboard())
+  renderMfaChallenge(document.querySelector('#admin-mfa-holder'), 'admin-mfa', factor.id, () => loadAdminDashboard(), {
+    codeLabel: 'CODE',
+    submitLabel: 'VERIFY',
+  })
 }
 
 async function showMfaEnroll() {
   const loginPane = document.querySelector('#admin-login')
   loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div>
-    <div class="section-kicker">OBLIGĀTA IESTATĪŠANA</div>
-    <h1>Iestati<br><em>divfaktoru autentifikāciju.</em></h1>
-    <p>Admin kontiem ir obligāta 2FA. Skenē kodu ar autentifikācijas lietotni (piem., Google Authenticator, Authy) vai ievadi atslēgu manuāli.</p>
+    <div class="section-kicker">REQUIRED SETUP</div>
+    <h1>Enable<br><em>two-factor auth.</em></h1>
+    <p>2FA is required for staff accounts. Scan the QR code with your authenticator app (e.g. Google Authenticator, Authy) or enter the key manually.</p>
     <div id="admin-mfa-holder"></div>`
-  await renderMfaEnroll(document.querySelector('#admin-mfa-holder'), 'admin-mfa-enroll', () => loadAdminDashboard())
+  await renderMfaEnroll(document.querySelector('#admin-mfa-holder'), 'admin-mfa-enroll', () => loadAdminDashboard(), {
+    codeLabel: 'CODE',
+    submitLabel: 'ENABLE 2FA',
+    keyLabel: 'Key:',
+    enrollError: 'Could not start 2FA setup. Please try again.',
+  })
 }
 
 async function loadAdminDashboard() {
@@ -85,7 +102,7 @@ async function loadAdminDashboard() {
     .single()
   if (!profile || !STAFF_ROLES.includes(profile.role)) {
     const msg = document.querySelector('#admin-auth-message')
-    if (msg) msg.textContent = 'Šim kontam nav piekļuves administrācijas panelim.'
+    if (msg) msg.textContent = 'This account does not have access to the admin panel.'
     await supabase.auth.signOut()
     return
   }
@@ -119,7 +136,7 @@ async function loadAdminDashboard() {
       <button class="admin-tab" data-tab="reports" type="button">⚑ Reports <b id="reports-badge">0</b></button>
       <button class="admin-tab" data-tab="tasks" type="button">✓ Team</button>
       <button class="admin-tab" data-tab="settings" type="button">⚙ Settings</button>
-      <button class="admin-logout" id="admin-logout" type="button">Iziet</button>
+      <button class="admin-logout" id="admin-logout" type="button">Log out</button>
     </aside>
     <section class="admin-content" id="admin-content"></section>
   </div>`
@@ -179,7 +196,26 @@ function adminProductFormMarkup(product) {
       <label>WARRANTY<input name="warranty" maxlength="40" placeholder="e.g. 3 mēneši" value="${escapeHtml(p.warranty || '')}"></label>
       <label>LOCATION<input name="location" maxlength="80" value="${escapeHtml(p.location || '')}"></label>
     </div>
-    <label>IMAGE URLS (one per line)<textarea name="images" rows="3">${escapeHtml((p.images?.length ? p.images : [p.image].filter(Boolean)).join('\n'))}</textarea></label>
+    ${
+      (p.images?.length ? p.images : [p.image].filter(Boolean))
+        .map((url) => safeUrl(url))
+        .filter(Boolean).length
+        ? `<label>CURRENT PHOTOS<div class="admin-listing-images" id="admin-product-image-tiles">${(
+            p.images?.length ? p.images : [p.image].filter(Boolean)
+          )
+            .map((url) => safeUrl(url))
+            .filter(Boolean)
+            .map(
+              (url) => `<div class="editable-image-tile" data-product-img-url="${escapeHtml(url)}">
+                <img src="${escapeHtml(url)}" alt="">
+                <button class="editable-image-remove" type="button" data-remove-product-img="${escapeHtml(url)}" aria-label="Remove photo">×</button>
+              </div>`,
+            )
+            .join('')}</div></label>`
+        : ''
+    }
+    <label>UPLOAD PHOTOS (max 10 files, up to 5 MB each)<input name="image_files" type="file" accept="image/*" multiple></label>
+    <label>IMAGE URLS (one per line, optional)<textarea name="images" id="admin-product-images-textarea" rows="3">${escapeHtml((p.images?.length ? p.images : [p.image].filter(Boolean)).join('\n'))}</textarea></label>
     <label>DESCRIPTION<textarea name="description" rows="3" maxlength="2000">${escapeHtml(p.description || '')}</textarea></label>
     <div class="form-actions">
       <button class="button button-dark" type="submit">${product ? 'Save changes' : 'Add product'}</button>
@@ -196,6 +232,20 @@ function bindAdminProductForm(existingProduct) {
   document.querySelector('#admin-product-cancel').addEventListener('click', () => {
     holder.innerHTML = ''
   })
+  holder.querySelectorAll('[data-remove-product-img]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const targetUrl = btn.dataset.removeProductImg
+      const textarea = document.querySelector('#admin-product-images-textarea')
+      if (textarea) {
+        textarea.value = textarea.value
+          .split('\n')
+          .map((line) => line.trim())
+          .filter((line) => line && line !== targetUrl)
+          .join('\n')
+      }
+      btn.closest('.editable-image-tile')?.remove()
+    }),
+  )
   const form = document.querySelector('#admin-product-form')
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
@@ -203,10 +253,34 @@ function bindAdminProductForm(existingProduct) {
       const message = document.querySelector('#admin-product-form-message')
       const data = new FormData(form)
       const id = data.get('id') || `${slugify(data.get('name'))}-${Math.random().toString(36).slice(2, 7)}`
-      const images = (data.get('images') || '')
+      const urlImages = String(data.get('images') || '')
         .split('\n')
         .map((line) => safeUrl(line.trim()))
         .filter(Boolean)
+      const { valid: files, error: fileError } = validateImageFiles(data.getAll('image_files'), {
+        existingCount: urlImages.length,
+      })
+      if (fileError) {
+        message.textContent = fileError
+        return
+      }
+      const uploadedUrls = []
+      if (files.length) {
+        message.textContent = `Uploading ${files.length} ${files.length === 1 ? 'photo' : 'photos'}...`
+        for (let index = 0; index < files.length; index += 1) {
+          const file = files[index]
+          const safeName = sanitizeUploadFilename(file.name, index)
+          const path = `${id}/${safeName}`
+          const upload = await supabase.storage.from('product-images').upload(path, file)
+          if (upload.error) {
+            message.textContent = `Photo upload failed: ${upload.error.message}`
+            return
+          }
+          const publicUrl = supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl
+          if (publicUrl) uploadedUrls.push(publicUrl)
+        }
+      }
+      const images = [...urlImages, ...uploadedUrls]
       const condition = String(data.get('condition') || '').trim()
       const customTag = String(data.get('tag') || '').trim()
       const row = {
@@ -268,7 +342,7 @@ async function renderAdminTab(tab) {
         <div><span>Products in stock</span><strong>${products.length}</strong></div>
         <div><span>Low stock</span><strong class="warning">${products.filter((p) => Number(p.stock) <= 2).length}</strong></div>
         <div><span>Community listings</span><strong>${listingCount || 0}</strong></div>
-        <div><span>Awaiting moderation</span><strong class="warning">${pendingCount || 0}</strong></div>
+        <div><span>Open reports</span><strong class="warning">${reportCount || 0}</strong></div>
       </div>
       <div class="admin-table">
         <div class="admin-table-head"><span>Part</span><span>Category</span><span>Stock</span><span>Price</span></div>
@@ -414,7 +488,7 @@ async function renderAdminTab(tab) {
                 </div>`,
               )
               .join('')}`
-          : '<p class="admin-note">Vēl nav neviena pasūtījuma. Norēķinu / apmaksas sistēma tiks pievienota vēlāk — tagad klienti nosūta pasūtījuma pieprasījumu, un jūs sazināties, lai vienotos par apmaksu.</p>'
+          : '<p class="admin-note">No orders yet. Customers submit order requests from the cart so you can arrange payment and delivery directly.</p>'
       }</div>
       <p class="admin-note" id="admin-orders-message"></p>`
     document.querySelectorAll('[data-order-status]').forEach((select) => {
@@ -596,7 +670,7 @@ async function renderAdminTab(tab) {
         <h3>Store</h3>
         <label>Low stock alert threshold<input value="2" readonly></label>
         <label>Free shipping threshold<input value="150 €" readonly></label>
-        <p class="admin-note">Šie iestatījumi pagaidām ir fiksēti kodā. Konfigurējama veikala iestatījumu tabula tiks pievienota vēlāk.</p>
+        <p class="admin-note">These thresholds are currently configured in code. A database-backed store settings table can be added later.</p>
       </div>`
   }
 

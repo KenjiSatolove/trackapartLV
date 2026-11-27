@@ -125,6 +125,29 @@ export function isSpamSubmit(formData) {
   return Boolean(formData.get('hp_field'))
 }
 
+// Keeps Tab / Shift+Tab keyboard focus cycling inside an open modal or drawer.
+export function trapFocus(container, event) {
+  if (!container || event.key !== 'Tab') return
+  const focusable = [
+    ...container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ].filter((el) => !el.hidden && (typeof el.getBoundingClientRect !== 'function' || el.getBoundingClientRect().width > 0))
+  if (!focusable.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  const active = container.ownerDocument?.activeElement
+  if (event.shiftKey) {
+    if (active === first || !container.contains(active)) {
+      event.preventDefault()
+      last.focus()
+    }
+  } else if (active === last || !container.contains(active)) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
 // Disables submit buttons on a form while an async submission is running
 // so double-clicks cannot create duplicate records or double-upload files.
 export async function withSubmitLock(form, fn) {

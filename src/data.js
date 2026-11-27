@@ -296,6 +296,7 @@ export const ROUTE_TITLES = {
   marketplace: 'Tirdzniecības noteikumi — TrackParts',
   safety: 'Drošība — TrackParts',
   admin: 'Admin panelis — TrackParts',
+  notFound: 'Lapa nav atrasta — TrackParts',
 }
 
 export const ROUTE_TITLES_EN = {
@@ -311,6 +312,7 @@ export const ROUTE_TITLES_EN = {
   marketplace: 'Marketplace rules — TrackParts',
   safety: 'Safety — TrackParts',
   admin: 'Admin panel — TrackParts',
+  notFound: 'Page not found — TrackParts',
 }
 
 let products = FALLBACK_PRODUCTS.map((product) => ({ ...product }))

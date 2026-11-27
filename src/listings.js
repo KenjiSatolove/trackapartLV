@@ -300,17 +300,27 @@ export async function loadListingDetail(id, openAuthModal) {
       .eq('id', id)
       .single()
     if (data) {
-      listing = { ...data, seller: 'Lietotājs', phone: 'Sazinies e-pastā' }
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, phone')
-        .eq('id', data.user_id)
-        .single()
-      if (profile) {
+      listing = { ...data, seller: 'Lietotājs', phone: '' }
+      const rpcSeller = await supabase.rpc('get_listing_seller', { target_listing_id: data.id })
+      const sellerRow = Array.isArray(rpcSeller.data) ? rpcSeller.data[0] : rpcSeller.data
+      if (!rpcSeller.error && sellerRow) {
         listing = {
           ...listing,
-          seller: profile.display_name || 'Lietotājs',
-          phone: profile.phone || 'Sazinies e-pastā',
+          seller: sellerRow.display_name || 'Lietotājs',
+          phone: sellerRow.phone || '',
+        }
+      } else {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, phone')
+          .eq('id', data.user_id)
+          .maybeSingle()
+        if (profile) {
+          listing = {
+            ...listing,
+            seller: profile.display_name || 'Lietotājs',
+            phone: profile.phone || '',
+          }
         }
       }
     }

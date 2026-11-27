@@ -67,30 +67,39 @@ function setAuthModalTab(mode) {
   if (isEnglish()) translatePage()
 }
 
-export function mfaCodeFormMarkup(idPrefix, submitLabel) {
+export function mfaCodeFormMarkup(idPrefix, submitLabel, codeLabel = 'KODS') {
   return `<form class="site-form" id="${escapeHtml(idPrefix)}-form">
-    <label>KODS<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label>
+    <label>${escapeHtml(codeLabel)}<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autocomplete="one-time-code"></label>
     <button class="button button-dark" type="submit">${escapeHtml(submitLabel)} ↗</button>
     <p class="form-message" id="${escapeHtml(idPrefix)}-message"></p>
   </form>`
 }
 
-export function renderMfaChallenge(container, idPrefix, factorId, onVerified) {
-  container.innerHTML = mfaCodeFormMarkup(idPrefix, 'APSTIPRINĀT')
-  document.querySelector(`#${idPrefix}-form`).addEventListener('submit', async (event) => {
+export function renderMfaChallenge(container, idPrefix, factorId, onVerified, labels = {}) {
+  const submitLabel = labels.submitLabel || 'APSTIPRINĀT'
+  const codeLabel = labels.codeLabel || 'KODS'
+  container.innerHTML = mfaCodeFormMarkup(idPrefix, submitLabel, codeLabel)
+  const form = document.querySelector(`#${idPrefix}-form`)
+  form.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const code = new FormData(event.target).get('code')
-    const message = document.querySelector(`#${idPrefix}-message`)
-    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
-    if (error) {
-      message.textContent = error.message
-      return
-    }
-    onVerified()
+    await withSubmitLock(form, async () => {
+      const code = new FormData(form).get('code')
+      const message = document.querySelector(`#${idPrefix}-message`)
+      const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
+      if (error) {
+        message.textContent = error.message
+        return
+      }
+      onVerified()
+    })
   })
 }
 
-export async function renderMfaEnroll(container, idPrefix, onEnrolled) {
+export async function renderMfaEnroll(container, idPrefix, onEnrolled, labels = {}) {
+  const submitLabel = labels.submitLabel || 'AKTIVIZĒT'
+  const codeLabel = labels.codeLabel || 'KODS'
+  const keyLabel = labels.keyLabel || 'Atslēga:'
+  const enrollError = labels.enrollError || 'Neizdevās sagatavot 2FA iestatīšanu. Mēģini vēlreiz.'
   const { data: existingFactors } = await supabase.auth.mfa.listFactors()
   const staleFactors = (existingFactors?.all || []).filter(
     (f) => f.factor_type === 'totp' && f.status === 'unverified',
@@ -98,24 +107,27 @@ export async function renderMfaEnroll(container, idPrefix, onEnrolled) {
   for (const stale of staleFactors) await supabase.auth.mfa.unenroll({ factorId: stale.id })
   const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
   if (error || !data?.totp?.qr_code || !data.totp.secret) {
-    container.innerHTML = `<p class="form-message">${escapeHtml(error?.message || 'Neizdevās sagatavot 2FA iestatīšanu. Mēģini vēlreiz.')}</p>`
+    container.innerHTML = `<p class="form-message">${escapeHtml(error?.message || enrollError)}</p>`
     return
   }
   const { id: factorId, totp } = data
   const qrSrc = escapeHtml(qrCodeToImgSrc(totp.qr_code))
-  container.innerHTML = `<div class="mfa-qr"><img src="${qrSrc}" alt="QR kods" width="200" height="200"></div>
-    <p class="admin-note">Atslēga: <code>${escapeHtml(totp.secret)}</code></p>
-    ${mfaCodeFormMarkup(idPrefix, 'AKTIVIZĒT')}`
-  document.querySelector(`#${idPrefix}-form`).addEventListener('submit', async (event) => {
+  container.innerHTML = `<div class="mfa-qr"><img src="${qrSrc}" alt="QR code" width="200" height="200"></div>
+    <p class="admin-note">${escapeHtml(keyLabel)} <code>${escapeHtml(totp.secret)}</code></p>
+    ${mfaCodeFormMarkup(idPrefix, submitLabel, codeLabel)}`
+  const form = document.querySelector(`#${idPrefix}-form`)
+  form.addEventListener('submit', async (event) => {
     event.preventDefault()
-    const code = new FormData(event.target).get('code')
-    const message = document.querySelector(`#${idPrefix}-message`)
-    const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
-    if (verifyError) {
-      message.textContent = verifyError.message
-      return
-    }
-    onEnrolled()
+    await withSubmitLock(form, async () => {
+      const code = new FormData(form).get('code')
+      const message = document.querySelector(`#${idPrefix}-message`)
+      const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
+      if (verifyError) {
+        message.textContent = verifyError.message
+        return
+      }
+      onEnrolled()
+    })
   })
 }
 

@@ -32,7 +32,9 @@ export function productCardMarkup(product, index, capped) {
 
   return `<article class="product-card${capped ? ' card-capped' : ''}${outOfStock ? ' is-out-of-stock' : ''}" data-product-id="${safeId}" data-name="${escapeHtml(dataName)}" data-year="${escapeHtml(product.production_year || '')}" data-price="${Number(product.price || 0)}" data-category="${escapeHtml((product.category || '').toLowerCase())}" data-brand="${escapeHtml((product.brand || '').toLowerCase())}" data-model="${escapeHtml((product.model || '').toLowerCase())}" data-condition="${escapeHtml((product.condition || '').toLowerCase())}" data-order="${index ?? 0}">
     <div class="product-image">
-      ${imgSrc ? `<img src="${imgSrc}" alt="${escapeHtml(product.name)}" loading="lazy"/>` : '<div class="gallery-empty">Nav bildes</div>'}
+      <a class="product-card-link product-image-link" href="#product-${safeId}" tabindex="-1" aria-hidden="true">
+        ${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy"/>` : '<div class="gallery-empty">Nav bildes</div>'}
+      </a>
       <span class="product-tag${outOfStock ? ' is-soldout' : ''}">${escapeHtml(tagText)}</span>
       <button class="quick-add" data-id="${safeId}" type="button" ${outOfStock ? 'disabled' : ''} aria-label="Pievienot grozam">+</button>
     </div>
@@ -40,7 +42,7 @@ export function productCardMarkup(product, index, capped) {
       <span>${escapeHtml(product.type)}</span>
       <small>${escapeHtml(product.code || '')}</small>
     </div>
-    <h3>${escapeHtml(product.name)}</h3>
+    <h3><a class="product-card-link" href="#product-${safeId}">${escapeHtml(product.name)}</a></h3>
     <div class="product-bottom">
       <strong>${formatPrice(product.price)}</strong>
       <button class="add-text" data-id="${safeId}" type="button" ${outOfStock ? 'disabled' : ''}>${outOfStock ? 'NAV NOLIKTAVĀ' : 'PIEVIENOT <span>↗</span>'}</button>
@@ -386,7 +388,7 @@ export function bindProductButtons() {
   )
   document.querySelectorAll('.product-card').forEach((card) =>
     card.addEventListener('click', (event) => {
-      if (event.target.closest('button')) return
+      if (event.target.closest('button, a')) return
       window.location.hash = `product-${card.dataset.productId}`
     }),
   )

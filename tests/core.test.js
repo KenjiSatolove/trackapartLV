@@ -13,6 +13,7 @@ import {
   safeUrl,
   sanitizeUploadFilename,
   slugify,
+  trapFocus,
   validateImageFiles,
   withSubmitLock,
 } from '../src/utils.js'
@@ -123,13 +124,18 @@ test('matchesProductionYear supports year ranges like 2010–2017 and substrings
 
 test('all fallback products and rendered markup pass basic safety and link invariants', async () => {
   const { productCardMarkup, categoryPage, matchesConditionFilter } = await import('../src/catalog.js')
-  const { homeMarkup, STATIC_PAGES } = await import('../src/pages.js')
+  const { homeMarkup, notFoundMarkup, STATIC_PAGES } = await import('../src/pages.js')
 
   const home = homeMarkup()
   assert.ok(home.includes('href="#catalog">SKATĪT VISUS'))
   assert.ok(home.includes('data-year="2010–2017"'))
   assert.ok(home.includes('DETAĻAS, KURĀM VAR UZTICĒTIES'))
   assert.ok(!home.includes('id="catalog-show-more"'))
+
+  const notFound = notFoundMarkup('<script>xss</script>')
+  assert.ok(notFound.includes('404 / LAPA NAV ATRASTA'))
+  assert.ok(!notFound.includes('<script>xss</script>'))
+  assert.ok(notFound.includes('href="#home"'))
 
   assert.equal(matchesConditionFilter('Ļoti labs', 'labs'), false)
   assert.equal(matchesConditionFilter('Labs', 'labs'), true)
@@ -154,6 +160,7 @@ test('all fallback products and rendered markup pass basic safety and link invar
   assert.ok(!xssCard.includes('<script>'))
   assert.ok(!xssCard.includes('javascript:alert'))
   assert.ok(xssCard.includes('data-condition="labs"'))
+  assert.ok(xssCard.includes('class="product-card-link"'))
   assert.ok(xssCard.includes('NAV NOLIKTAVĀ'))
   assert.ok(xssCard.includes('disabled'))
 
@@ -227,6 +234,28 @@ test('withSubmitLock prevents concurrent re-entry and restores submit button sta
   )
   assert.equal(btn.disabled, false)
   assert.equal(form.dataset.submitting, undefined)
+})
+
+test('trapFocus cycles Tab and Shift+Tab cleanly inside dialogs', () => {
+  let focused = null
+  const first = { hidden: false, focus: () => (focused = first) }
+  const last = { hidden: false, focus: () => (focused = last) }
+  const doc = { activeElement: last }
+  const container = {
+    ownerDocument: doc,
+    contains: (el) => el === first || el === last,
+    querySelectorAll: () => [first, last],
+  }
+  let prevented = false
+  trapFocus(container, { key: 'Tab', shiftKey: false, preventDefault: () => (prevented = true) })
+  assert.equal(prevented, true)
+  assert.equal(focused, first)
+
+  doc.activeElement = first
+  prevented = false
+  trapFocus(container, { key: 'Tab', shiftKey: true, preventDefault: () => (prevented = true) })
+  assert.equal(prevented, true)
+  assert.equal(focused, last)
 })
 
 test('index.html CSP disallows inline scripts and allows Supabase + fonts', () => {

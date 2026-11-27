@@ -1,7 +1,7 @@
 import './style.css'
 import { supabase } from './lib/supabase.js'
 import { CATEGORIES, ROUTE_TITLES, ROUTE_TITLES_EN, loadProducts } from './data.js'
-import { honeypotFieldMarkup } from './utils.js'
+import { honeypotFieldMarkup, trapFocus } from './utils.js'
 import {
   initLanguage,
   isEnglish,
@@ -42,7 +42,7 @@ import {
   setPendingAuthEvent,
 } from './auth.js'
 import { adminPage, bindAdminPage } from './admin.js'
-import { STATIC_PAGES, catalogPageMarkup, homeMarkup } from './pages.js'
+import { STATIC_PAGES, catalogPageMarkup, homeMarkup, notFoundMarkup } from './pages.js'
 import { bindHeroFx, initGlobalFx } from './fx.js'
 
 if (window.location.hash.includes('error=') || window.location.hash.includes('error_description=')) {
@@ -298,8 +298,27 @@ window.addEventListener('resize', () => {
   if (window.innerWidth <= 960) closeMegaMenu()
 })
 
-// Global Escape closes the topmost open modal/drawer cleanly.
+// Global Escape closes the topmost open modal/drawer cleanly, and Tab stays trapped inside it.
+function getTopOpenDialog() {
+  const lightbox = document.querySelector('#lightbox-overlay')
+  if (lightbox && !lightbox.hidden) return lightbox
+  const mfa = document.querySelector('#mfa-modal-overlay')
+  if (mfa && !mfa.hidden) return mfa
+  const auth = document.querySelector('#auth-modal-overlay')
+  if (auth && !auth.hidden) return auth
+  const cart = document.querySelector('#cart-panel')
+  if (cart?.classList.contains('is-open')) return cart
+  const mobile = document.querySelector('#mobile-nav')
+  if (mobile?.classList.contains('is-open')) return mobile
+  return null
+}
+
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Tab') {
+    const dialog = getTopOpenDialog()
+    if (dialog) trapFocus(dialog, event)
+    return
+  }
   if (event.key !== 'Escape') return
   if (!document.querySelector('#lightbox-overlay')?.hidden) {
     closeLightbox()
@@ -412,7 +431,7 @@ function resolvePageHtml(route) {
   if (route.startsWith('product-')) return productDetailPage
   if (route.startsWith('seller-')) return sellerProfilePage
   if (route.startsWith('category-')) return categoryPage(route.replace('category-', '').replaceAll('-', ' '))
-  return STATIC_PAGES[route] || catalogPageMarkup()
+  return STATIC_PAGES[route] || notFoundMarkup(route)
 }
 
 function renderPage({ scrollToTop = false } = {}) {
@@ -436,7 +455,9 @@ function renderPage({ scrollToTop = false } = {}) {
     titleMap[route] ||
     (route.startsWith('category-')
       ? `${route.replace('category-', '').replaceAll('-', ' ')} — TrackParts`
-      : titleMap.home)
+      : route.startsWith('listing-') || route.startsWith('product-') || route.startsWith('seller-')
+        ? titleMap.home
+        : titleMap.notFound)
 
   bindProductButtons()
   bindAccountAuthForm(() => renderPage())

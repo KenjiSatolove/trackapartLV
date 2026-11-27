@@ -1,5 +1,5 @@
 import { CATEGORIES, getProducts } from './data.js'
-import { honeypotFieldMarkup } from './utils.js'
+import { escapeHtml, honeypotFieldMarkup } from './utils.js'
 import { productGridMarkup, searchBoxMarkup, sidebarFilterMarkup } from './catalog.js'
 
 export function homeMarkup() {
@@ -127,6 +127,18 @@ export function catalogPageMarkup() {
         </select>
       </div>
       ${productGridMarkup(products, true)}
+    </div>
+  </section>`
+}
+
+export function notFoundMarkup(route) {
+  return `<section class="page-hero not-found-hero">
+    <div class="section-kicker">404 / LAPA NAV ATRASTA</div>
+    <h1>Lapa nav<br><em>atrasta.</em></h1>
+    <p>Adrese <code>#${escapeHtml(route || '')}</code> neeksistē vai ir pārvietota.</p>
+    <div class="form-actions">
+      <a class="button button-light" href="#home">UZ SĀKUMU <span>↗</span></a>
+      <a class="button button-dark" href="#catalog">SKATĪT KATALOGU <span>↗</span></a>
     </div>
   </section>`
 }
