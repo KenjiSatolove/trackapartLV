@@ -13,6 +13,13 @@ import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
 
 export const CATALOG_PAGE_SIZE = 8
 
+export function normalizeConditionLabel(condition) {
+  const trimmed = String(condition ?? '').trim()
+  if (!trimmed) return ''
+  if (trimmed.toLowerCase() === 'pārbaudīta') return 'Pārbaudīts'
+  return trimmed
+}
+
 export function matchesConditionFilter(productCondition, filterCondition) {
   const filter = String(filterCondition ?? '').trim().toLowerCase()
   if (!filter) return true
@@ -242,7 +249,13 @@ export function bindCatalogSidebarFilters() {
     if (exclude !== 'brand' && state.brands.size && !state.brands.has(p.brand)) return false
     if (exclude !== 'model' && state.models.size && !state.models.has(p.model)) return false
     if (exclude !== 'category' && state.categories.size && !state.categories.has(p.category)) return false
-    if (exclude !== 'condition' && state.conditions.size && !state.conditions.has(p.condition)) return false
+    if (
+      exclude !== 'condition' &&
+      state.conditions.size &&
+      !state.conditions.has(normalizeConditionLabel(p.condition))
+    ) {
+      return false
+    }
     if (exclude !== 'price' && (Number(p.price) < state.priceMin || Number(p.price) > state.priceMax)) return false
     if (exclude !== 'year' && state.year && !matchesProductionYear(p.production_year, state.year)) {
       return false
@@ -253,7 +266,8 @@ export function bindCatalogSidebarFilters() {
   function countsFor(key, exclude) {
     const counts = {}
     products.forEach((p) => {
-      if (p[key] && matches(p, exclude)) counts[p[key]] = (counts[p[key]] || 0) + 1
+      const raw = key === 'condition' ? normalizeConditionLabel(p[key]) : p[key]
+      if (raw && matches(p, exclude)) counts[raw] = (counts[raw] || 0) + 1
     })
     return counts
   }

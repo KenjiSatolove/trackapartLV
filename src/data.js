@@ -295,7 +295,7 @@ export const ROUTE_TITLES = {
   privacy: 'Privātuma politika — TrackParts',
   marketplace: 'Tirdzniecības noteikumi — TrackParts',
   safety: 'Drošība — TrackParts',
-  admin: 'Admin panelis — TrackParts',
+  admin: 'Admin panel — TrackParts',
   notFound: 'Lapa nav atrasta — TrackParts',
 }
 

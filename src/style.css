@@ -253,6 +253,8 @@ footer {
 
 .lang {
   font: 11px 'DM Mono';
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .lang small,
@@ -321,7 +323,7 @@ footer {
 /* ---- mega menu ---- */
 .mega-menu-backdrop {
   position: fixed;
-  inset: 0;
+  inset: 78px 0 0 0;
   z-index: 45;
   background: rgba(0, 0, 0, 0.35);
   opacity: 0;
@@ -1581,16 +1583,23 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   border-top: 1px solid var(--line);
   padding-top: 12px;
 }
 
 .product-bottom strong {
-  font-size: 17px;
+  font-size: 16px;
+  white-space: nowrap;
 }
 
 .add-text {
   padding: 0;
+  white-space: nowrap;
+}
+
+.add-text span {
+  margin-left: 5px;
 }
 
 .no-results {
@@ -3130,6 +3139,32 @@ footer {
 }
 
 /* ---- responsive breakpoints ---- */
+@media (max-width: 1220px) {
+  .site-header {
+    padding: 0 3vw;
+    gap: 14px;
+  }
+  .brand img {
+    width: 126px;
+    height: 48px;
+  }
+  .main-nav {
+    gap: 15px;
+  }
+  .header-actions {
+    gap: 9px;
+  }
+  .cart-button {
+    padding-left: 12px;
+  }
+}
+
+@media (min-width: 801px) and (max-width: 1220px) {
+  .catalog-main .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 960px) {
   .site-header {
     height: 68px;

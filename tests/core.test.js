@@ -123,8 +123,14 @@ test('matchesProductionYear supports year ranges like 2010–2017 and substrings
 })
 
 test('all fallback products and rendered markup pass basic safety and link invariants', async () => {
-  const { productCardMarkup, categoryPage, matchesConditionFilter } = await import('../src/catalog.js')
+  const { productCardMarkup, categoryPage, matchesConditionFilter, normalizeConditionLabel } = await import(
+    '../src/catalog.js'
+  )
   const { homeMarkup, notFoundMarkup, STATIC_PAGES } = await import('../src/pages.js')
+
+  assert.equal(normalizeConditionLabel('Pārbaudīta'), 'Pārbaudīts')
+  assert.equal(normalizeConditionLabel('Pārbaudīts'), 'Pārbaudīts')
+  assert.equal(normalizeConditionLabel('Labs'), 'Labs')
 
   const home = homeMarkup()
   assert.ok(home.includes('href="#catalog">SKATĪT VISUS'))
