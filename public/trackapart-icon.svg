@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Brake rotor & 5-lug black hub matching the TrackApart logo emblem -->
+  <circle cx="36" cy="32" r="20.5" fill="#ffffff" stroke="#18191d" stroke-width="2.4"/>
+  <circle cx="36" cy="32" r="15.5" fill="#0d0e11"/>
+  <circle cx="36" cy="32" r="5.6" fill="#ffffff"/>
+  <circle cx="36" cy="21.4" r="2.1" fill="#ffffff"/>
+  <circle cx="46.1" cy="28.7" r="2.1" fill="#ffffff"/>
+  <circle cx="42.2" cy="40.6" r="2.1" fill="#ffffff"/>
+  <circle cx="29.8" cy="40.6" r="2.1" fill="#ffffff"/>
+  <circle cx="25.9" cy="28.7" r="2.1" fill="#ffffff"/>
+  <!-- Sculpted crimson brake caliper wrapping the left side -->
+  <path
+    d="M39.5 4.2C23.5 2.5 8.8 13.6 5.6 29.4L4.2 35.2L15.6 31.8C16.2 21.4 24.4 13.6 35 13.2L39.5 4.2Z"
+    fill="#e10600"
+  />
+  <path
+    d="M15.8 35.4L8.2 37.8C11.4 51 23.2 60.4 37.8 59.8L39.2 50.8C27.4 51.6 17.8 44.8 15.8 35.4Z"
+    fill="#e10600"
+  />
+  <!-- Signature caliper detail notches -->
+  <path d="M22.5 17.5L27.5 11.2" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M23.5 47.2L29 53.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
