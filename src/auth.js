@@ -67,7 +67,7 @@ function setAuthModalTab(mode) {
   form.dataset.mode = isSignup ? 'signup' : 'login'
   const titleEl = document.querySelector('#auth-modal-title')
   if (titleEl) {
-    titleEl.innerHTML = isSignup ? 'Izveido <em>kontu.</em>' : 'Ielogojies <em>TrackParts.</em>'
+    titleEl.innerHTML = isSignup ? 'Izveido <em>kontu.</em>' : 'Ielogojies <em>TrackApart.</em>'
   }
   const subtitleEl = document.querySelector('#auth-modal-subtitle')
   if (subtitleEl) {

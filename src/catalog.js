@@ -518,7 +518,7 @@ export function categoryPage(categoryValue) {
     <section class="product-section category-products reveal">
       <div class="section-top">
         <div>
-          <div class="section-kicker">TRACKPARTS KATALOGS</div>
+          <div class="section-kicker">TRACKAPART KATALOGS</div>
           <h2>Kataloga <em>preces.</em></h2>
         </div>
         <a class="text-link" href="#catalog">VISAS KATEGORIJAS <span>↗</span></a>
@@ -605,7 +605,7 @@ export function loadProductDetail(id) {
   document.querySelector('#product-gallery').innerHTML = galleryMarkup(images, product.name)
   bindGallery(document.querySelector('#product-gallery'), images)
   titleEl.textContent = product.name
-  document.title = `${product.name} — TrackParts`
+  document.title = `${product.name} — TrackApart`
   document.querySelector('#product-description').textContent = product.description || ''
   document.querySelector('#product-price').textContent = formatPrice(product.price)
 

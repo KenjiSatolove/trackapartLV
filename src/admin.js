@@ -41,12 +41,12 @@ const tabState = {
 
 export const adminPage = `<section class="admin-shell">
   <div class="admin-login" id="admin-login">
-    <div class="admin-mark">TP / ADMIN</div>
+    <div class="admin-mark">TA / ADMIN</div>
     <div class="section-kicker">PRIVATE ACCESS</div>
     <h1>Admin<br><em>panel.</em></h1>
-    <p>Sign in with a staff account to manage TrackParts.</p>
+    <p>Sign in with a staff account to manage TrackApart.</p>
     <form class="site-form" id="admin-auth-form">
-      <label>EMAIL<input name="email" type="email" required placeholder="owner@trackparts.lv"></label>
+      <label>EMAIL<input name="email" type="email" required placeholder="owner@trackapart.lv"></label>
       <label>PASSWORD<input name="password" type="password" required></label>
       <button class="button button-dark" type="submit">SIGN IN ↗</button>
       <p class="form-message" id="admin-auth-message"></p>
@@ -82,7 +82,7 @@ export function bindAdminPage() {
 async function showMfaChallenge(factor) {
   const loginPane = document.querySelector('#admin-login')
   if (!loginPane) return
-  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div>
+  loginPane.innerHTML = `<div class="admin-mark">TA / ADMIN</div>
     <div class="section-kicker">TWO-FACTOR AUTHENTICATION</div>
     <h1>Enter<br><em>code.</em></h1>
     <p>Enter the 6-digit code from your authenticator app.</p>
@@ -96,7 +96,7 @@ async function showMfaChallenge(factor) {
 async function showMfaEnroll() {
   const loginPane = document.querySelector('#admin-login')
   if (!loginPane) return
-  loginPane.innerHTML = `<div class="admin-mark">TP / ADMIN</div>
+  loginPane.innerHTML = `<div class="admin-mark">TA / ADMIN</div>
     <div class="section-kicker">REQUIRED SETUP</div>
     <h1>Enable<br><em>two-factor auth.</em></h1>
     <p>2FA is required for staff accounts. Scan the QR code with your authenticator app (e.g. Google Authenticator, Authy) or enter the key manually.</p>
@@ -214,7 +214,7 @@ async function loadAdminDashboard() {
   dashboard.innerHTML = `<div class="admin-layout">
     <aside class="admin-sidebar">
       <div class="admin-brand-bar">
-        <div class="admin-logo"><span class="admin-logo-dot"></span><strong>TP / ADMIN</strong></div>
+        <div class="admin-logo"><span class="admin-logo-dot"></span><strong>TA / ADMIN</strong></div>
         <a class="admin-store-link" href="#home">Storefront ↗</a>
       </div>
 
@@ -489,7 +489,7 @@ function exportProductsCsv(products) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `trackparts-catalog-${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = `trackapart-catalog-${new Date().toISOString().slice(0, 10)}.csv`
   a.click()
   URL.revokeObjectURL(url)
   showToast(`Exported ${products.length} products to CSV`)

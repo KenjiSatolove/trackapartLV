@@ -96,7 +96,7 @@ document.querySelector('#app').innerHTML = `
   <div class="toast-host" id="toast-host"></div>
   <header class="site-header">
     <button class="icon-button menu-toggle" id="menu-toggle" type="button" aria-label="Izvēlne" aria-expanded="false">☰</button>
-    <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
+    <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackApart LV logo"></a>
     <nav class="main-nav" aria-label="Galvenā navigācija">
       <a class="active" href="#home">Sākums</a>
       <a href="#catalog" id="catalog-nav-trigger" aria-haspopup="true" aria-expanded="false">Katalogs <span class="nav-caret">▾</span></a>
@@ -170,9 +170,9 @@ document.querySelector('#app').innerHTML = `
     <div class="auth-modal">
       <button class="modal-close" id="auth-modal-close" type="button" aria-label="Aizvērt">×</button>
       <div class="auth-modal-brand">
-        <img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV">
+        <img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackApart LV">
       </div>
-      <h2 class="auth-modal-title" id="auth-modal-title">Ielogojies <em>TrackParts.</em></h2>
+      <h2 class="auth-modal-title" id="auth-modal-title">Ielogojies <em>TrackApart.</em></h2>
       <p class="auth-modal-subtitle" id="auth-modal-subtitle">Pieslēdzies, lai piekļūtu savam kontam, sludinājumiem un favorītiem.</p>
       <form class="site-form auth-popup-form" id="auth-modal-form" data-mode="login">
         ${honeypotFieldMarkup()}
@@ -218,7 +218,7 @@ document.querySelector('#app').innerHTML = `
 
   <footer id="site-footer">
     <div class="footer-brand">
-      <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackParts LV logo"></a>
+      <a class="brand" href="#home"><img src="${import.meta.env.BASE_URL}image-removebg-preview.png" alt="TrackApart LV logo"></a>
       <p>Auto detaļas bez liekām<br>rūpēm.</p>
     </div>
     <div class="footer-column">
@@ -235,12 +235,12 @@ document.querySelector('#app').innerHTML = `
     </div>
     <div class="footer-contact">
       <b>RUNĀSIM</b>
-      <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>
+      <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a>
       <a href="tel:+37120000000">+371 2000 0000</a>
       <p>Rīga, Latvija</p>
     </div>
     <div class="footer-bottom">
-      <span>© ${currentYear} TRACKPARTS</span>
+      <span>© ${currentYear} TRACKAPART</span>
       <nav class="footer-legal">
         <a href="#terms">Lietošanas noteikumi</a>
         <a href="#privacy">Privātuma politika</a>
@@ -510,7 +510,7 @@ function renderPage({ scrollToTop = false } = {}) {
   document.title =
     titleMap[route] ||
     (route.startsWith('category-')
-      ? `${matchedCategory?.[1] || route.replace('category-', '').replaceAll('-', ' ')} — TrackParts`
+      ? `${matchedCategory?.[1] || route.replace('category-', '').replaceAll('-', ' ')} — TrackApart`
       : route.startsWith('listing-') || route.startsWith('product-') || route.startsWith('seller-')
         ? titleMap.home
         : titleMap.notFound)

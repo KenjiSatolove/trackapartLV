@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
       const res = await fetch(
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=lv|en&de=hello@trackparts.lv`,
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=lv|en&de=hello@trackapart.lv`,
       )
       const json = await res.json()
       const translated = json?.responseData?.translatedText

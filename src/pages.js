@@ -21,7 +21,7 @@ export function homeMarkup() {
           </div>
         </div>
         <div class="hero-label"><span class="live-dot" aria-hidden="true"></span>EST. 2024 <i></i> RĪGA, LV</div>
-        <div class="hero-spec">01 <span>TRACKPARTS // OEM TELEMETRY</span></div>
+        <div class="hero-spec">01 <span>TRACKAPART // OEM TELEMETRY</span></div>
       </div>
       <div class="hero-stats">
         <div><strong>10k+</strong><span>DETAĻAS<br>NOLIKTAVĀ</span></div>
@@ -37,13 +37,13 @@ export function homeMarkup() {
         <span><b>●</b> 24H IZSŪTĪŠANA VISĀ EIROPĀ</span>
         <span><b>//</b> BMW · AUDI · MERCEDES-BENZ · VW · VOLVO</span>
         <span><b>●</b> PĀRBAUDĪTS PIRMS NOSŪTĪŠANAS</span>
-        <span><b>//</b> TRACKPARTS LV</span>
+        <span><b>//</b> TRACKAPART LV</span>
         <span><b>●</b> OEM PĀRBAUDĪTAS DETAĻAS</span>
         <span><b>//</b> RĪGAS NOLIKTAVA TIEŠSAISTĒ</span>
         <span><b>●</b> 24H IZSŪTĪŠANA VISĀ EIROPĀ</span>
         <span><b>//</b> BMW · AUDI · MERCEDES-BENZ · VW · VOLVO</span>
         <span><b>●</b> PĀRBAUDĪTS PIRMS NOSŪTĪŠANAS</span>
-        <span><b>//</b> TRACKPARTS LV</span>
+        <span><b>//</b> TRACKAPART LV</span>
       </div>
     </div>
 
@@ -151,7 +151,7 @@ export function notFoundMarkup(route) {
 
 export const STATIC_PAGES = {
   about: `<section class="page-hero about-hero">
-    <div class="section-kicker">03 / PAR TRACKPARTS</div>
+    <div class="section-kicker">03 / PAR TRACKAPART</div>
     <h1>Būvēts ceļam<br><em>uz priekšu.</em></h1>
     <p>Mēs atrodam labas detaļas cilvēkiem, kuri paši zina, cik svarīgs ir katrs pagrieziens.</p>
   </section>
@@ -159,7 +159,7 @@ export const STATIC_PAGES = {
     <div class="section-kicker">MŪSU PIEEJA</div>
     <h2>Nevis detaļu kaudze.<br><em>Īstais atradums.</em></h2>
     <div class="story-grid">
-      <p>TrackParts sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p>
+      <p>TrackApart sākās Rīgā ar vienu vienkāršu ideju: lietotai detaļai nav jābūt kompromisam. Katra detaļa tiek pārbaudīta, nofotografēta un marķēta, lai tu vari pirkt ar pārliecību.</p>
       <p>Mūsu noliktavā katram kodam ir sava vieta, statuss un vēsture. Mazāk minēšanas, vairāk laika uz ceļa.</p>
     </div>
   </section>
@@ -180,7 +180,7 @@ export const STATIC_PAGES = {
       <h2>Atbildēsim<br><em>ātri.</em></h2>
     </div>
     <div class="contact-list">
-      <a href="mailto:hello@trackparts.lv"><small>E-PASTS</small>hello@trackparts.lv ↗</a>
+      <a href="mailto:hello@trackapart.lv"><small>E-PASTS</small>hello@trackapart.lv ↗</a>
       <a href="tel:+37120000000"><small>TELEFONS</small>+371 2000 0000 ↗</a>
       <div><small>ATRODI MŪS</small>Rīga, Latvija</div>
     </div>
@@ -189,21 +189,21 @@ export const STATIC_PAGES = {
   terms: `<section class="page-hero">
     <div class="section-kicker">LIETOŠANAS NOTEIKUMI</div>
     <h1>Noteikumi.<br><em>Skaidri un godīgi.</em></h1>
-    <p>Šie noteikumi regulē TrackParts interneta veikala un sludinājumu platformas lietošanu.</p>
+    <p>Šie noteikumi regulē TrackApart interneta veikala un sludinājumu platformas lietošanu.</p>
   </section>
   <section class="legal-page">
     <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
     <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
     <h3>1. Vispārīga informācija</h3>
-    <p>Šo tīmekļa vietni ("TrackParts", "mēs") uztur [UZŅĒMUMA NOSAUKUMS / KOMERSANTA VĀRDS, REĢ. NR. XXXXXXXXXXX, JURIDISKĀ ADRESE], turpmāk — "Pārdevējs" vai "Operators". Lietojot vietni, tu piekrīti šiem noteikumiem. Ja nepiekrīti, lūdzu, nelieto vietni.</p>
+    <p>Šo tīmekļa vietni ("TrackApart", "mēs") uztur [UZŅĒMUMA NOSAUKUMS / KOMERSANTA VĀRDS, REĢ. NR. XXXXXXXXXXX, JURIDISKĀ ADRESE], turpmāk — "Pārdevējs" vai "Operators". Lietojot vietni, tu piekrīti šiem noteikumiem. Ja nepiekrīti, lūdzu, nelieto vietni.</p>
     <h3>2. Konta reģistrācija</h3>
     <p>Reģistrējoties tu apliecini, ka sniegtā informācija ir patiesa un ka tev ir vismaz 18 gadu, vai arī rīkojies ar likumiskā pārstāvja piekrišanu. Tu esi atbildīgs par sava konta datu konfidencialitāti un visām darbībām, kas veiktas, izmantojot tavu kontu.</p>
     <h3>3. Pasūtījumi un cenas</h3>
     <p>Cenas norādītas eiro (€) un, ja piemērojams, ietver PVN. Interneta apmaksa pašlaik nav pieejama — pēc pasūtījuma pieprasījuma nosūtīšanas mēs sazināmies ar tevi pa e-pastu, lai vienotos par apmaksu un piegādi. Līgums starp pusēm uzskatāms par noslēgtu tikai pēc abpusējas apmaksas un piegādes nosacījumu apstiprināšanas.</p>
     <h3>4. Atteikuma tiesības (14 dienas)</h3>
-    <p>Ja esi patērētājs (fiziska persona, kas pērk ārpus savas saimnieciskās darbības), tev ir tiesības atteikties no pirkuma 14 kalendāro dienu laikā no preces saņemšanas dienas, nenorādot iemeslu, saskaņā ar Patērētāju tiesību aizsardzības likumu un ES Direktīvu 2011/83/ES. Lai izmantotu šīs tiesības, raksti mums uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>. Nauda tiek atmaksāta 14 dienu laikā pēc preces saņemšanas atpakaļ. Preces atpakaļsūtīšanas izmaksas sedz pircējs, ja vien nav norādīts citādi. Prece jāatdod tādā stāvoklī, kāds nepieciešams tās īpašību un darbības pārbaudei.</p>
+    <p>Ja esi patērētājs (fiziska persona, kas pērk ārpus savas saimnieciskās darbības), tev ir tiesības atteikties no pirkuma 14 kalendāro dienu laikā no preces saņemšanas dienas, nenorādot iemeslu, saskaņā ar Patērētāju tiesību aizsardzības likumu un ES Direktīvu 2011/83/ES. Lai izmantotu šīs tiesības, raksti mums uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a>. Nauda tiek atmaksāta 14 dienu laikā pēc preces saņemšanas atpakaļ. Preces atpakaļsūtīšanas izmaksas sedz pircējs, ja vien nav norādīts citādi. Prece jāatdod tādā stāvoklī, kāds nepieciešams tās īpašību un darbības pārbaudei.</p>
     <h3>5. Kopienas sludinājumi</h3>
-    <p>Reģistrēti lietotāji var publicēt savus sludinājumus. Par sludinājuma saturu, precizitāti un preces stāvokli atbild attiecīgais lietotājs — TrackParts darbojas kā starpnieks (informācijas sabiedrības pakalpojumu sniedzējs) un neveic katras detaļas fizisku pārbaudi pirms publicēšanas. Aizliegts publicēt maldinošu, nelikumīgu vai trešo personu tiesības aizskarošu saturu. Mēs paturam tiesības noņemt sludinājumus, kas pārkāpj šos noteikumus.</p>
+    <p>Reģistrēti lietotāji var publicēt savus sludinājumus. Par sludinājuma saturu, precizitāti un preces stāvokli atbild attiecīgais lietotājs — TrackApart darbojas kā starpnieks (informācijas sabiedrības pakalpojumu sniedzējs) un neveic katras detaļas fizisku pārbaudi pirms publicēšanas. Aizliegts publicēt maldinošu, nelikumīgu vai trešo personu tiesības aizskarošu saturu. Mēs paturam tiesības noņemt sludinājumus, kas pārkāpj šos noteikumus.</p>
     <h3>6. Atbildības ierobežojums</h3>
     <p>Mēs nenesam atbildību par netiešiem zaudējumiem, kas radušies vietnes lietošanas rezultātā, izņemot gadījumos, kad atbildību nevar ierobežot saskaņā ar piemērojamiem tiesību aktiem (piemēram, par miesas bojājumiem vai krāpšanu).</p>
     <h3>7. Strīdu risināšana</h3>
@@ -211,19 +211,19 @@ export const STATIC_PAGES = {
     <h3>8. Grozījumi</h3>
     <p>Mēs varam šos noteikumus laiku pa laikam atjaunot. Būtiskas izmaiņas tiks paziņotas vietnē. Turpinot lietot vietni pēc izmaiņām, tu piekrīti atjauninātajiem noteikumiem.</p>
     <h3>9. Kontakti</h3>
-    <p>Jautājumu gadījumā raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a> vai zvani +371 2000 0000.</p>
+    <p>Jautājumu gadījumā raksti uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a> vai zvani +371 2000 0000.</p>
   </section>`,
 
   privacy: `<section class="page-hero">
     <div class="section-kicker">PRIVĀTUMA POLITIKA</div>
     <h1>Tavi dati.<br><em>Mūsu atbildība.</em></h1>
-    <p>Šī politika izskaidro, kādus personas datus TrackParts apstrādā un kāpēc, saskaņā ar Vispārīgo datu aizsardzības regulu (VDAR/GDPR).</p>
+    <p>Šī politika izskaidro, kādus personas datus TrackApart apstrādā un kāpēc, saskaņā ar Vispārīgo datu aizsardzības regulu (VDAR/GDPR).</p>
   </section>
   <section class="legal-page">
     <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
     <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
     <h3>1. Pārzinis</h3>
-    <p>Par tavu personas datu apstrādi atbild [UZŅĒMUMA NOSAUKUMS / KOMERSANTA VĀRDS, REĢ. NR. XXXXXXXXXXX, JURIDISKĀ ADRESE]. Jautājumos par datu apstrādi raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>.</p>
+    <p>Par tavu personas datu apstrādi atbild [UZŅĒMUMA NOSAUKUMS / KOMERSANTA VĀRDS, REĢ. NR. XXXXXXXXXXX, JURIDISKĀ ADRESE]. Jautājumos par datu apstrādi raksti uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a>.</p>
     <h3>2. Kādus datus mēs apstrādājam</h3>
     <ul>
       <li>Konta dati: e-pasts, parole (šifrētā veidā), lietotājvārds, vārds, tālrunis, pilsēta.</li>
@@ -238,23 +238,23 @@ export const STATIC_PAGES = {
     <h3>5. Datu saņēmēji</h3>
     <p>Tavus datus glabā un apstrādā Supabase (datubāzes, autentifikācijas un faila glabāšanas pakalpojumu sniedzējs) kā mūsu datu apstrādātājs. Datus nepārdodam un nekopīgojam ar trešajām personām reklāmas nolūkos.</p>
     <h3>6. Tavas tiesības</h3>
-    <p>Tev ir tiesības pieprasīt piekļuvi saviem datiem, to labošanu, dzēšanu, apstrādes ierobežošanu, iebilst pret apstrādi un saņemt datus pārnesamā formātā. Lai izmantotu šīs tiesības, raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>. Ja uzskati, ka tavas tiesības ir pārkāptas, vari iesniegt sūdzību Datu valsts inspekcijā (<a href="https://www.dvi.gov.lv" target="_blank" rel="noreferrer">dvi.gov.lv</a>).</p>
+    <p>Tev ir tiesības pieprasīt piekļuvi saviem datiem, to labošanu, dzēšanu, apstrādes ierobežošanu, iebilst pret apstrādi un saņemt datus pārnesamā formātā. Lai izmantotu šīs tiesības, raksti uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a>. Ja uzskati, ka tavas tiesības ir pārkāptas, vari iesniegt sūdzību Datu valsts inspekcijā (<a href="https://www.dvi.gov.lv" target="_blank" rel="noreferrer">dvi.gov.lv</a>).</p>
     <h3>7. Sīkdatnes un lokālā glabātuve</h3>
     <p>Vietne izmanto tikai tehniski nepieciešamu pārlūkprogrammas lokālo glabātuvi (local storage), lai uzturētu tavu pieslēgšanās sesiju un valodas izvēli. Mēs neizmantojam analītikas vai reklāmas sīkdatnes.</p>
     <h3>8. Kontakti</h3>
-    <p>Jautājumu vai lūgumu gadījumā par saviem datiem raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>.</p>
+    <p>Jautājumu vai lūgumu gadījumā par saviem datiem raksti uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a>.</p>
   </section>`,
 
   marketplace: `<section class="page-hero">
     <div class="section-kicker">TIRDZNIECĪBAS NOTEIKUMI</div>
     <h1>Tirgus noteikumi.<br><em>Godīga spēle visiem.</em></h1>
-    <p>Papildu noteikumi, kas regulē detaļu ievietošanu un tirdzniecību TrackParts kopienas sludinājumos.</p>
+    <p>Papildu noteikumi, kas regulē detaļu ievietošanu un tirdzniecību TrackApart kopienas sludinājumos.</p>
   </section>
   <section class="legal-page">
     <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
     <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
     <h3>1. Piemērošana</h3>
-    <p>Šie tirdzniecības noteikumi papildina TrackParts <a href="#terms">Lietošanas noteikumus</a> un attiecas konkrēti uz kopienas lietotāju ievietotajiem sludinājumiem (nevis uz precēm, ko tieši pārdod TrackParts katalogā). Publicējot vai apskatot sludinājumu, tu piekrīti šiem noteikumiem.</p>
+    <p>Šie tirdzniecības noteikumi papildina TrackApart <a href="#terms">Lietošanas noteikumus</a> un attiecas konkrēti uz kopienas lietotāju ievietotajiem sludinājumiem (nevis uz precēm, ko tieši pārdod TrackApart katalogā). Publicējot vai apskatot sludinājumu, tu piekrīti šiem noteikumiem.</p>
     <h3>2. Kas drīkst pārdot</h3>
     <p>Sludinājumu var ievietot ikviens reģistrēts lietotājs, kuram ir vismaz 18 gadu un likumīgas tiesības pārdot norādīto detaļu (tā pieder tev vai tev ir īpašnieka atļauja to pārdot tavā vārdā).</p>
     <h3>3. Ko drīkst ievietot</h3>
@@ -272,26 +272,26 @@ export const STATIC_PAGES = {
       <li>Kontaktinformācijas vākšana, uzmākšanās citiem lietotājiem vai mēģinājumi pārcelt darījumu ārpus platformas krāpnieciskā nolūkā.</li>
       <li>Naida runa, aizskaroši vai citu personu tiesības pārkāpjoši materiāli.</li>
     </ul>
-    <h3>5. TrackParts loma darījumā</h3>
-    <p>Kopienas sludinājumos TrackParts darbojas tikai kā starpnieks — savienojam pircēju ar pārdevēju, bet nepiedalāmies maksājumā, piegādē vai preces apskatē pirms publicēšanas. Vienošanās par cenu, apmaksu un nodošanu notiek tieši starp pircēju un pārdevēju, un abas puses par to ir pilnībā atbildīgas. Sk. arī mūsu <a href="#safety">Drošības ieteikumus</a> drošam darījumam.</p>
+    <h3>5. TrackApart loma darījumā</h3>
+    <p>Kopienas sludinājumos TrackApart darbojas tikai kā starpnieks — savienojam pircēju ar pārdevēju, bet nepiedalāmies maksājumā, piegādē vai preces apskatē pirms publicēšanas. Vienošanās par cenu, apmaksu un nodošanu notiek tieši starp pircēju un pārdevēju, un abas puses par to ir pilnībā atbildīgas. Sk. arī mūsu <a href="#safety">Drošības ieteikumus</a> drošam darījumam.</p>
     <h3>6. Moderācija un sludinājumu noņemšana</h3>
     <p>Mēs paturam tiesības pārskatīt, pieprasīt rediģēšanu vai bez brīdinājuma noņemt sludinājumus, kas pārkāpj šos noteikumus, kā arī apturēt vai dzēst lietotāja kontu smagu vai atkārtotu pārkāpumu gadījumā (piemēram, aizdomas par zagtu preci vai krāpšanu).</p>
     <h3>7. Ziņošana par pārkāpumiem</h3>
-    <p>Ja pamani sludinājumu vai lietotāju, kas pārkāpj šos noteikumus, izmanto pogu "Ziņot par sludinājumu" attiecīgā sludinājuma lapā vai raksti mums uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a>.</p>
+    <p>Ja pamani sludinājumu vai lietotāju, kas pārkāpj šos noteikumus, izmanto pogu "Ziņot par sludinājumu" attiecīgā sludinājuma lapā vai raksti mums uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a>.</p>
     <h3>8. Kontakti</h3>
-    <p>Jautājumu gadījumā raksti uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a> vai zvani +371 2000 0000.</p>
+    <p>Jautājumu gadījumā raksti uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a> vai zvani +371 2000 0000.</p>
   </section>`,
 
   safety: `<section class="page-hero">
     <div class="section-kicker">DROŠĪBA</div>
     <h1>Droši darījumi.<br><em>Tavai drošībai.</em></h1>
-    <p>Ieteikumi, kā droši pirkt un pārdot TrackParts kopienas sludinājumos.</p>
+    <p>Ieteikumi, kā droši pirkt un pārdot TrackApart kopienas sludinājumos.</p>
   </section>
   <section class="legal-page">
     <small class="legal-updated">Pēdējo reizi atjaunots: 2026. gada augustā</small>
     <p class="legal-lang-note">Šis dokuments pieejams tikai latviešu valodā. Ja nepieciešams tulkojums, sazinies ar mums.</p>
     <h3>1. Vispārīgi</h3>
-    <p>Kopienas sludinājumos darījums notiek tieši starp diviem lietotājiem. TrackParts negarantē pārdevēja identitāti, preces stāvokli vai darījuma norisi. Šie ieteikumi palīdzēs samazināt risku, pērkot vai pārdodot.</p>
+    <p>Kopienas sludinājumos darījums notiek tieši starp diviem lietotājiem. TrackApart negarantē pārdevēja identitāti, preces stāvokli vai darījuma norisi. Šie ieteikumi palīdzēs samazināt risku, pērkot vai pārdodot.</p>
     <h3>2. Pirms tikšanās</h3>
     <p>Pārrunā detaļas ar otru pusi rakstiski — precīzu preces stāvokli, cenu un saderību (VIN, OEM numurs, modelis, gads). Lūdz papildu fotogrāfijas, ja kaut kas nav skaidrs.</p>
     <h3>3. Tiekoties klātienē</h3>
@@ -310,9 +310,9 @@ export const STATIC_PAGES = {
       <li>Prasa personisku finanšu informāciju, kas darījumam nav nepieciešama.</li>
     </ul>
     <h3>8. Ja kaut kas noiet greizi</h3>
-    <p>Raksti mums uz <a href="mailto:hello@trackparts.lv">hello@trackparts.lv</a> ar sludinājuma saiti un aprakstu, lai varam izvērtēt un rīkoties. Ja aizdomas par krāpšanu, vērsies arī Valsts policijā (tālr. 110) vai Patērētāju tiesību aizsardzības centrā (<a href="https://www.ptac.gov.lv" target="_blank" rel="noreferrer">ptac.gov.lv</a>).</p>
+    <p>Raksti mums uz <a href="mailto:hello@trackapart.lv">hello@trackapart.lv</a> ar sludinājuma saiti un aprakstu, lai varam izvērtēt un rīkoties. Ja aizdomas par krāpšanu, vērsies arī Valsts policijā (tālr. 110) vai Patērētāju tiesību aizsardzības centrā (<a href="https://www.ptac.gov.lv" target="_blank" rel="noreferrer">ptac.gov.lv</a>).</p>
     <h3>9. Atšķirība no veikala pirkumiem</h3>
-    <p>Kopienas sludinājumi ir darījumi starp privātpersonām un uz tiem <strong>neattiecas</strong> 14 dienu atteikuma tiesības, kas pieejamas, pērkot tieši no TrackParts kataloga (sk. <a href="#terms">Lietošanas noteikumu</a> 4. punktu). Pirms pirkuma pārliecinies, ka esi ar to iepazinies.</p>
+    <p>Kopienas sludinājumi ir darījumi starp privātpersonām un uz tiem <strong>neattiecas</strong> 14 dienu atteikuma tiesības, kas pieejamas, pērkot tieši no TrackApart kataloga (sk. <a href="#terms">Lietošanas noteikumu</a> 4. punktu). Pirms pirkuma pārliecinies, ka esi ar to iepazinies.</p>
   </section>`,
 
   account: `<section class="page-hero">

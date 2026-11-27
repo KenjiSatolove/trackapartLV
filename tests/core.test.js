@@ -177,7 +177,7 @@ test('rendered markup passes safety, link, and zero-demo-inventory invariants', 
   const validCategory = categoryPage('dzinējs')
   assert.ok(!validCategory.includes('category-search-empty'))
   assert.ok(categoryPage('balstiekārta').includes('Balstiekārtas'))
-  assert.ok(STATIC_PAGES.about.includes('PAR TRACKPARTS'))
+  assert.ok(STATIC_PAGES.about.includes('PAR TRACKAPART'))
   assert.ok(STATIC_PAGES.about.includes('Būvēts ceļam'))
   assert.ok(!STATIC_PAGES.account.includes('id="auth-form"'))
 })

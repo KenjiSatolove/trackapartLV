@@ -17,7 +17,7 @@ import { bindGallery, galleryMarkup } from './catalog.js'
 export const listingsPage = `<section class="page-hero">
   <div class="section-kicker">04 / KOPIENAS TIRGUS</div>
   <h1>Redzi, ko citi<br><em>pārdod.</em></h1>
-  <p>Īstas detaļas no TrackParts kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.</p>
+  <p>Īstas detaļas no TrackApart kopienas. Atver sludinājumu, lai redzētu pārdevēju un sazinātos.</p>
 </section>
 <section class="listings-section listings-page">
   <div class="section-top">
@@ -54,8 +54,8 @@ export const listingDetailPage = `<section class="detail-page">
       <hr>
       <small>PĀRDEVĒJS</small>
       <h3 id="detail-seller"></h3>
-      <a id="detail-phone" class="seller-contact" href="mailto:hello@trackparts.lv">SAZINĀTIES ↗</a>
-      <a class="seller-contact" href="mailto:hello@trackparts.lv">RAKSTĪT E-PASTU ↗</a>
+      <a id="detail-phone" class="seller-contact" href="mailto:hello@trackapart.lv">SAZINĀTIES ↗</a>
+      <a class="seller-contact" href="mailto:hello@trackapart.lv">RAKSTĪT E-PASTU ↗</a>
       <div class="report-block" id="detail-report-block" hidden>
         <hr>
         <button class="text-button report-toggle" id="detail-report-toggle" type="button">ZIŅOT PAR SLUDINĀJUMU</button>
@@ -350,7 +350,7 @@ export async function loadListingDetail(id, openAuthModal) {
   document.querySelector('#detail-gallery').innerHTML = galleryMarkup(images, listing.title)
   bindGallery(document.querySelector('#detail-gallery'), images)
   document.querySelector('#detail-title').textContent = listing.title
-  document.title = `${listing.title} — TrackParts`
+  document.title = `${listing.title} — TrackApart`
   document.querySelector('#detail-description').textContent =
     listing.description || 'Pārdevējs nav pievienojis aprakstu.'
   document.querySelector('#detail-price').textContent = formatPrice(listing.price)
@@ -471,7 +471,7 @@ export async function loadSellerProfile(id, openAuthModal) {
   if (!document.querySelector('#seller-name')) return
 
   document.querySelector('#seller-name').textContent = profile?.display_name || 'Pārdevējs'
-  document.title = `${profile?.display_name || 'Pārdevējs'} — TrackParts`
+  document.title = `${profile?.display_name || 'Pārdevējs'} — TrackApart`
   const avg = reviews?.length ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0
   document.querySelector('#seller-meta').textContent = [
     profile?.city,
