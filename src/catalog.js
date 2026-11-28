@@ -9,7 +9,7 @@ import {
   safeUrl,
   stockLabel,
 } from './utils.js'
-import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
+import { isTranslated, primeAndTranslate, translatePage } from './i18n.js'
 import { syncSelect } from './selects.js'
 
 export const CATALOG_PAGE_SIZE = 8
@@ -184,7 +184,7 @@ export function bindCatalogFilters() {
   document.querySelector('#more-filters')?.addEventListener('click', (event) => {
     const isOpen = document.querySelector('#extra-filters')?.classList.toggle('is-open')
     event.currentTarget.textContent = isOpen ? '- MAZĀK FILTRU' : '+ VAIRĀK FILTRU'
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
   })
   // Scoped strictly to .brand-strip buttons so product cards with data-brand aren't matched!
   document.querySelectorAll('.brand-strip [data-brand]').forEach((button) =>
@@ -325,7 +325,7 @@ export function bindCatalogSidebarFilters() {
     const countEl = document.querySelector('#sidebar-catalog-count')
     if (countEl) countEl.innerHTML = `${visible} <span>PRECES</span>`
     renderAllFacets()
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
   }
 
   document.querySelector('#sidebar-search-input')?.addEventListener('input', (event) => {
@@ -390,7 +390,7 @@ export function bindProductButtons() {
           setTimeout(() => {
             delete button.dataset.resetTimer
             button.innerHTML = isQuick ? '+' : 'PIEVIENOT <span>↗</span>'
-            if (isEnglish()) translatePage()
+            if (isTranslated()) translatePage()
           }, 1200),
         )
         return
@@ -400,7 +400,7 @@ export function bindProductButtons() {
         setTimeout(() => {
           delete button.dataset.resetTimer
           button.innerHTML = isQuick ? '+' : 'PIEVIENOT <span>↗</span>'
-          if (isEnglish()) translatePage()
+          if (isTranslated()) translatePage()
         }, 900),
       )
     }),
@@ -594,7 +594,7 @@ export function loadProductDetail(id) {
       document.querySelector('#product-description').textContent = 'Šī prece vairs nav pieejama katalogā.'
       document.querySelector('#product-add').hidden = true
       document.querySelector('#product-stock-badge').hidden = true
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
     }
     return
   }
@@ -638,18 +638,18 @@ export function loadProductDetail(id) {
         res.reason === 'out_of_stock'
           ? 'Šī detaļa pašlaik nav noliktavā.'
           : 'Sasniegts pieejamais atlikums noliktavā.'
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
       return
     }
     msgEl.textContent = ''
     if (addBtn.dataset.resetTimer) clearTimeout(Number(addBtn.dataset.resetTimer))
     addBtn.textContent = '✓ PIEVIENOTS GROZAM'
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
     addBtn.dataset.resetTimer = String(
       setTimeout(() => {
         delete addBtn.dataset.resetTimer
         addBtn.textContent = 'PIEVIENOT GROZAM ↗'
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
       }, 1200),
     )
   }

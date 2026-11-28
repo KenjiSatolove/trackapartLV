@@ -99,6 +99,28 @@ export const ROUTE_TITLES_EN = {
   notFound: 'Page not found — TrackApart',
 }
 
+export const ROUTE_TITLES_RU = {
+  home: 'TrackApart — Автозапчасти без лишних хлопот',
+  catalog: 'Каталог — TrackApart',
+  listings: 'Объявления сообщества — TrackApart',
+  about: 'О нас — TrackApart',
+  contact: 'Контакты — TrackApart',
+  account: 'Мой аккаунт — TrackApart',
+  sell: 'Продать запчасть — TrackApart',
+  terms: 'Условия использования — TrackApart',
+  privacy: 'Политика конфиденциальности — TrackApart',
+  marketplace: 'Правила площадки — TrackApart',
+  safety: 'Безопасность — TrackApart',
+  admin: 'Admin panel — TrackApart',
+  notFound: 'Страница не найдена — TrackApart',
+}
+
+export function getRouteTitles(lang) {
+  if (lang === 'en') return ROUTE_TITLES_EN
+  if (lang === 'ru') return ROUTE_TITLES_RU
+  return ROUTE_TITLES
+}
+
 let products = []
 let productsLoaded = false
 let resolveProductsReady = null

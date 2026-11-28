@@ -16,7 +16,7 @@ import {
   validateImageFiles,
   withSubmitLock,
 } from './utils.js'
-import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
+import { isTranslated, primeAndTranslate, translatePage } from './i18n.js'
 import { fetchListingThumbnails, listingThumbMarkup } from './listings.js'
 import { enhanceSelects } from './selects.js'
 
@@ -96,7 +96,7 @@ function setAuthModalTab(mode) {
   const switchBtn = document.querySelector('#auth-modal-switch-btn')
   if (switchText) switchText.textContent = isSignup ? 'Jau ir konts?' : 'Vēl nav konta?'
   if (switchBtn) switchBtn.textContent = isSignup ? 'Ielogoties' : 'Reģistrēties'
-  if (isEnglish()) translatePage()
+  if (isTranslated()) translatePage()
 }
 
 export function mfaCodeFormMarkup(idPrefix, submitLabel, codeLabel = 'KODS') {
@@ -201,18 +201,18 @@ export function bindAuthModal(onSignedIn) {
     const message = document.querySelector('#auth-modal-message')
     if (!supabase) {
       message.textContent = 'Pieslēgšanās sistēma pašlaik nav pieejama.'
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
       return
     }
     const email = new FormData(document.querySelector('#auth-modal-form')).get('email')
     if (!email) {
       message.textContent = 'Ievadi e-pastu, lai atjaunotu paroli.'
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
       return
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${SITE_URL}#account` })
     message.textContent = error ? error.message : 'Paroles atjaunošanas saite nosūtīta uz e-pastu.'
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
   })
   document.querySelector('#auth-modal-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
@@ -223,18 +223,18 @@ export function bindAuthModal(onSignedIn) {
       if (isSpamSubmit(data)) return
       if (!supabase) {
         message.textContent = 'Pieslēgšanās sistēma pašlaik nav pieejama.'
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
         return
       }
       if (!data.get('email') || !data.get('password')) {
         message.textContent = 'Ievadi e-pastu un paroli.'
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
         return
       }
       if (form.dataset.mode === 'signup') {
         if (!data.get('consent')) {
           message.textContent = 'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.'
-          if (isEnglish()) translatePage()
+          if (isTranslated()) translatePage()
           return
         }
         const { error } = await supabase.auth.signUp({
@@ -245,7 +245,7 @@ export function bindAuthModal(onSignedIn) {
         message.textContent = error
           ? error.message
           : 'Konts izveidots. Pārbaudi savu e-pastu un noklikšķini uz apstiprinājuma saites.'
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: data.get('email'),
@@ -774,13 +774,13 @@ export async function initAccountPage(callbacks = {}) {
         message.textContent = isDuplicateUsername
           ? 'Šis lietotājvārds jau ir aizņemts. Izvēlies citu.'
           : error.message
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
         return
       }
       const greetingEl = document.querySelector('#account-greeting-name')
       if (greetingEl) greetingEl.textContent = `${displayName || user.email}!`
       message.textContent = 'Profils saglabāts.'
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
     })
   })
   document.querySelector('#delete-account-button').addEventListener('click', async () => {
@@ -799,5 +799,5 @@ export async function initAccountPage(callbacks = {}) {
   await loadMyListings(user.id)
   await loadMyOrders(user.id)
   await loadMyFavorites(user.id)
-  if (isEnglish()) translatePage()
+  if (isTranslated()) translatePage()
 }

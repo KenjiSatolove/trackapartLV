@@ -1,13 +1,15 @@
 import './style.css'
 import { supabase } from './lib/supabase.js'
-import { CATEGORIES, ROUTE_TITLES, ROUTE_TITLES_EN, loadProducts } from './data.js'
+import { CATEGORIES, getRouteTitles, loadProducts } from './data.js'
 import { honeypotFieldMarkup, trapFocus } from './utils.js'
 import {
+  getLanguage,
   initLanguage,
-  isEnglish,
+  isTranslated,
   primeAndTranslate,
+  setLanguage,
   syncDocumentLanguage,
-  toggleLanguage,
+  syncLanguageSwitchers,
   translatePage,
 } from './i18n.js'
 import { bindCartControls, closeCartPanel, loadCartForOwner, switchCartOwner } from './cart.js'
@@ -90,6 +92,16 @@ if (supabase) {
 
 const currentYear = new Date().getFullYear()
 
+function langSwitcherMarkup(extraClass = '') {
+  return `<div class="lang-switcher${extraClass ? ` ${extraClass}` : ''}" role="group" aria-label="Language">
+    <button class="lang-opt active" type="button" data-lang="lv" aria-pressed="true">LV</button>
+    <span class="lang-sep" aria-hidden="true">/</span>
+    <button class="lang-opt" type="button" data-lang="en" aria-pressed="false">EN</button>
+    <span class="lang-sep" aria-hidden="true">/</span>
+    <button class="lang-opt" type="button" data-lang="ru" aria-pressed="false">RU</button>
+  </div>`
+}
+
 document.querySelector('#app').innerHTML = `
   <div class="page-wipe" id="page-wipe"></div>
   <div class="scroll-progress-wrap" aria-hidden="true"><div class="scroll-progress" id="scroll-progress"></div></div>
@@ -107,7 +119,7 @@ document.querySelector('#app').innerHTML = `
       <a href="#contact">Kontakti</a>
     </nav>
     <div class="header-actions">
-      <button class="lang" type="button">LV <small>/ EN</small></button>
+      ${langSwitcherMarkup('header-lang')}
       <button class="icon-button search-trigger" type="button" aria-label="Meklēt">⌕</button>
       <button class="header-login-btn auth-login-trigger" type="button">IELOGOTIES</button>
       <button class="icon-button user-button" type="button" aria-label="Mans konts" hidden>◎</button>
@@ -149,7 +161,7 @@ document.querySelector('#app').innerHTML = `
       <a href="#marketplace">Tirdzniecības noteikumi</a>
       <a href="#safety">Drošība</a>
     </nav>
-    <button class="mobile-nav-lang lang" type="button">LV <small>/ EN</small></button>
+    ${langSwitcherMarkup('mobile-nav-lang')}
   </aside>
 
   <div class="cart-backdrop" id="cart-backdrop"></div>
@@ -247,7 +259,7 @@ document.querySelector('#app').innerHTML = `
         <a href="#marketplace">Tirdzniecības noteikumi</a>
         <a href="#safety">Drošība</a>
       </nav>
-      <button class="lang footer-lang" type="button">LV <small>/ EN</small></button>
+      ${langSwitcherMarkup('footer-lang')}
       <a href="https://www.instagram.com" target="_blank" rel="noreferrer">INSTAGRAM ↗</a>
     </div>
   </footer>
@@ -416,9 +428,9 @@ bindAuthModal(() => {
   renderPage()
 })
 
-document.querySelectorAll('.lang').forEach((languageButton) =>
+document.querySelectorAll('.lang-opt[data-lang]').forEach((languageButton) =>
   languageButton.addEventListener('click', () => {
-    toggleLanguage()
+    setLanguage(languageButton.dataset.lang)
     const rawRoute = window.location.hash.slice(1) || 'home'
     let route = rawRoute
     try {
@@ -503,7 +515,7 @@ function renderPage({ scrollToTop = false } = {}) {
     .querySelectorAll('.main-nav a, .mobile-nav-links a, .mobile-nav-legal a')
     .forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${route}`))
 
-  const titleMap = isEnglish() ? ROUTE_TITLES_EN : ROUTE_TITLES
+  const titleMap = getRouteTitles(getLanguage())
   const matchedCategory = route.startsWith('category-')
     ? CATEGORIES.find((c) => c[3] === route.replace('category-', '').replaceAll('-', ' '))
     : null
@@ -542,9 +554,11 @@ function renderPage({ scrollToTop = false } = {}) {
     })
   }
 
-  if (isEnglish()) {
+  if (isTranslated()) {
     translatePage()
     primeAndTranslate()
+  } else {
+    syncLanguageSwitchers()
   }
   enhanceSelects()
   bindHeroFx()

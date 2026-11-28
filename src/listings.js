@@ -11,7 +11,7 @@ import {
   validateImageFiles,
   withSubmitLock,
 } from './utils.js'
-import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
+import { isTranslated, primeAndTranslate, translatePage } from './i18n.js'
 import { bindGallery, galleryMarkup } from './catalog.js'
 import { enhanceSelects } from './selects.js'
 import { showToast } from './fx.js'
@@ -296,7 +296,7 @@ async function bindFavoriteToggle(listing, openAuthModal) {
   const paint = () => {
     button.textContent = isFavorite ? '♥ SAGLABĀTS' : '♡ SAGLABĀT'
     button.classList.toggle('is-active', isFavorite)
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
   }
   paint()
   button.onclick = async () => {
@@ -355,11 +355,11 @@ function bindReportListing(listing, openAuthModal) {
       if (error) {
         message.textContent =
           error.code === '23505' ? 'Tu jau esi ziņojis par šo sludinājumu.' : error.message
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
         return
       }
       message.textContent = 'Paldies! Ziņojums nosūtīts administrācijai.'
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
       form.reset()
     })
   }
@@ -402,7 +402,7 @@ export async function loadListingDetail(id, openAuthModal) {
   if (!document.querySelector('#detail-gallery')) return
   if (!listing) {
     document.querySelector('#detail-title').textContent = 'Sludinājums nav atrasts'
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
     return
   }
   let images = listing.images || []
@@ -570,7 +570,7 @@ function bindReviewForm(sellerId, reviewerId, openAuthModal) {
     })
     if (ratingLabel) {
       ratingLabel.textContent = n ? RATING_LABELS[n] : 'Izvēlies zvaigznes'
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
     }
   }
   paintStars(Number(ratingInput.value))
@@ -611,7 +611,7 @@ function bindReviewForm(sellerId, reviewerId, openAuthModal) {
       const rating = Number(ratingInput.value)
       if (!rating) {
         message.textContent = 'Izvēlies vērtējumu.'
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
         return
       }
       const data = new FormData(form)
@@ -791,7 +791,7 @@ export async function loadSellerProfile(id, openAuthModal) {
       }
       setTimeout(() => {
         btn.textContent = 'KOPĒT SAITI'
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
       }, 1800)
     })
   }
@@ -946,7 +946,7 @@ export async function loadSellerProfile(id, openAuthModal) {
           ? '<div class="profile-empty-state"><p>Nav atsauksmju ar šo vērtējumu.</p></div>'
           : '<div class="profile-empty-state"><p>Vēl nav nevienas atsauksmes.</p></div>'
     }
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
   }
 
   if (clearChip) {
@@ -1062,7 +1062,7 @@ export function bindSellForm(route, openAuthModal) {
         message.textContent = uploadError
           ? `Sludinājums publicēts, bet bildes neizdevās augšupielādēt: ${uploadError.message}`
           : 'Sludinājums publicēts! Pārvaldi to savā kontā (Mans konts).'
-        if (isEnglish()) translatePage()
+        if (isTranslated()) translatePage()
         listingForm.reset()
       })
     })

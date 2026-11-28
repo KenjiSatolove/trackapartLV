@@ -4,7 +4,9 @@
   --line: #d8d8d8;
   --orange: #e10600;
   --muted: #707070;
-  font: 15px/1.45 'Space Grotesk', sans-serif;
+  --font-sans: 'Space Grotesk', 'Manrope', sans-serif;
+  --font-mono: 'DM Mono', 'JetBrains Mono', monospace;
+  font: 15px/1.45 var(--font-sans);
   color: var(--ink);
   background: var(--paper);
   font-synthesis: none;
@@ -140,7 +142,7 @@ footer {
   border: 1px solid rgba(255, 255, 255, 0.42);
   background: none;
   color: #fff;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   white-space: nowrap;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
@@ -257,13 +259,51 @@ footer {
   color: var(--ink);
 }
 
-.lang {
-  font: 11px 'DM Mono';
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.lang small,
+.lang-opt {
+  position: relative;
+  border: 0;
+  background: none;
+  padding: 4px 3px;
+  color: #8a8a8a;
+  font: inherit;
+  letter-spacing: 0.05em;
+  transition: color 0.18s ease;
+}
+
+.lang-opt:hover {
+  color: var(--ink);
+}
+
+.lang-opt.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.lang-opt.active:after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 0;
+  height: 2px;
+  background: var(--orange);
+}
+
+.lang-sep {
+  color: #c8c8c8;
+  font-size: 10px;
+  user-select: none;
+}
+
 .footer-bottom small {
   color: #6e6e6e;
 }
@@ -282,7 +322,7 @@ footer {
   background: var(--ink);
   color: #fff;
   padding: 9px 14px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   white-space: nowrap;
   flex-shrink: 0;
@@ -301,7 +341,7 @@ footer {
   border: 0;
   background: var(--orange);
   color: #fff;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   text-align: center;
 }
@@ -313,7 +353,7 @@ footer {
 .cart-button {
   padding-left: 18px;
   border-left: 1px solid var(--line);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
@@ -538,7 +578,7 @@ footer {
 .mobile-nav-legal a {
   padding: 10px 0;
   color: #a8a8a8;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.04em;
 }
 
@@ -550,15 +590,28 @@ footer {
 .mobile-nav-lang {
   align-self: flex-start;
   margin-top: 24px;
-  padding: 12px 18px;
+  padding: 6px 10px;
   border: 1px solid #3a3a3a;
-  color: #fff;
-  font: 12px 'DM Mono';
+  background: rgba(255, 255, 255, 0.04);
+  gap: 6px;
+  font-size: 12px;
 }
 
-.mobile-nav-lang:hover {
-  border-color: var(--orange);
-  color: var(--orange);
+.mobile-nav-lang .lang-opt {
+  padding: 6px 8px;
+  color: #9e9e9e;
+}
+
+.mobile-nav-lang .lang-opt:hover {
+  color: #fff;
+}
+
+.mobile-nav-lang .lang-opt.active {
+  color: #fff;
+}
+
+.mobile-nav-lang .lang-sep {
+  color: #4a4a4a;
 }
 
 /* ---- cart drawer ---- */
@@ -652,7 +705,7 @@ footer {
   display: block;
   margin-top: 6px;
   color: #a8a8a8;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .cart-item-controls {
@@ -669,7 +722,7 @@ footer {
   border: 1px solid #444;
   background: #1b1b1b;
   color: #fff;
-  font: 12px 'DM Mono';
+  font: 12px 'DM Mono', 'JetBrains Mono', monospace;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -689,7 +742,7 @@ footer {
 .cart-qty-val {
   min-width: 18px;
   text-align: center;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: #ddd;
 }
 
@@ -705,12 +758,12 @@ footer {
   border-top: 2px solid var(--orange);
   margin-top: 24px;
   padding-top: 15px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .cart-summary strong {
   font-size: 18px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
 }
 
 .cart-panel .button {
@@ -756,7 +809,7 @@ footer {
 #checkout-form label {
   display: block;
   margin-top: 14px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: #bdbdbd;
 }
 
@@ -801,7 +854,7 @@ footer {
   border: 1px solid #444;
   background: transparent;
   color: #e5e5e5;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   white-space: nowrap;
   transition: border-color 0.2s, color 0.2s;
@@ -843,7 +896,7 @@ footer {
   right: 4%;
   top: 40px;
   color: rgba(255, 255, 255, 0.035);
-  font: 700 22vw/0.8 'Space Grotesk', sans-serif;
+  font: 700 22vw/0.8 'Space Grotesk', 'Manrope', sans-serif;
   letter-spacing: -0.12em;
   pointer-events: none;
 }
@@ -863,7 +916,7 @@ footer {
 
 .eyebrow,
 .section-kicker {
-  font: 10px 'DM Mono', monospace;
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.13em;
   color: var(--orange);
   text-transform: uppercase;
@@ -914,7 +967,7 @@ h2 em,
   gap: 27px;
   margin-top: 34px;
   padding: 14px 18px;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   border: 1px solid transparent;
 }
@@ -1049,7 +1102,7 @@ h2 em,
 .hero-spec {
   position: absolute;
   z-index: 1;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.1em;
 }
 
@@ -1107,7 +1160,7 @@ h2 em,
   color: #b5b5b5;
   border-bottom: 1px solid #222;
   padding: 11px 0;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -1177,7 +1230,7 @@ h2 em,
 
 .hero-stats span {
   color: #a8aaa5;
-  font: 10px/1.25 'DM Mono';
+  font: 10px/1.25 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 /* ---- sections & search ---- */
@@ -1239,7 +1292,7 @@ h2 {
   background: var(--orange);
   border: 0;
   color: #fff;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .search-box button b {
@@ -1261,7 +1314,7 @@ h2 {
   flex-direction: column;
   gap: 7px;
   min-width: 0;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
@@ -1298,7 +1351,7 @@ h2 {
   border-radius: 2px;
   background: var(--paper);
   padding: 0 13px;
-  font: 500 14px 'Space Grotesk', sans-serif;
+  font: 500 14px 'Space Grotesk', 'Manrope', sans-serif;
   color: var(--ink);
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
@@ -1385,7 +1438,7 @@ h2 {
   border-radius: 2px;
   background: var(--paper);
   color: var(--ink);
-  font: 500 14px/1.2 'Space Grotesk', sans-serif;
+  font: 500 14px/1.2 'Space Grotesk', 'Manrope', sans-serif;
   letter-spacing: -0.01em;
   text-align: left;
   cursor: pointer;
@@ -1568,7 +1621,7 @@ h2 {
   border-radius: 2px;
   background: transparent;
   color: #1f1f1f;
-  font: 500 14px/1.25 'Space Grotesk', sans-serif;
+  font: 500 14px/1.25 'Space Grotesk', 'Manrope', sans-serif;
   text-align: left;
   cursor: pointer;
   transition: background-color 0.12s ease, color 0.12s ease;
@@ -1656,7 +1709,7 @@ h2 {
 }
 
 .tp-select-sheet-title {
-  font: 600 11px 'DM Mono';
+  font: 600 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink);
@@ -1697,7 +1750,7 @@ h2 {
 .add-text {
   background: none;
   border: 0;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   text-align: right;
 }
@@ -1737,7 +1790,7 @@ h2 {
   border: 1px solid var(--line);
   background: #fff;
   padding: 10px 14px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   transition: color 0.2s, border-color 0.2s;
 }
 
@@ -1808,7 +1861,7 @@ h2 {
 
 .category-number {
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   transition: color 0.25s ease;
 }
 
@@ -1885,7 +1938,7 @@ h2 {
 }
 
 .sidebar-facet-label {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.1em;
   color: var(--muted);
   text-transform: uppercase;
@@ -1940,7 +1993,7 @@ h2 {
 }
 
 .facet-option b {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
   font-weight: 400;
 }
@@ -1948,7 +2001,7 @@ h2 {
 .facet-empty {
   margin: 0;
   color: var(--muted);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .sidebar-facet-toggle {
@@ -1960,7 +2013,7 @@ h2 {
   border: 0;
   border-top: 1px solid var(--line);
   background: none;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.1em;
   color: var(--ink);
   text-transform: uppercase;
@@ -1978,7 +2031,7 @@ h2 {
 .sidebar-year-label {
   display: block;
   margin-top: 12px;
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -2006,7 +2059,7 @@ h2 {
   flex: 1;
   padding: 9px;
   border: 1px solid var(--line);
-  font: 13px 'Space Grotesk', sans-serif;
+  font: 13px 'Space Grotesk', 'Manrope', sans-serif;
 }
 
 .sidebar-price-inputs span {
@@ -2018,7 +2071,7 @@ h2 {
   width: 100%;
   margin-top: 12px;
   padding: 11px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   text-align: center;
 }
@@ -2035,7 +2088,7 @@ h2 {
   border-radius: 0;
   background: var(--paper);
   padding: 9px 12px;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .catalog-main .product-grid {
@@ -2047,7 +2100,7 @@ h2 {
 }
 
 .catalog-count {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -2133,7 +2186,7 @@ h2 {
   padding: 5px 8px;
   background: var(--orange);
   color: #fff;
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .product-tag.is-soldout {
@@ -2173,7 +2226,7 @@ h2 {
   align-items: baseline;
   gap: 8px;
   margin-top: 16px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--orange);
   text-transform: uppercase;
 }
@@ -2225,7 +2278,7 @@ h2 {
 
 .no-results {
   margin-top: 45px;
-  font: 12px 'DM Mono';
+  font: 12px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -2287,7 +2340,7 @@ h2 {
 .listing-head {
   padding: 12px 0;
   color: var(--muted);
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .listing-row {
@@ -2352,7 +2405,7 @@ h2 {
 .listing-loading {
   padding: 25px 0;
   color: var(--muted);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 /* ---- detail pages & gallery ---- */
@@ -2364,7 +2417,7 @@ h2 {
 
 .back-link {
   color: var(--orange);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .page-hero .back-link {
@@ -2444,13 +2497,13 @@ h2 {
 .detail-data span,
 .seller-panel > small {
   color: var(--muted);
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .detail-data strong {
   display: block;
   color: var(--ink);
-  font: 14px 'Space Grotesk', sans-serif;
+  font: 14px 'Space Grotesk', 'Manrope', sans-serif;
   margin-top: 4px;
 }
 
@@ -2468,7 +2521,7 @@ h2 {
 .seller-contact {
   display: block;
   color: var(--orange);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   margin-top: 12px;
 }
 
@@ -2505,7 +2558,7 @@ h2 {
   border: 1px solid var(--line);
   background: none;
   padding: 7px 12px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.06em;
   color: var(--muted);
   white-space: nowrap;
@@ -2543,7 +2596,7 @@ h2 {
   justify-content: center;
   height: 100%;
   color: var(--muted);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .gallery-arrow {
@@ -2697,7 +2750,7 @@ h2 {
 
 .not-found-hero code {
   color: #fff;
-  font: 13px 'DM Mono';
+  font: 13px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .page-hero {
@@ -2766,7 +2819,7 @@ h2 {
 .contact-list small {
   display: block;
   color: var(--orange);
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
   margin-bottom: 8px;
 }
 
@@ -2806,7 +2859,7 @@ h2 {
 
 .legal-updated {
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   margin-bottom: 8px;
   display: block;
 }
@@ -2843,7 +2896,7 @@ h2 {
 .site-form label {
   display: block;
   margin-top: 22px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -2885,7 +2938,7 @@ h2 {
   border: 0;
   background: var(--ink);
   color: #fff;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -2921,13 +2974,13 @@ h2 {
   border: 0;
   background: none;
   color: var(--orange);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .form-message {
   margin-top: 20px;
   color: var(--orange);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .hp-field,
@@ -2942,7 +2995,7 @@ h2 {
   gap: 10px;
   margin-top: 20px !important;
   color: var(--muted);
-  font: 12px 'Space Grotesk', sans-serif !important;
+  font: 12px 'Space Grotesk', 'Manrope', sans-serif !important;
   line-height: 1.5;
   text-transform: none;
 }
@@ -3022,7 +3075,7 @@ h2 {
   display: block;
   margin-top: 6px;
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .review-row p {
@@ -3056,7 +3109,7 @@ h2 {
   background: none;
   color: var(--orange);
   padding: 12px 20px;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
 }
 
@@ -3177,7 +3230,7 @@ h2 {
   margin-top: 10px;
   padding: 0;
   color: var(--muted);
-  font: 11px 'Space Grotesk', sans-serif;
+  font: 11px 'Space Grotesk', 'Manrope', sans-serif;
 }
 
 .auth-forgot-link:hover {
@@ -3205,7 +3258,7 @@ h2 {
 
 .auth-modal-switch .text-button {
   padding: 0;
-  font: 600 13px 'Space Grotesk', sans-serif;
+  font: 600 13px 'Space Grotesk', 'Manrope', sans-serif;
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -3278,7 +3331,7 @@ h2 {
 
 .admin-mark {
   color: var(--orange);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.12em;
   margin-bottom: 52px;
 }
@@ -3332,7 +3385,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  font: 600 12px 'DM Mono';
+  font: 600 12px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.1em;
   color: #fff;
 }
@@ -3346,7 +3399,7 @@ h2 {
 }
 
 .admin-store-link {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: #9a9a9a;
   letter-spacing: 0.04em;
   transition: color 0.18s;
@@ -3365,7 +3418,7 @@ h2 {
 .admin-nav-label {
   padding: 0 10px 6px;
   color: #6b6b6b;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.12em;
 }
 
@@ -3417,7 +3470,7 @@ h2 {
   padding: 2px 7px;
   background: var(--orange);
   color: #fff;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   line-height: 1.4;
 }
 
@@ -3450,7 +3503,7 @@ h2 {
 .admin-staff-chip small {
   display: block;
   margin-top: 2px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: #8f8f8f;
 }
 
@@ -3461,7 +3514,7 @@ h2 {
   text-align: center;
   padding: 9px 10px;
   color: #bbb;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.06em;
   transition: border-color 0.18s, color 0.18s;
 }
@@ -3491,7 +3544,7 @@ h2 {
 }
 
 .admin-topbar-date {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
   letter-spacing: 0.04em;
 }
@@ -3510,7 +3563,7 @@ h2 {
   background: #fff;
   color: var(--ink);
   padding: 8px 13px;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.04em;
   transition: border-color 0.18s, color 0.18s;
 }
@@ -3535,7 +3588,7 @@ h2 {
 
 .admin-overline {
   color: var(--orange);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.12em;
 }
 
@@ -3548,7 +3601,7 @@ h2 {
 .admin-user,
 .admin-count {
   color: var(--muted);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .admin-kpi-grid {
@@ -3580,7 +3633,7 @@ h2 {
 }
 
 .admin-kpi-card span {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -3636,7 +3689,7 @@ h2 {
   background: none;
   padding: 0;
   color: var(--orange);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
@@ -3697,7 +3750,7 @@ h2 {
   padding: 28px 18px;
   text-align: center;
   color: var(--muted);
-  font: 12px 'DM Mono';
+  font: 12px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .admin-metrics {
@@ -3717,7 +3770,7 @@ h2 {
 .admin-metrics span {
   display: block;
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 6px;
@@ -3761,7 +3814,7 @@ h2 {
   background: #fff;
   color: var(--muted);
   padding: 6px 12px;
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   transition: border-color 0.16s, background-color 0.16s, color 0.16s;
 }
 
@@ -3808,7 +3861,7 @@ h2 {
   color: var(--muted);
   border-bottom: 1px solid var(--line);
   background: #fafafa;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -3837,7 +3890,7 @@ h2 {
 }
 
 .admin-table-row code {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   font-weight: 600;
 }
 
@@ -3899,7 +3952,7 @@ h2 {
   border: 0;
   background: #fafafa;
   color: var(--ink);
-  font: 13px 'DM Mono';
+  font: 13px 'DM Mono', 'JetBrains Mono', monospace;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3913,7 +3966,7 @@ h2 {
 .stepper-val {
   min-width: 30px;
   text-align: center;
-  font: 600 12px 'DM Mono';
+  font: 600 12px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--ink) !important;
 }
 
@@ -3928,7 +3981,7 @@ h2 {
   border-left: 1px solid #ececec;
   border-right: 1px solid #ececec;
   text-align: center;
-  font: 600 12px 'DM Mono';
+  font: 600 12px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--ink);
   padding: 0 2px;
 }
@@ -3968,7 +4021,7 @@ h2 {
 .admin-copy-btn {
   align-self: flex-start;
   margin-top: 6px;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .status-pill {
@@ -3977,7 +4030,7 @@ h2 {
   padding: 3px 8px;
   background: #ededed;
   color: var(--ink) !important;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -4022,7 +4075,7 @@ h2 {
   background: var(--orange);
   color: #fff;
   border-color: var(--orange);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -4087,7 +4140,7 @@ h2 {
   display: block;
   margin-top: 12px;
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .admin-product-form input,
@@ -4242,7 +4295,7 @@ h2 {
 }
 
 .admin-form-section-title {
-  font: 600 10px 'DM Mono';
+  font: 600 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.12em;
   color: var(--orange);
   margin-bottom: 4px;
@@ -4371,7 +4424,7 @@ h2 {
 
 .admin-note {
   color: var(--muted);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .admin-info-banner {
@@ -4393,7 +4446,7 @@ h2 {
   padding: 10px 12px;
   background: #e6f6ec;
   color: #166534;
-  font: 600 11px 'DM Mono';
+  font: 600 11px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .admin-settings-actions {
@@ -4409,7 +4462,7 @@ h2 {
   display: block;
   margin-top: 14px;
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 .settings-card input {
@@ -4446,7 +4499,7 @@ footer {
 
 .footer-column b,
 .footer-contact b {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.1em;
   color: var(--muted);
   margin-bottom: 4px;
@@ -4479,7 +4532,7 @@ footer {
   margin-top: 60px;
   padding: 24px 0;
   border-top: 1px solid var(--line);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -4494,7 +4547,7 @@ footer {
 
 .footer-lang {
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   padding: 0;
 }
 
@@ -4702,7 +4755,8 @@ footer {
     min-height: 44px;
   }
   .header-actions .user-button,
-  .header-actions .lang {
+  .header-actions .lang,
+  .header-actions .header-lang {
     display: none;
   }
   .header-login-btn {
@@ -5101,7 +5155,7 @@ footer {
   background: var(--ink);
   color: #fff;
   border-bottom: 2px solid var(--orange);
-  font: 700 13px 'Space Grotesk', sans-serif;
+  font: 700 13px 'Space Grotesk', 'Manrope', sans-serif;
   letter-spacing: 0.04em;
 }
 
@@ -5123,7 +5177,7 @@ footer {
 }
 
 .seller-mini-rating {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--orange);
 }
 
@@ -5194,7 +5248,7 @@ footer {
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.04);
   color: #e5e5e5;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
@@ -5236,7 +5290,7 @@ footer {
 }
 
 .profile-avatar span {
-  font: 700 32px/1 'Space Grotesk', sans-serif;
+  font: 700 32px/1 'Space Grotesk', 'Manrope', sans-serif;
   letter-spacing: -0.03em;
   color: #fff;
 }
@@ -5278,7 +5332,7 @@ footer {
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.06);
   color: #e2e2e2;
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
 }
 
@@ -5339,7 +5393,7 @@ footer {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #d6d6d6;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -5386,7 +5440,7 @@ footer {
 }
 
 .profile-kpi-label {
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.12em;
   color: #8f8f8f;
 }
@@ -5401,7 +5455,7 @@ footer {
 }
 
 .profile-kpi-sub {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: #a8a8a8;
   display: inline-flex;
   align-items: center;
@@ -5438,7 +5492,7 @@ footer {
   border: 0;
   background: none;
   color: var(--muted);
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.09em;
   transition: color 0.2s ease;
 }
@@ -5596,7 +5650,7 @@ footer {
 }
 
 .profile-listing-cta {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.08em;
   color: var(--ink);
 }
@@ -5618,7 +5672,7 @@ footer {
 .profile-empty-state p {
   margin: 0;
   color: var(--muted);
-  font: 12px 'DM Mono';
+  font: 12px 'DM Mono', 'JetBrains Mono', monospace;
 }
 
 /* ---- ratings breakdown & reviews layout ---- */
@@ -5674,7 +5728,7 @@ footer {
 }
 
 .rating-score-big span {
-  font: 13px 'DM Mono';
+  font: 13px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -5696,7 +5750,7 @@ footer {
   padding: 3px 8px;
   background: #edf9f0;
   color: #166534;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.04em;
 }
 
@@ -5735,7 +5789,7 @@ footer {
 }
 
 .rating-bar-label {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -5755,7 +5809,7 @@ footer {
 }
 
 .rating-bar-count {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -5807,7 +5861,7 @@ footer {
 }
 
 .star-rating-label {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -5815,7 +5869,7 @@ footer {
   display: block;
   margin-top: 6px;
   text-align: right;
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -5851,7 +5905,7 @@ footer {
 }
 
 .reviews-toolbar-count {
-  font: 11px 'DM Mono';
+  font: 11px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -5862,7 +5916,7 @@ footer {
   border: 1px solid var(--orange);
   background: rgba(225, 6, 0, 0.08);
   color: var(--orange);
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.06em;
 }
 
@@ -5919,7 +5973,7 @@ footer {
   place-items: center;
   background: var(--ink);
   color: #fff;
-  font: 700 12px 'Space Grotesk', sans-serif;
+  font: 700 12px 'Space Grotesk', 'Manrope', sans-serif;
   letter-spacing: 0.04em;
 }
 
@@ -5942,7 +5996,7 @@ footer {
 }
 
 .review-author-meta small {
-  font: 10px 'DM Mono';
+  font: 10px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--muted);
 }
 
@@ -5951,7 +6005,7 @@ footer {
   padding: 2px 7px;
   background: rgba(225, 6, 0, 0.1);
   color: var(--orange);
-  font: 9px 'DM Mono';
+  font: 9px 'DM Mono', 'JetBrains Mono', monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -5967,7 +6021,7 @@ footer {
 }
 
 .review-score-badge b {
-  font: 600 12px 'DM Mono';
+  font: 600 12px 'DM Mono', 'JetBrains Mono', monospace;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }

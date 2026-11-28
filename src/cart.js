@@ -1,7 +1,7 @@
 import { supabase } from './lib/supabase.js'
 import { getProducts, whenProductsReady } from './data.js'
 import { escapeHtml, formatPrice, honeypotFieldMarkup, isSpamSubmit, notifyEmail } from './utils.js'
-import { primeAndTranslate, translatePage, isEnglish } from './i18n.js'
+import { primeAndTranslate, translatePage, isTranslated, translateValue } from './i18n.js'
 import { pulseCartBadge, showToast } from './fx.js'
 
 const cartItems = []
@@ -162,7 +162,7 @@ export function addToCart(product) {
   pulseCartBadge()
   renderCart()
   persistCart()
-  showToast(`Pievienots grozam: ${product.name}`, {
+  showToast(`${translateValue('Pievienots grozam')}: ${product.name}`, {
     actionLabel: 'SKATĪT GROZU ↗',
     onAction: () => openCartPanel(),
   })
@@ -236,7 +236,7 @@ export function renderCart() {
       btn.addEventListener('click', () => removeCartItem(btn.dataset.cartRemove)),
     )
   }
-  if (isEnglish()) {
+  if (isTranslated()) {
     translatePage()
     primeAndTranslate()
   }
@@ -292,13 +292,13 @@ export function bindCartControls({ onOpen } = {}) {
           .querySelector('#cart-items')
           .insertAdjacentHTML('beforeend', '<p class="form-message">Pievieno detaļu grozam vispirms.</p>')
       }
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
       return
     }
     cartView.hidden = true
     checkoutView.hidden = false
     checkoutView.innerHTML = checkoutFormMarkup()
-    if (isEnglish()) translatePage()
+    if (isTranslated()) translatePage()
     document.querySelector('#checkout-back')?.addEventListener('click', () => {
       checkoutView.hidden = true
       cartView.hidden = false
@@ -348,7 +348,7 @@ export function bindCartControls({ onOpen } = {}) {
         <h2>Pasūtījums <em>saņemts.</em></h2>
         <p class="form-message">Pasūtījums #${escapeHtml(order.id)} saņemts. Mēs sazināsimies pa e-pastu ${escapeHtml(data.get('email'))}, lai vienotos par apmaksu un piegādi.</p>
         <button class="text-button" type="button" id="checkout-close">AIZVĒRT</button>`
-      if (isEnglish()) translatePage()
+      if (isTranslated()) translatePage()
       document.querySelector('#checkout-close')?.addEventListener('click', () => {
         checkoutView.hidden = true
         cartView.hidden = false

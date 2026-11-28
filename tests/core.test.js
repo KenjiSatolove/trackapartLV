@@ -299,3 +299,34 @@ test('seller profile helpers compute initials, rating breakdown, and SVG stars a
   assert.ok(sellerProfilePage.includes('id="seller-rating-summary"'))
   assert.ok(sellerProfilePage.includes('id="reviews-sort-select"'))
 })
+
+test('i18n EN and RU dictionaries have 100% key parity and route titles', async () => {
+  const {
+    SUPPORTED_LANGS,
+    placeholderTranslations,
+    placeholderTranslationsRu,
+    translateValue,
+    translations,
+    translationsRu,
+  } = await import('../src/i18n.js')
+  const { ROUTE_TITLES, ROUTE_TITLES_EN, ROUTE_TITLES_RU, getRouteTitles } = await import('../src/data.js')
+
+  assert.deepEqual(SUPPORTED_LANGS, ['lv', 'en', 'ru'])
+
+  const missingInRu = Object.keys(translations).filter((key) => !translationsRu[key])
+  assert.deepEqual(missingInRu, [], `Missing RU translations: ${missingInRu.join(', ')}`)
+
+  const missingPhInRu = Object.keys(placeholderTranslations).filter((key) => !placeholderTranslationsRu[key])
+  assert.deepEqual(missingPhInRu, [], `Missing RU placeholders: ${missingPhInRu.join(', ')}`)
+
+  assert.deepEqual(Object.keys(ROUTE_TITLES_RU).sort(), Object.keys(ROUTE_TITLES).sort())
+  assert.deepEqual(Object.keys(ROUTE_TITLES_EN).sort(), Object.keys(ROUTE_TITLES).sort())
+  assert.equal(getRouteTitles('ru').catalog, 'Каталог — TrackApart')
+  assert.equal(getRouteTitles('en').catalog, 'Catalog — TrackApart')
+  assert.equal(getRouteTitles('lv').catalog, 'Katalogs — TrackApart')
+
+  assert.equal(translateValue('Katalogs', 'lv'), 'Katalogs')
+  assert.equal(translateValue('Katalogs', 'en'), 'Catalog')
+  assert.equal(translateValue('Katalogs', 'ru'), 'Каталог')
+  assert.equal(translateValue('Pievienots grozam', 'ru'), 'Добавлено в корзину')
+})

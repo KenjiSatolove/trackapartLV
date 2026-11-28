@@ -1,7 +1,7 @@
 // Visual micro-interactions: scroll telemetry bar, sticky header state,
 // hero pointer spotlight/parallax, and cart toast notifications.
 import { escapeHtml } from './utils.js'
-import { isEnglish, translatePage } from './i18n.js'
+import { isTranslated, translatePage } from './i18n.js'
 
 let fxBound = false
 let toastTimer = null
@@ -86,7 +86,7 @@ export function showToast(title, { actionLabel, onAction, isWarning = false } = 
     <span class="toast-text">${escapeHtml(title)}</span>
     ${actionLabel ? `<button class="toast-action" type="button" id="toast-action-btn">${escapeHtml(actionLabel)}</button>` : ''}
   </div>`
-  if (isEnglish()) translatePage()
+  if (isTranslated()) translatePage()
   if (actionLabel && onAction) {
     document.querySelector('#toast-action-btn')?.addEventListener('click', () => {
       host.innerHTML = ''
