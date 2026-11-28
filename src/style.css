@@ -6056,13 +6056,26 @@ footer {
   .profile-kpi-val {
     font-size: 26px;
   }
+  .profile-tabs-bar {
+    padding: 0 4vw;
+  }
   .profile-tabs {
-    overflow-x: auto;
-    gap: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    overflow: visible;
   }
   .profile-tab {
-    margin-right: 18px;
+    justify-content: center;
+    margin-right: 0;
+    padding: 15px 4px;
+    gap: 5px;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
     white-space: nowrap;
+  }
+  .profile-tab:after {
+    bottom: 0;
   }
   .profile-listings-grid {
     grid-template-columns: 1fr;

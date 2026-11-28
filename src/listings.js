@@ -546,7 +546,7 @@ function reviewFormMarkup(existing) {
         <span class="review-char-count" id="review-char-count">${commentLen} / 1000</span>
       </label>
       <div class="form-actions review-form-actions">
-        <button class="button button-dark" type="submit">${existing ? 'ATJAUNOT ATSAUKSMI' : 'PUBLICĒT ATSAUKSMI'} ↗</button>
+        <button class="button button-dark" type="submit">${existing ? 'ATJAUNOT ATSAUKSMI ↗' : 'PUBLICĒT ATSAUKSMI ↗'}</button>
         ${existing ? '<button class="text-button review-delete-btn" id="review-delete-btn" type="button">DZĒST</button>' : ''}
       </div>
       <p class="form-message" id="review-message"></p>
@@ -679,8 +679,8 @@ function ratingSummaryMarkup(stats, activeStarFilter) {
       </div>
       <div class="rating-score-meta">
         ${renderStarsSvg(stats.average, { size: 16 })}
-        <p>${stats.count ? `${stats.count} ${stats.count === 1 ? 'atsauksme' : 'atsauksmes'}` : 'Vēl nav atsauksmju'}</p>
-        ${stats.count ? `<span class="rating-positive-pill">${stats.positivePercent}% pozitīvas</span>` : ''}
+        <p>${stats.count ? `<span>${stats.count}</span> <span>${stats.count === 1 ? 'atsauksme' : 'atsauksmes'}</span>` : 'Vēl nav atsauksmju'}</p>
+        ${stats.count ? `<span class="rating-positive-pill"><span>${stats.positivePercent}%</span> <span>pozitīvas</span></span>` : ''}
       </div>
     </div>
     <div class="rating-bars" role="group" aria-label="Vērtējumu sadalījums">
@@ -709,11 +709,7 @@ function reviewCardsMarkup(reviews, reviewerMap, currentUserId) {
       const reviewerName = reviewer?.display_name || 'Lietotājs'
       const reviewerCity = reviewer?.city || ''
       const isMine = currentUserId && r.reviewer_id === currentUserId
-      const dateStr = new Date(r.created_at).toLocaleDateString('lv-LV', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+      const dateStr = new Date(r.created_at).toLocaleDateString('lv-LV')
       return `<article class="review-card${isMine ? ' is-own-review' : ''}">
         <div class="review-card-head">
           <a class="review-author" href="#seller-${escapeHtml(r.reviewer_id)}">
@@ -821,11 +817,8 @@ export async function loadSellerProfile(id, openAuthModal) {
     const metaItems = []
     metaItems.push(`<span class="profile-meta-pill">${PIN_ICON_SVG}<span>${escapeHtml(profile?.city || 'Latvija')}</span></span>`)
     if (profile?.created_at) {
-      const joined = new Date(profile.created_at).toLocaleDateString('lv-LV', {
-        year: 'numeric',
-        month: 'long',
-      })
-      metaItems.push(`<span class="profile-meta-pill">${CALENDAR_ICON_SVG}<span>Pievienojies ${escapeHtml(joined)}</span></span>`)
+      const joined = new Date(profile.created_at).toLocaleDateString('lv-LV')
+      metaItems.push(`<span class="profile-meta-pill">${CALENDAR_ICON_SVG}<span>Pievienojies</span> <span>${escapeHtml(joined)}</span></span>`)
     }
     metaEl.innerHTML = metaItems.join('')
   }
@@ -845,8 +838,8 @@ export async function loadSellerProfile(id, openAuthModal) {
     ? renderStarsSvg(stats.average, { size: 13 })
     : 'Vēl nav vērtējumu'
   document.querySelector('#kpi-reviews').textContent = String(stats.count)
-  document.querySelector('#kpi-positive').textContent = stats.count
-    ? `${stats.positivePercent}% pozitīvas`
+  document.querySelector('#kpi-positive').innerHTML = stats.count
+    ? `<span>${stats.positivePercent}%</span> <span>pozitīvas</span>`
     : 'Vēl nav atsauksmju'
   document.querySelector('#kpi-listings').textContent = String(activeListings.length)
   document.querySelector('#kpi-since').textContent = profile?.created_at
@@ -939,11 +932,11 @@ export async function loadSellerProfile(id, openAuthModal) {
 
     if (toolbar) toolbar.hidden = allReviews.length === 0
     if (countEl) {
-      countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'atsauksme' : 'atsauksmes'}`
+      countEl.innerHTML = `<span>${filtered.length}</span> <span>${filtered.length === 1 ? 'atsauksme' : 'atsauksmes'}</span>`
     }
     if (clearChip) {
       clearChip.hidden = !activeStarFilter
-      if (activeStarFilter) clearChip.textContent = `Tikai ${activeStarFilter} ★ ×`
+      if (activeStarFilter) clearChip.innerHTML = `<span>Tikai</span> ${activeStarFilter} ★ ×`
     }
 
     if (reviewsHolder) {
@@ -993,7 +986,7 @@ export async function loadSellerProfile(id, openAuthModal) {
         <p class="profile-review-hint">Vari atjaunot savu vārdu, pilsētu un sludinājumus sava konta iestatījumos.</p>
       </div>
       <div class="review-login-prompt">
-        <a class="button button-dark" href="#account">ATVERT MANU KONTU ↗</a>
+        <a class="button button-dark" href="#account">ATVĒRT MANU KONTU ↗</a>
       </div>`
   } else {
     formHolder.innerHTML = reviewFormMarkup(allReviews.find((r) => r.reviewer_id === user.id))
