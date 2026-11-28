@@ -99,7 +99,16 @@ export const translations = {
   'Lai izveidotu kontu, jāpiekrīt Lietošanas noteikumiem un Privātuma politikai.': 'You must agree to the Terms of Use and Privacy Policy to create an account.',
   'Šī vietne izmanto tikai tehniski nepieciešamu lokālo glabātuvi, lai uzturētu tavu pieslēgšanās sesiju. Uzzini vairāk mūsu': 'This site only uses technically necessary local storage to keep you signed in. Learn more in our', 'SAPRATU': 'GOT IT', 'Privātuma politikā': 'Privacy Policy',
   'Auto detaļas bez liekām': 'Car parts without the', 'rūpēm.': 'hassle.',
-  'PĀRDEVĒJA PROFILS': 'SELLER PROFILE', 'Pārdevēja': "Seller's", 'ATSAUKSMES': 'REVIEWS', 'Ko saka': 'What buyers', 'pircēji.': 'say.', 'VĒRTĒJUMS': 'RATING', 'KOMENTĀRS': 'COMMENT', 'PUBLICĒT ATSAUKSMI': 'POST REVIEW', 'ATJAUNOT ATSAUKSMI': 'UPDATE REVIEW',
+  'PĀRDEVĒJA PROFILS': 'SELLER PROFILE', 'Pārdevēja': "Seller's", 'ATSAUKSMES': 'REVIEWS', 'ATSAUKSMES UN VĒRTĒJUMI': 'REVIEWS & RATINGS', 'Ko saka': 'What buyers', 'pircēji.': 'say.', 'VĒRTĒJUMS': 'RATING', 'KOMENTĀRS': 'COMMENT', 'PUBLICĒT ATSAUKSMI': 'POST REVIEW', 'ATJAUNOT ATSAUKSMI': 'UPDATE REVIEW',
+  'KOPĒT SAITI': 'COPY LINK', '✓ SAITE NOKOPĒTA': '✓ LINK COPIED', 'REDIĢĒT PROFILU ↗': 'EDIT PROFILE ↗', 'VIDĒJAIS VĒRTĒJUMS': 'AVERAGE RATING', 'DALĪBNIEKS KOPŠ': 'MEMBER SINCE', 'Pieejamas detaļas': 'Available parts', 'TrackApart kopiena': 'TrackApart community', 'Vēl nav vērtējumu': 'No ratings yet', 'Vēl nav atsauksmju': 'No reviews yet',
+  'PĀRSKATS': 'OVERVIEW', 'SLUDINĀJUMI': 'LISTINGS', 'SKATĪT': 'VIEW', 'Jauns pārdevējs': 'New seller',
+  '★ AUGSTI NOVĒRTĒTS': '★ TOP RATED', 'AKTĪVS PĀRDEVĒJS': 'ACTIVE SELLER', 'TAVS PROFILS': 'YOUR PROFILE', 'TAVA ATSAUKSME': 'YOUR REVIEW', 'Tava atsauksme': 'Your review',
+  'ATSTĀT ATSAUKSMI': 'LEAVE A REVIEW', 'Novērtē pārdevēju': 'Rate this seller', 'Rediģē savu vērtējumu': 'Edit your rating', 'Izvēlies zvaigznes': 'Select stars',
+  'Slikti': 'Poor', 'Viduvēji': 'Fair', 'Labi': 'Good', 'Izcili!': 'Excellent!', 'DZĒST': 'DELETE',
+  'Jaunākās': 'Newest', 'Augstākais vērtējums': 'Highest rated', 'Zemākais vērtējums': 'Lowest rated',
+  'Bez komentāra.': 'No comment.', 'Nav atsauksmju ar šo vērtējumu.': 'No reviews with this rating.',
+  'Dalies ar pieredzi': 'Share your experience', 'Pieslēdzies savam kontam, lai novērtētu šo pārdevēju.': 'Sign in to your account to rate this seller.',
+  'TAVS PUBLISKAIS PROFILS': 'YOUR PUBLIC PROFILE', 'Tā tevi redz pircēji': 'How buyers see you', 'Vari atjaunot savu vārdu, pilsētu un sludinājumus sava konta iestatījumos.': 'You can update your name, city, and listings in your account settings.', 'ATVERT MANU KONTU ↗': 'OPEN MY ACCOUNT ↗',
   'Ielādē...': 'Loading...', 'Ielādējam...': 'Loading...', 'Ielogojies, lai publicētu sludinājumu.': 'Sign in to publish a listing.', 'Lai ievietotu sludinājumu, vispirms ielogojies.': 'Please sign in first to publish a listing.', 'Pārdevējs nav pievienojis aprakstu.': 'Seller has not added a description.', 'Nav norādīta': 'Not specified', 'Paldies! Ziņojums nosūtīts administrācijai.': 'Thanks! Your report has been sent to moderation.', 'Izvēlies vērtējumu.': 'Please select a rating.', 'Vēl nav nevienas atsauksmes.': 'No reviews yet.', 'Ielogojies, lai atstātu atsauksmi.': 'Sign in to leave a review.', 'Šim pārdevējam pašlaik nav aktīvu sludinājumu.': 'This seller has no active listings right now.', 'BILDES (maks. 10 faili, līdz 5 MB katrs)': 'PHOTOS (max 10 files, up to 5 MB each)', '2FA ir ieslēgta šim kontam.': '2FA is enabled for this account.', '2FA nav ieslēgta šim kontam. Ieteicams pārdevējiem, lai pasargātu kontu no pārņemšanas.': '2FA is not enabled for this account. Recommended for sellers to protect against account takeover.', 'Konta dzēšana ir neatgriezeniska. Tiks dzēsti tavi sludinājumi, favorīti un profils.': 'Deleting your account is permanent. Your listings, favorites, and profile will be removed.', 'Šī prece vairs nav pieejama katalogā.': 'This item is no longer available in the catalog.', 'Veiksmīgi ielogojies.': 'Signed in successfully.', 'Parole atjaunota! Tagad vari izmantot jauno paroli.': 'Password updated! You can now use your new password.', 'Ievadi e-pastu un paroli, lai izveidotu kontu.': 'Enter your email and password to create an account.', 'Šis lietotājvārds jau ir aizņemts. Izvēlies citu.': 'This username is already taken. Please choose another.', 'Tu jau esi ziņojis par šo sludinājumu.': 'You have already reported this listing.', '404 / LAPA NAV ATRASTA': '404 / PAGE NOT FOUND', 'Lapa nav': 'Page not', 'atrasta.': 'found.', 'Adrese': 'Address', 'neeksistē vai ir pārvietota.': 'does not exist or has been moved.', 'UZ SĀKUMU': 'BACK TO HOME',
 }
 
@@ -114,6 +123,7 @@ export const placeholderTranslations = {
   'Meklē...': 'Search...',
   'Meklēt...': 'Search...',
   'Meklē pēc nosaukuma, markas vai modeļa': 'Search by title, brand or model',
+  'Meklēt pārdevēja detaļās...': "Search seller's parts...",
   'Kā pagāja darījums?': 'How did the deal go?',
   'Apraksti iemeslu (piem., maldinošs apraksts vai aizdomīgs sludinājums)': 'Describe the reason (e.g. misleading listing or suspected scam)',
 }

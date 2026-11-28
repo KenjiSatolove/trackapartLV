@@ -13,6 +13,8 @@ import {
 } from './utils.js'
 import { isEnglish, primeAndTranslate, translatePage } from './i18n.js'
 import { bindGallery, galleryMarkup } from './catalog.js'
+import { enhanceSelects } from './selects.js'
+import { showToast } from './fx.js'
 
 export const listingsPage = `<section class="page-hero">
   <div class="section-kicker">04 / KOPIENAS TIRGUS</div>
@@ -69,30 +71,99 @@ export const listingDetailPage = `<section class="detail-page">
   </div>
 </section>`
 
-export const sellerProfilePage = `<section class="page-hero">
-  <a class="back-link" href="#listings">← ATPAKAĻ UZ SLUDINĀJUMIEM</a>
-  <div class="section-kicker">PĀRDEVĒJA PROFILS</div>
-  <h1 id="seller-name">Ielādē...</h1>
-  <p id="seller-meta" class="detail-description"></p>
+export const sellerProfilePage = `<section class="profile-hero" id="seller-hero">
+  <div class="profile-hero-top">
+    <a class="back-link" href="#listings">← ATPAKAĻ UZ SLUDINĀJUMIEM</a>
+    <div class="profile-hero-actions" id="seller-hero-actions">
+      <button class="profile-action-btn" id="profile-share-btn" type="button">KOPĒT SAITI</button>
+    </div>
+  </div>
+  <div class="profile-identity">
+    <div class="profile-avatar" id="seller-avatar" aria-hidden="true"><span>--</span></div>
+    <div class="profile-identity-body">
+      <div class="profile-kicker-row">
+        <span class="section-kicker">PĀRDEVĒJA PROFILS</span>
+        <div class="profile-badges" id="seller-badges"></div>
+      </div>
+      <h1 id="seller-name">Ielādē...</h1>
+      <div class="profile-meta-row" id="seller-meta"></div>
+      <div class="profile-brand-tags" id="seller-brands"></div>
+    </div>
+  </div>
+  <div class="profile-kpis" id="seller-kpis">
+    <button class="profile-kpi is-clickable" type="button" data-jump-tab="reviews">
+      <span class="profile-kpi-label">VIDĒJAIS VĒRTĒJUMS</span>
+      <strong class="profile-kpi-val" id="kpi-rating">—</strong>
+      <span class="profile-kpi-sub" id="kpi-rating-stars"></span>
+    </button>
+    <button class="profile-kpi is-clickable" type="button" data-jump-tab="reviews">
+      <span class="profile-kpi-label">ATSAUKSMES</span>
+      <strong class="profile-kpi-val" id="kpi-reviews">0</strong>
+      <span class="profile-kpi-sub" id="kpi-positive">Vēl nav atsauksmju</span>
+    </button>
+    <button class="profile-kpi is-clickable" type="button" data-jump-tab="listings">
+      <span class="profile-kpi-label">AKTĪVIE SLUDINĀJUMI</span>
+      <strong class="profile-kpi-val" id="kpi-listings">0</strong>
+      <span class="profile-kpi-sub">Pieejamas detaļas</span>
+    </button>
+    <div class="profile-kpi">
+      <span class="profile-kpi-label">DALĪBNIEKS KOPŠ</span>
+      <strong class="profile-kpi-val" id="kpi-since">—</strong>
+      <span class="profile-kpi-sub">TrackApart kopiena</span>
+    </div>
+  </div>
 </section>
-<section class="listings-section reveal">
-  <div class="section-top">
+
+<nav class="profile-tabs-bar" aria-label="Profila sadaļas">
+  <div class="profile-tabs">
+    <button class="profile-tab active" type="button" data-profile-tab="all">PĀRSKATS</button>
+    <button class="profile-tab" type="button" data-profile-tab="listings">SLUDINĀJUMI <b id="tab-count-listings">0</b></button>
+    <button class="profile-tab" type="button" data-profile-tab="reviews">ATSAUKSMES <b id="tab-count-reviews">0</b></button>
+  </div>
+</nav>
+
+<section class="profile-section reveal" id="profile-listings-section">
+  <div class="section-top profile-section-head">
     <div>
       <div class="section-kicker">AKTĪVIE SLUDINĀJUMI</div>
       <h2>Pārdevēja <em>sludinājumi.</em></h2>
     </div>
+    <div class="profile-listings-search-wrap" id="seller-listings-search-wrap" hidden>
+      <span aria-hidden="true">⌕</span>
+      <input id="seller-listings-search" placeholder="Meklēt pārdevēja detaļās...">
+    </div>
   </div>
-  <div class="listing-table" id="seller-listings"><p class="listing-loading">Ielādējam...</p></div>
+  <div id="seller-listings"><p class="listing-loading">Ielādējam...</p></div>
+  <p class="no-results" id="seller-listings-empty" hidden>Neviena prece neatbilst meklējumam.</p>
 </section>
-<section class="listings-section reveal">
+
+<section class="profile-section profile-reviews-section reveal" id="profile-reviews-section">
   <div class="section-top">
     <div>
-      <div class="section-kicker">ATSAUKSMES</div>
+      <div class="section-kicker">ATSAUKSMES UN VĒRTĒJUMI</div>
       <h2>Ko saka <em>pircēji.</em></h2>
     </div>
   </div>
-  <div id="seller-review-form-holder"></div>
-  <div class="reviews-list" id="seller-reviews"><p class="listing-loading">Ielādējam...</p></div>
+  <div class="profile-reviews-layout">
+    <aside class="profile-rating-sidebar">
+      <div class="rating-summary-card" id="seller-rating-summary"></div>
+      <div class="profile-review-card" id="seller-review-form-holder"></div>
+    </aside>
+    <div class="profile-reviews-feed">
+      <div class="reviews-toolbar" id="seller-reviews-toolbar" hidden>
+        <div class="reviews-toolbar-left">
+          <span class="reviews-toolbar-count" id="reviews-visible-count"></span>
+          <button class="reviews-filter-chip" id="reviews-clear-filter" type="button" hidden></button>
+        </div>
+        <select id="reviews-sort-select" aria-label="Kārtot atsauksmes">
+          <option value="newest">Jaunākās</option>
+          <option value="highest">Augstākais vērtējums</option>
+          <option value="lowest">Zemākais vērtējums</option>
+        </select>
+      </div>
+      <div class="reviews-cards" id="seller-reviews"><p class="listing-loading">Ielādējam...</p></div>
+    </div>
+  </div>
 </section>`
 
 export async function fetchListingThumbnails(rows) {
@@ -335,16 +406,19 @@ export async function loadListingDetail(id, openAuthModal) {
     return
   }
   let images = listing.images || []
+  let sellerRatings = []
   if (supabase && listing.id) {
-    const { data: imageRows } = await supabase
-      .from('listing_images')
-      .select('storage_path')
-      .eq('listing_id', id)
-      .order('sort_order')
+    const [{ data: imageRows }, { data: ratingRows }] = await Promise.all([
+      supabase.from('listing_images').select('storage_path').eq('listing_id', id).order('sort_order'),
+      listing.user_id
+        ? supabase.from('reviews').select('rating').eq('seller_id', listing.user_id)
+        : Promise.resolve({ data: [] }),
+    ])
     images = (imageRows || [])
       .map((row) => String(row.storage_path || '').trim())
       .filter(Boolean)
       .map((storagePath) => supabase.storage.from('listing-images').getPublicUrl(storagePath).data.publicUrl)
+    sellerRatings = ratingRows || []
   }
   if (!document.querySelector('#detail-gallery')) return
   document.querySelector('#detail-gallery').innerHTML = galleryMarkup(images, listing.title)
@@ -359,10 +433,22 @@ export async function loadListingDetail(id, openAuthModal) {
     <span>STĀVOKLIS<strong>${escapeHtml(CONDITION_NAMES[listing.condition] || listing.condition || 'Nav norādīts')}</strong></span>
     <span>ATRAŠANĀS VIETA<strong>${escapeHtml(listing.location || 'Nav norādīta')}</strong></span>`
   const sellerHeading = document.querySelector('#detail-seller')
+  const sellerDisplayName = listing.seller || 'Privāts pārdevējs'
+  const sellerStats = computeRatingStats(sellerRatings)
+  const sellerSub = sellerStats.count
+    ? `<span class="seller-mini-rating">★ ${sellerStats.average.toFixed(1)} <small>(${sellerStats.count})</small></span>`
+    : `<span class="seller-mini-rating is-empty">Jauns pārdevējs</span>`
   if (listing.user_id) {
-    sellerHeading.innerHTML = `<a href="#seller-${escapeHtml(listing.user_id)}">${escapeHtml(listing.seller || 'Privāts pārdevējs')} ↗</a>`
+    sellerHeading.innerHTML = `<a class="seller-mini-card" href="#seller-${escapeHtml(listing.user_id)}">
+      <span class="seller-mini-avatar" aria-hidden="true">${escapeHtml(getInitials(sellerDisplayName))}</span>
+      <span class="seller-mini-info">
+        <strong>${escapeHtml(sellerDisplayName)}</strong>
+        ${sellerSub}
+      </span>
+      <span class="seller-mini-arrow" aria-hidden="true">↗</span>
+    </a>`
   } else {
-    sellerHeading.textContent = listing.seller || 'Privāts pārdevējs'
+    sellerHeading.textContent = sellerDisplayName
   }
   const phone = document.querySelector('#detail-phone')
   const telHref = formatTelHref(listing.phone)
@@ -378,38 +464,146 @@ export async function loadListingDetail(id, openAuthModal) {
   primeAndTranslate()
 }
 
-function reviewFormMarkup(existing) {
-  return `<form class="site-form review-form" id="review-form">
-    <label>VĒRTĒJUMS
-      <div class="star-rating" id="star-rating" role="radiogroup" aria-label="Vērtējums">
-        ${[1, 2, 3, 4, 5]
-          .map(
-            (n) =>
-              `<button type="button" class="star-input" data-star="${n}" aria-label="Vērtēt ar ${n} no 5">★</button>`,
-          )
-          .join('')}
-        <input type="hidden" name="rating" value="${existing?.rating || 0}">
-      </div>
-    </label>
-    <label>KOMENTĀRS<textarea name="comment" rows="3" maxlength="1000" placeholder="Kā pagāja darījums?">${escapeHtml(existing?.comment || '')}</textarea></label>
-    <div class="form-actions"><button class="button button-dark" type="submit">${existing ? 'ATJAUNOT ATSAUKSMI' : 'PUBLICĒT ATSAUKSMI'} ↗</button></div>
-    <p class="form-message" id="review-message"></p>
-  </form>`
+const RATING_LABELS = {
+  1: 'Slikti',
+  2: 'Viduvēji',
+  3: 'Labi',
+  4: 'Ļoti labi',
+  5: 'Izcili!',
 }
 
-function bindReviewForm(sellerId, reviewerId) {
+export function getInitials(name) {
+  const cleaned = String(name || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+  if (!cleaned) return 'TA'
+  const parts = cleaned.split(' ').filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+  }
+  return cleaned.slice(0, 2).toUpperCase()
+}
+
+export function computeRatingStats(reviews) {
+  const list = Array.isArray(reviews) ? reviews : []
+  const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  let sum = 0
+  let positive = 0
+  for (const r of list) {
+    const val = Math.max(1, Math.min(5, Math.round(Number(r?.rating) || 0)))
+    if (val >= 1 && val <= 5) {
+      breakdown[val] += 1
+      sum += val
+      if (val >= 4) positive += 1
+    }
+  }
+  const count = Object.values(breakdown).reduce((a, b) => a + b, 0)
+  return {
+    count,
+    average: count ? sum / count : 0,
+    positivePercent: count ? Math.round((positive / count) * 100) : 0,
+    breakdown,
+  }
+}
+
+export function renderStarsSvg(rating, { size = 14 } = {}) {
+  const rounded = Math.round(Number(rating || 0) * 2) / 2
+  return `<span class="tp-stars" aria-label="${Number(rating || 0).toFixed(1)} / 5">${[1, 2, 3, 4, 5]
+    .map((n) => {
+      const filled = n <= rounded
+      return `<svg class="tp-star${filled ? ' is-filled' : ''}" width="${size}" height="${size}" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.8l2.47 5.01 5.53.8-4 3.9.94 5.51L10 14.42l-4.94 2.6.94-5.51-4-3.9 5.53-.8L10 1.8z" fill="currentColor"/></svg>`
+    })
+    .join('')}</span>`
+}
+
+const PIN_ICON_SVG = `<svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 17.5s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="10" cy="7.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg>`
+const CALENDAR_ICON_SVG = `<svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12.5" stroke="currentColor" stroke-width="1.6"/><path d="M3 8.5h14M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`
+
+function reviewFormMarkup(existing) {
+  const currentRating = existing?.rating || 0
+  const commentLen = (existing?.comment || '').length
+  return `<div class="profile-review-card-head">
+      <div class="section-kicker">${existing ? 'TAVA ATSAUKSME' : 'ATSTĀT ATSAUKSMI'}</div>
+      <h3>${existing ? 'Rediģē savu vērtējumu' : 'Novērtē pārdevēju'}</h3>
+    </div>
+    <form class="site-form review-form" id="review-form">
+      <label>VĒRTĒJUMS
+        <div class="star-picker-row">
+          <div class="star-rating" id="star-rating" role="radiogroup" aria-label="Vērtējums">
+            ${[1, 2, 3, 4, 5]
+              .map(
+                (n) =>
+                  `<button type="button" class="star-input" data-star="${n}" aria-label="Vērtēt ar ${n} no 5">★</button>`,
+              )
+              .join('')}
+            <input type="hidden" name="rating" value="${currentRating}">
+          </div>
+          <span class="star-rating-label" id="star-rating-label">${currentRating ? RATING_LABELS[currentRating] : 'Izvēlies zvaigznes'}</span>
+        </div>
+      </label>
+      <label>KOMENTĀRS
+        <textarea name="comment" id="review-comment-input" rows="3" maxlength="1000" placeholder="Kā pagāja darījums?">${escapeHtml(existing?.comment || '')}</textarea>
+        <span class="review-char-count" id="review-char-count">${commentLen} / 1000</span>
+      </label>
+      <div class="form-actions review-form-actions">
+        <button class="button button-dark" type="submit">${existing ? 'ATJAUNOT ATSAUKSMI' : 'PUBLICĒT ATSAUKSMI'} ↗</button>
+        ${existing ? '<button class="text-button review-delete-btn" id="review-delete-btn" type="button">DZĒST</button>' : ''}
+      </div>
+      <p class="form-message" id="review-message"></p>
+    </form>`
+}
+
+function bindReviewForm(sellerId, reviewerId, openAuthModal) {
   const form = document.querySelector('#review-form')
   if (!form) return
   const ratingInput = form.querySelector('input[name="rating"]')
-  const paintStars = (n) =>
-    form.querySelectorAll('.star-input').forEach((btn) => btn.classList.toggle('is-active', Number(btn.dataset.star) <= n))
+  const ratingLabel = form.querySelector('#star-rating-label')
+  const commentInput = form.querySelector('#review-comment-input')
+  const charCount = form.querySelector('#review-char-count')
+  const stars = form.querySelectorAll('.star-input')
+
+  const paintStars = (n, preview = false) => {
+    stars.forEach((btn) => {
+      const val = Number(btn.dataset.star)
+      btn.classList.toggle('is-active', !preview && val <= n)
+      btn.classList.toggle('is-preview', preview && val <= n)
+    })
+    if (ratingLabel) {
+      ratingLabel.textContent = n ? RATING_LABELS[n] : 'Izvēlies zvaigznes'
+      if (isEnglish()) translatePage()
+    }
+  }
   paintStars(Number(ratingInput.value))
-  form.querySelectorAll('.star-input').forEach((btn) =>
+
+  stars.forEach((btn) => {
+    btn.addEventListener('mouseenter', () => paintStars(Number(btn.dataset.star), true))
+    btn.addEventListener('mouseleave', () => paintStars(Number(ratingInput.value), false))
     btn.addEventListener('click', () => {
       ratingInput.value = btn.dataset.star
-      paintStars(Number(btn.dataset.star))
-    }),
-  )
+      paintStars(Number(btn.dataset.star), false)
+    })
+  })
+
+  commentInput?.addEventListener('input', () => {
+    if (charCount) charCount.textContent = `${commentInput.value.length} / 1000`
+  })
+
+  document.querySelector('#review-delete-btn')?.addEventListener('click', async () => {
+    if (!window.confirm('Dzēst tavu atsauksmi?')) return
+    const { error } = await supabase
+      .from('reviews')
+      .delete()
+      .eq('seller_id', sellerId)
+      .eq('reviewer_id', reviewerId)
+    if (error) {
+      const msg = document.querySelector('#review-message')
+      if (msg) msg.textContent = error.message
+      return
+    }
+    showToast('Atsauksme dzēsta.')
+    await loadSellerProfile(sellerId, openAuthModal)
+  })
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
     await withSubmitLock(form, async () => {
@@ -431,7 +625,8 @@ function bindReviewForm(sellerId, reviewerId) {
         message.textContent = error.message
         return
       }
-      await loadSellerProfile(sellerId)
+      showToast('Atsauksme saglabāta!')
+      await loadSellerProfile(sellerId, openAuthModal)
     })
   })
 }
@@ -445,6 +640,104 @@ async function fetchPublicProfilesByIds(ids) {
   return fallback.data || []
 }
 
+function sellerListingCardsMarkup(listings, thumbs) {
+  return `<div class="profile-listings-grid">${listings
+    .map((row) => {
+      const thumbUrl = escapeHtml(safeUrl(thumbs[row.id]))
+      const condLabel = CONDITION_NAMES[row.condition] || row.condition || ''
+      const searchText = [row.title, row.brand, row.model, row.location, row.category]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return `<a class="profile-listing-card" href="#listing-${escapeHtml(row.id)}" data-seller-search="${escapeHtml(searchText)}">
+        <div class="profile-listing-media">
+          ${thumbUrl ? `<img src="${thumbUrl}" alt="${escapeHtml(row.title)}" loading="lazy">` : '<div class="gallery-empty">Nav bildes</div>'}
+          ${condLabel ? `<span class="product-tag">${escapeHtml(condLabel)}</span>` : ''}
+        </div>
+        <div class="profile-listing-body">
+          <div class="product-meta">
+            <span>${escapeHtml([row.brand, row.model].filter(Boolean).join(' ') || 'Auto detaļa')}</span>
+            <small>${escapeHtml(row.location || '')}</small>
+          </div>
+          <h3>${escapeHtml(row.title)}</h3>
+          <div class="product-bottom">
+            <strong>${formatPrice(row.price)}</strong>
+            <span class="profile-listing-cta">SKATĪT <b>↗</b></span>
+          </div>
+        </div>
+      </a>`
+    })
+    .join('')}</div>`
+}
+
+function ratingSummaryMarkup(stats, activeStarFilter) {
+  const scoreDisplay = stats.count ? stats.average.toFixed(1) : '—'
+  return `<div class="rating-summary-head">
+      <div class="rating-score-big">
+        <strong>${scoreDisplay}</strong>
+        <span>/ 5</span>
+      </div>
+      <div class="rating-score-meta">
+        ${renderStarsSvg(stats.average, { size: 16 })}
+        <p>${stats.count ? `${stats.count} ${stats.count === 1 ? 'atsauksme' : 'atsauksmes'}` : 'Vēl nav atsauksmju'}</p>
+        ${stats.count ? `<span class="rating-positive-pill">${stats.positivePercent}% pozitīvas</span>` : ''}
+      </div>
+    </div>
+    <div class="rating-bars" role="group" aria-label="Vērtējumu sadalījums">
+      ${[5, 4, 3, 2, 1]
+        .map((star) => {
+          const n = stats.breakdown[star] || 0
+          const pct = stats.count ? Math.round((n / stats.count) * 100) : 0
+          const isSelected = activeStarFilter === star
+          return `<button class="rating-bar-row${isSelected ? ' is-selected' : ''}" type="button" data-filter-star="${star}" ${n === 0 ? 'disabled' : ''}>
+            <span class="rating-bar-label">${star} ★</span>
+            <span class="rating-bar-track"><i style="width:${pct}%"></i></span>
+            <span class="rating-bar-count">${n}</span>
+          </button>`
+        })
+        .join('')}
+    </div>`
+}
+
+function reviewCardsMarkup(reviews, reviewerMap, currentUserId) {
+  if (!reviews.length) {
+    return '<div class="profile-empty-state"><p>Vēl nav nevienas atsauksmes.</p></div>'
+  }
+  return reviews
+    .map((r) => {
+      const reviewer = reviewerMap.get(r.reviewer_id)
+      const reviewerName = reviewer?.display_name || 'Lietotājs'
+      const reviewerCity = reviewer?.city || ''
+      const isMine = currentUserId && r.reviewer_id === currentUserId
+      const dateStr = new Date(r.created_at).toLocaleDateString('lv-LV', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+      return `<article class="review-card${isMine ? ' is-own-review' : ''}">
+        <div class="review-card-head">
+          <a class="review-author" href="#seller-${escapeHtml(r.reviewer_id)}">
+            <span class="review-avatar" aria-hidden="true">${escapeHtml(getInitials(reviewerName))}</span>
+            <span class="review-author-meta">
+              <strong>${escapeHtml(reviewerName)}${isMine ? ' <em class="review-own-pill">Tava atsauksme</em>' : ''}</strong>
+              <small>${escapeHtml([reviewerCity, dateStr].filter(Boolean).join(' · '))}</small>
+            </span>
+          </a>
+          <div class="review-score-badge">
+            ${renderStarsSvg(r.rating, { size: 13 })}
+            <b>${Number(r.rating).toFixed(1)}</b>
+          </div>
+        </div>
+        ${
+          r.comment
+            ? `<p class="review-card-body">${escapeHtml(r.comment)}</p>`
+            : '<p class="review-card-body is-empty">Bez komentāra.</p>'
+        }
+      </article>`
+    })
+    .join('')
+}
+
 export async function loadSellerProfile(id, openAuthModal) {
   if (!supabase) return
   const [{ data: { user } }, { data: reviews }, { data: listings }] = await Promise.all([
@@ -456,7 +749,7 @@ export async function loadSellerProfile(id, openAuthModal) {
       .order('created_at', { ascending: false }),
     supabase
       .from('listings')
-      .select('id, title, brand, model, price, condition')
+      .select('id, title, brand, model, price, condition, location, category')
       .eq('user_id', id)
       .eq('status', 'active')
       .order('created_at', { ascending: false }),
@@ -467,50 +760,246 @@ export async function loadSellerProfile(id, openAuthModal) {
     fetchListingThumbnails(listings || []),
   ])
   const profile = publicProfiles.find((p) => p.id === id) || null
-  const reviewers = publicProfiles.filter((p) => reviewerIds.includes(p.id))
+  const reviewerMap = new Map(publicProfiles.map((p) => [p.id, p]))
   if (!document.querySelector('#seller-name')) return
 
-  document.querySelector('#seller-name').textContent = profile?.display_name || 'Pārdevējs'
-  document.title = `${profile?.display_name || 'Pārdevējs'} — TrackApart`
-  const avg = reviews?.length ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0
-  document.querySelector('#seller-meta').textContent = [
-    profile?.city,
-    reviews?.length ? `${avg.toFixed(1)} ★ (${reviews.length})` : 'Vēl nav atsauksmju',
-    profile?.created_at ? `Pievienojies ${new Date(profile.created_at).toLocaleDateString('lv-LV')}` : '',
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  const displayName = profile?.display_name || 'Pārdevējs'
+  const activeListings = listings || []
+  const allReviews = reviews || []
+  const stats = computeRatingStats(allReviews)
+  const isOwnProfile = Boolean(user && user.id === id)
 
-  document.querySelector('#seller-listings').innerHTML = listings?.length
-    ? listingRowsMarkup(listings, thumbs)
-    : '<p class="listing-loading">Šim pārdevējam pašlaik nav aktīvu sludinājumu.</p>'
+  document.title = `${displayName} — TrackApart`
+  document.querySelector('#seller-name').textContent = displayName
 
-  const reviewsHolder = document.querySelector('#seller-reviews')
-  if (reviews?.length) {
-    const nameById = Object.fromEntries((reviewers || []).map((r) => [r.id, r.display_name]))
-    reviewsHolder.innerHTML = reviews
-      .map(
-        (r) =>
-          `<div class="review-row"><strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><span>${escapeHtml(nameById[r.reviewer_id] || 'Lietotājs')} · ${new Date(r.created_at).toLocaleDateString('lv-LV')}</span>${r.comment ? `<p>${escapeHtml(r.comment)}</p>` : ''}</div>`,
-      )
-      .join('')
-  } else {
-    reviewsHolder.innerHTML = '<p class="listing-loading">Vēl nav nevienas atsauksmes.</p>'
+  // Avatar monogram + live active indicator
+  const avatarEl = document.querySelector('#seller-avatar')
+  if (avatarEl) {
+    avatarEl.innerHTML = `<span>${escapeHtml(getInitials(displayName))}</span>${activeListings.length ? '<i class="profile-avatar-dot" title="Aktīvs pārdevējs"></i>' : ''}`
   }
 
+  // Hero action buttons (Share + Edit if own profile)
+  const actionsEl = document.querySelector('#seller-hero-actions')
+  if (actionsEl) {
+    actionsEl.innerHTML = `<button class="profile-action-btn" id="profile-share-btn" type="button">KOPĒT SAITI</button>${
+      isOwnProfile ? '<a class="profile-action-btn is-primary" href="#account">REDIĢĒT PROFILU ↗</a>' : ''
+    }`
+    document.querySelector('#profile-share-btn')?.addEventListener('click', async (event) => {
+      const btn = event.currentTarget
+      try {
+        await navigator.clipboard.writeText(window.location.href)
+        btn.textContent = '✓ SAITE NOKOPĒTA'
+        showToast('Profila saite nokopēta starpliktuvē.')
+      } catch {
+        showToast('Neizdevās nokopēt saiti.', { isWarning: true })
+      }
+      setTimeout(() => {
+        btn.textContent = 'KOPĒT SAITI'
+        if (isEnglish()) translatePage()
+      }, 1800)
+    })
+  }
+
+  // Trust badges
+  const badgesEl = document.querySelector('#seller-badges')
+  if (badgesEl) {
+    const badges = []
+    if (stats.count >= 2 && stats.average >= 4.5) {
+      badges.push('<span class="profile-badge is-top">★ AUGSTI NOVĒRTĒTS</span>')
+    } else if (activeListings.length > 0) {
+      badges.push('<span class="profile-badge">AKTĪVS PĀRDEVĒJS</span>')
+    }
+    if (isOwnProfile) {
+      badges.push('<span class="profile-badge is-own">TAVS PROFILS</span>')
+    }
+    badgesEl.innerHTML = badges.join('')
+  }
+
+  // Meta pills (City + Member since)
+  const metaEl = document.querySelector('#seller-meta')
+  if (metaEl) {
+    const metaItems = []
+    metaItems.push(`<span class="profile-meta-pill">${PIN_ICON_SVG}<span>${escapeHtml(profile?.city || 'Latvija')}</span></span>`)
+    if (profile?.created_at) {
+      const joined = new Date(profile.created_at).toLocaleDateString('lv-LV', {
+        year: 'numeric',
+        month: 'long',
+      })
+      metaItems.push(`<span class="profile-meta-pill">${CALENDAR_ICON_SVG}<span>Pievienojies ${escapeHtml(joined)}</span></span>`)
+    }
+    metaEl.innerHTML = metaItems.join('')
+  }
+
+  // Top brands sold by this seller
+  const brandsEl = document.querySelector('#seller-brands')
+  if (brandsEl) {
+    const topBrands = [...new Set(activeListings.map((l) => (l.brand || '').trim()).filter(Boolean))].slice(0, 5)
+    brandsEl.innerHTML = topBrands.length
+      ? topBrands.map((b) => `<span class="profile-brand-tag">${escapeHtml(b)}</span>`).join('')
+      : ''
+  }
+
+  // Telemetry KPI strip
+  document.querySelector('#kpi-rating').textContent = stats.count ? stats.average.toFixed(1) : '—'
+  document.querySelector('#kpi-rating-stars').innerHTML = stats.count
+    ? renderStarsSvg(stats.average, { size: 13 })
+    : 'Vēl nav vērtējumu'
+  document.querySelector('#kpi-reviews').textContent = String(stats.count)
+  document.querySelector('#kpi-positive').textContent = stats.count
+    ? `${stats.positivePercent}% pozitīvas`
+    : 'Vēl nav atsauksmju'
+  document.querySelector('#kpi-listings').textContent = String(activeListings.length)
+  document.querySelector('#kpi-since').textContent = profile?.created_at
+    ? String(new Date(profile.created_at).getFullYear())
+    : '—'
+  document.querySelector('#tab-count-listings').textContent = String(activeListings.length)
+  document.querySelector('#tab-count-reviews').textContent = String(stats.count)
+
+  // Tabs switching
+  const listingsSection = document.querySelector('#profile-listings-section')
+  const reviewsSection = document.querySelector('#profile-reviews-section')
+  const setTab = (tabName, scroll = false) => {
+    document.querySelectorAll('.profile-tab').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.profileTab === tabName)
+    })
+    if (listingsSection) listingsSection.hidden = tabName === 'reviews'
+    if (reviewsSection) reviewsSection.hidden = tabName === 'listings'
+    if (scroll) {
+      const target = tabName === 'reviews' ? reviewsSection : listingsSection
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+  document.querySelectorAll('.profile-tab').forEach((btn) =>
+    btn.addEventListener('click', () => setTab(btn.dataset.profileTab)),
+  )
+  document.querySelectorAll('[data-jump-tab]').forEach((btn) =>
+    btn.addEventListener('click', () => setTab(btn.dataset.jumpTab, true)),
+  )
+
+  // Listings grid + seller inventory search
+  const listingsHolder = document.querySelector('#seller-listings')
+  const searchWrap = document.querySelector('#seller-listings-search-wrap')
+  const searchInput = document.querySelector('#seller-listings-search')
+  const emptyNotice = document.querySelector('#seller-listings-empty')
+  if (activeListings.length) {
+    listingsHolder.innerHTML = sellerListingCardsMarkup(activeListings, thumbs)
+    if (searchWrap) searchWrap.hidden = activeListings.length < 2
+    if (searchInput) {
+      searchInput.oninput = () => {
+        const q = searchInput.value.trim().toLowerCase()
+        let visible = 0
+        listingsHolder.querySelectorAll('.profile-listing-card').forEach((card) => {
+          const ok = !q || (card.dataset.sellerSearch || '').includes(q)
+          card.hidden = !ok
+          if (ok) visible += 1
+        })
+        if (emptyNotice) emptyNotice.hidden = visible !== 0
+      }
+    }
+  } else {
+    if (searchWrap) searchWrap.hidden = true
+    listingsHolder.innerHTML =
+      '<div class="profile-empty-state"><p>Šim pārdevējam pašlaik nav aktīvu sludinājumu.</p></div>'
+  }
+
+  // Interactive Rating Summary + Sortable/Filterable Reviews Feed
+  let activeStarFilter = null
+  let currentSort = 'newest'
+
+  const summaryHolder = document.querySelector('#seller-rating-summary')
+  const reviewsHolder = document.querySelector('#seller-reviews')
+  const toolbar = document.querySelector('#seller-reviews-toolbar')
+  const countEl = document.querySelector('#reviews-visible-count')
+  const clearChip = document.querySelector('#reviews-clear-filter')
+  const sortSelect = document.querySelector('#reviews-sort-select')
+
+  const renderReviewsState = () => {
+    if (summaryHolder) {
+      summaryHolder.innerHTML = ratingSummaryMarkup(stats, activeStarFilter)
+      summaryHolder.querySelectorAll('[data-filter-star]').forEach((btn) =>
+        btn.addEventListener('click', () => {
+          const star = Number(btn.dataset.filterStar)
+          activeStarFilter = activeStarFilter === star ? null : star
+          renderReviewsState()
+        }),
+      )
+    }
+
+    let filtered = activeStarFilter
+      ? allReviews.filter((r) => Math.round(Number(r.rating)) === activeStarFilter)
+      : [...allReviews]
+
+    if (currentSort === 'highest') {
+      filtered.sort((a, b) => Number(b.rating) - Number(a.rating) || new Date(b.created_at) - new Date(a.created_at))
+    } else if (currentSort === 'lowest') {
+      filtered.sort((a, b) => Number(a.rating) - Number(b.rating) || new Date(b.created_at) - new Date(a.created_at))
+    } else {
+      filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    }
+
+    if (toolbar) toolbar.hidden = allReviews.length === 0
+    if (countEl) {
+      countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'atsauksme' : 'atsauksmes'}`
+    }
+    if (clearChip) {
+      clearChip.hidden = !activeStarFilter
+      if (activeStarFilter) clearChip.textContent = `Tikai ${activeStarFilter} ★ ×`
+    }
+
+    if (reviewsHolder) {
+      reviewsHolder.innerHTML = filtered.length
+        ? reviewCardsMarkup(filtered, reviewerMap, user?.id)
+        : activeStarFilter
+          ? '<div class="profile-empty-state"><p>Nav atsauksmju ar šo vērtējumu.</p></div>'
+          : '<div class="profile-empty-state"><p>Vēl nav nevienas atsauksmes.</p></div>'
+    }
+    if (isEnglish()) translatePage()
+  }
+
+  if (clearChip) {
+    clearChip.onclick = () => {
+      activeStarFilter = null
+      renderReviewsState()
+    }
+  }
+  if (sortSelect) {
+    sortSelect.onchange = () => {
+      currentSort = sortSelect.value
+      renderReviewsState()
+    }
+    enhanceSelects(toolbar)
+  }
+  renderReviewsState()
+
+  // Review Form / Prompt Card
   const formHolder = document.querySelector('#seller-review-form-holder')
   if (!user) {
-    formHolder.innerHTML =
-      '<div class="review-login-prompt"><button class="button button-dark" id="seller-review-login" type="button">IELOGOTIES, LAI ATSTĀTU ATSAUKSMI ↗</button></div>'
+    formHolder.innerHTML = `<div class="profile-review-card-head">
+        <div class="section-kicker">ATSTĀT ATSAUKSMI</div>
+        <h3>Dalies ar pieredzi</h3>
+        <p class="profile-review-hint">Pieslēdzies savam kontam, lai novērtētu šo pārdevēju.</p>
+      </div>
+      <div class="review-login-prompt">
+        <button class="button button-dark" id="seller-review-login" type="button">IELOGOTIES, LAI ATSTĀTU ATSAUKSMI ↗</button>
+      </div>`
     document.querySelector('#seller-review-login')?.addEventListener('click', () => {
       if (openAuthModal) openAuthModal('login')
       else window.location.hash = 'account'
     })
-  } else if (user.id === id) formHolder.innerHTML = ''
-  else {
-    formHolder.innerHTML = reviewFormMarkup(reviews?.find((r) => r.reviewer_id === user.id))
-    bindReviewForm(id, user.id)
+  } else if (isOwnProfile) {
+    formHolder.innerHTML = `<div class="profile-review-card-head">
+        <div class="section-kicker">TAVS PUBLISKAIS PROFILS</div>
+        <h3>Tā tevi redz pircēji</h3>
+        <p class="profile-review-hint">Vari atjaunot savu vārdu, pilsētu un sludinājumus sava konta iestatījumos.</p>
+      </div>
+      <div class="review-login-prompt">
+        <a class="button button-dark" href="#account">ATVERT MANU KONTU ↗</a>
+      </div>`
+  } else {
+    formHolder.innerHTML = reviewFormMarkup(allReviews.find((r) => r.reviewer_id === user.id))
+    bindReviewForm(id, user.id, openAuthModal)
   }
+
   primeAndTranslate()
 }
 

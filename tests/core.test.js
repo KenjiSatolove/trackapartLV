@@ -275,3 +275,27 @@ test('index.html CSP disallows inline scripts and allows Supabase + fonts', () =
   assert.ok(!html.includes("script-src 'self' 'unsafe-inline'"))
   assert.ok(html.includes('https://*.supabase.co'))
 })
+
+test('seller profile helpers compute initials, rating breakdown, and SVG stars accurately', async () => {
+  const { computeRatingStats, getInitials, renderStarsSvg, sellerProfilePage } = await import('../src/listings.js')
+
+  assert.equal(getInitials('Jānis Bērziņš'), 'JB')
+  assert.equal(getInitials('TrackApart'), 'TR')
+  assert.equal(getInitials(''), 'TA')
+
+  const empty = computeRatingStats([])
+  assert.equal(empty.count, 0)
+  assert.equal(empty.average, 0)
+  assert.equal(empty.positivePercent, 0)
+
+  const stats = computeRatingStats([{ rating: 5 }, { rating: 5 }, { rating: 4 }, { rating: 2 }])
+  assert.equal(stats.count, 4)
+  assert.equal(stats.average, 4)
+  assert.equal(stats.positivePercent, 75)
+  assert.deepEqual(stats.breakdown, { 5: 2, 4: 1, 3: 0, 2: 1, 1: 0 })
+
+  const starsHtml = renderStarsSvg(4)
+  assert.equal((starsHtml.match(/is-filled/g) || []).length, 4)
+  assert.ok(sellerProfilePage.includes('id="seller-rating-summary"'))
+  assert.ok(sellerProfilePage.includes('id="reviews-sort-select"'))
+})
